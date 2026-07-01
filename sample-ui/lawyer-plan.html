@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choose your plan | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+
+  <!-- ===== NAV ===== -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3">
+        <img src="assets/logo.svg" alt="LawMitran" style="height:36px;display:block" />
+      </a>
+      <a href="login.html" class="text-sm text-slate-500 hover:text-[#0B192C] font-medium">Skip for now</a>
+    </div>
+  </nav>
+
+  <section class="max-w-6xl mx-auto px-6 py-12">
+    <!-- trial banner -->
+    <div class="hero-gradient text-white rounded-2xl px-6 py-4 flex items-center justify-between flex-wrap gap-3 mb-10">
+      <span class="text-sm font-semibold"><i class="fa-solid fa-circle-check text-[#C9A24B] mr-2"></i> Your 30-day free trial is active — full access until you choose a paid plan.</span>
+      <span class="text-xs text-slate-300">Trial ends in 30 days</span>
+    </div>
+
+    <div class="text-center mb-8">
+      <span class="text-xs font-bold uppercase tracking-widest text-amber-600">Plans</span>
+      <h1 class="text-3xl md:text-4xl font-extrabold text-[#0B192C] mt-2">Choose your plan</h1>
+      <p class="text-sm text-slate-500 mt-2 max-w-xl mx-auto">Stay visible and keep receiving intent-matched client leads after your trial. Cancel anytime.</p>
+    </div>
+
+    <!-- ===== DURATION SELECTOR ===== -->
+    <div class="flex flex-col items-center mb-9">
+      <div id="durTabs" class="inline-flex flex-wrap justify-center gap-1 bg-white border border-gray-200 rounded-2xl p-1 shadow-sm">
+        <button data-dur="30"  onclick="setDur(30)"  class="dur-tab px-4 py-2 rounded-xl text-sm font-semibold transition-colors">30 days</button>
+        <button data-dur="90"  onclick="setDur(90)"  class="dur-tab px-4 py-2 rounded-xl text-sm font-semibold transition-colors">3 months</button>
+        <button data-dur="180" onclick="setDur(180)" class="dur-tab px-4 py-2 rounded-xl text-sm font-semibold transition-colors">6 months</button>
+        <button data-dur="365" onclick="setDur(365)" class="dur-tab px-4 py-2 rounded-xl text-sm font-semibold transition-colors">1 year</button>
+      </div>
+      <p id="saveHint" class="text-xs font-semibold text-green-600 mt-3 h-4"></p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6 items-stretch">
+
+      <!-- Trial -->
+      <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-7 flex flex-col">
+        <h3 class="text-lg font-bold text-[#0B192C]">Free Trial</h3>
+        <p class="text-xs text-slate-500 mt-1">First 30 days</p>
+        <div class="my-5"><span class="text-4xl font-extrabold text-[#0B192C]">₹0</span><span class="text-sm text-slate-400">/30 days</span></div>
+        <ul class="space-y-3 text-sm text-slate-600 flex-1">
+          <li class="flex gap-2.5"><i class="fa-solid fa-check text-[#C9A24B] mt-0.5"></i> Verified public profile</li>
+          <li class="flex gap-2.5"><i class="fa-solid fa-check text-[#C9A24B] mt-0.5"></i> Receive client leads</li>
+          <li class="flex gap-2.5"><i class="fa-solid fa-check text-[#C9A24B] mt-0.5"></i> Dashboard &amp; ratings</li>
+        </ul>
+        <button class="mt-6 w-full border border-gray-200 text-slate-500 font-semibold py-3 rounded-xl text-sm cursor-default">Active now</button>
+      </div>
+
+      <!-- Premium (featured) -->
+      <div class="bg-white rounded-2xl border-2 border-[#C9A24B] shadow-xl p-7 flex flex-col relative md:-mt-3">
+        <span class="absolute top-0 right-6 -translate-y-1/2 bg-[#C9A24B] text-[#0B192C] text-[11px] font-bold px-3 py-1 rounded-full">Most popular</span>
+        <h3 class="text-lg font-bold text-[#0B192C]">Premium</h3>
+        <p class="text-xs text-slate-500 mt-1">Grow faster</p>
+        <div class="my-5 min-h-[64px]">
+          <div><span id="premPrice" class="text-4xl font-extrabold text-[#0B192C]">₹1,499</span><span id="premUnit" class="text-sm text-slate-400">/30 days</span></div>
+          <p id="premSub" class="text-xs text-slate-400 mt-1">&nbsp;</p>
+        </div>
+        <ul class="space-y-3 text-sm text-slate-600 flex-1">
+          <li class="flex gap-2.5"><i class="fa-solid fa-check text-[#C9A24B] mt-0.5"></i> Everything in Basic</li>
+          <li class="flex gap-2.5"><i class="fa-solid fa-infinity text-[#C9A24B] mt-0.5"></i> <b>Unlimited</b> client leads</li>
+          <li class="flex gap-2.5"><i class="fa-solid fa-check text-[#C9A24B] mt-0.5"></i> <b>Priority</b> in lead routing</li>
+          <li class="flex gap-2.5"><i class="fa-solid fa-check text-[#C9A24B] mt-0.5"></i> <b>Top ranking</b> in search</li>
+          <li class="flex gap-2.5"><i class="fa-solid fa-check text-[#C9A24B] mt-0.5"></i> Premium badge &amp; homepage feature</li>
+        </ul>
+        <button id="premBtn" onclick="pay('PREMIUM')" class="mt-6 w-full bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] font-bold py-3 rounded-xl text-sm transition-colors shadow-md">Choose Premium</button>
+      </div>
+
+      <!-- Basic -->
+      <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-7 flex flex-col">
+        <h3 class="text-lg font-bold text-[#0B192C]">Basic</h3>
+        <p class="text-xs text-slate-500 mt-1">Stay listed</p>
+        <div class="my-5 min-h-[64px]">
+          <div><span id="basicPrice" class="text-4xl font-extrabold text-[#0B192C]">₹499</span><span id="basicUnit" class="text-sm text-slate-400">/30 days</span></div>
+          <p id="basicSub" class="text-xs text-slate-400 mt-1">&nbsp;</p>
+        </div>
+        <ul class="space-y-3 text-sm text-slate-600 flex-1">
+          <li class="flex gap-2.5"><i class="fa-solid fa-check text-[#C9A24B] mt-0.5"></i> Verified public profile</li>
+          <li class="flex gap-2.5"><i class="fa-solid fa-check text-[#C9A24B] mt-0.5"></i> Up to <b>25</b> client leads/month</li>
+          <li class="flex gap-2.5"><i class="fa-solid fa-check text-[#C9A24B] mt-0.5"></i> Standard lead routing</li>
+          <li class="flex gap-2.5"><i class="fa-solid fa-check text-[#C9A24B] mt-0.5"></i> Dashboard &amp; ratings</li>
+        </ul>
+        <button id="basicBtn" onclick="pay('BASIC')" class="mt-6 w-full bg-[#0B192C] hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-sm transition-colors">Choose Basic</button>
+      </div>
+    </div>
+
+    <p class="text-center text-xs text-slate-400 mt-8"><i class="fa-solid fa-lock text-[#C9A24B] mr-1"></i> Secure payments via Razorpay. GST applicable. Longer terms are billed once for the full period; you can cancel anytime from your dashboard.</p>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="bg-[#0B192C] text-slate-400 text-sm py-8">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+      <div class="flex items-center space-x-2">
+        <img src="assets/logo-light.svg" alt="LawMitran" style="height:36px;display:block" />
+      </div>
+      <span class="text-slate-500">© 2026 LawMitran · <span class="text-[#C9A24B] font-semibold">Justice Made Accessible.</span></span>
+    </div>
+    <p class="max-w-6xl mx-auto px-6 mt-5 pt-5 border-t border-slate-800/70 text-[11px] leading-relaxed text-slate-500 text-center">LawMitran is an information platform, not a law firm, and does not provide legal advice. Listings and rankings are informational and not an endorsement or solicitation.</p>
+  </footer>
+
+  <style>
+    .dur-tab { color:#64748b; }
+    .dur-tab.active { background:#0B192C; color:#fff; }
+  </style>
+  <script>
+    // Duration tiers — mirrors GET /api/subscriptions/plans/tiers (and prisma/seed.ts)
+    const TIERS = {
+      BASIC:   { 30:499,  90:1349,  180:2549,  365:4790 },
+      PREMIUM: { 30:1499, 90:4049,  180:7649,  365:14390 }
+    };
+    const LABEL = { 30:'30 days', 90:'3 months', 180:'6 months', 365:'1 year' };
+    const MONTHS = { 30:1, 90:3, 180:6, 365:12 };
+    const GST = 0.18; // 18% GST on platform fees
+    const inr = n => '₹' + Math.round(n).toLocaleString('en-IN');
+    let dur = 30;
+
+    function priceFor(plan, d){ return TIERS[plan][d]; }
+    function savingsPct(plan, d){
+      const monthly = TIERS[plan][30];
+      const full = monthly * MONTHS[d];
+      return Math.round((1 - TIERS[plan][d] / full) * 100);
+    }
+
+    function render(){
+      ['BASIC','PREMIUM'].forEach(plan => {
+        const id = plan==='BASIC' ? 'basic' : 'prem';
+        const amt = priceFor(plan, dur);
+        document.getElementById(id+'Price').textContent = inr(amt);
+        document.getElementById(id+'Unit').textContent = '/' + LABEL[dur];
+        const perMonth = amt / MONTHS[dur];
+        const gstLine = '+ 18% GST = ' + inr(amt * (1 + GST)) + ' total';
+        document.getElementById(id+'Sub').textContent = dur===30 ? gstLine : (inr(perMonth) + '/mo, ' + gstLine);
+        const _legacy =
+          dur===30 ? ' ' : inr(perMonth) + '/mo · billed ' + inr(amt) + ' once';
+      });
+      // savings hint
+      const pct = savingsPct('PREMIUM', dur);
+      document.getElementById('saveHint').textContent =
+        dur===30 ? ' ' : 'Save ' + pct + '% vs paying monthly';
+      // active tab styling
+      document.querySelectorAll('.dur-tab').forEach(t =>
+        t.classList.toggle('active', Number(t.dataset.dur)===dur));
+    }
+    function setDur(d){ dur = d; render(); }
+
+    function pay(plan){
+      const amt = priceFor(plan, dur);
+      // demo only → POST /api/subscriptions/checkout { planName, durationDays } → Razorpay
+      alert('Sample — POST /api/subscriptions/checkout { planName:"'+plan+'", durationDays:'+dur+' } · '+inr(amt)+' → Razorpay');
+    }
+    render();
+  </script>
+</body>
+</html>

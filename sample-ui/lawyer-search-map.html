@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lawmitran | Search Lawyers (Map View)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .navy-brand { background-color: #0B192C; }
+    .text-navy-brand { color: #0B192C; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    #map { height: 100%; width: 100%; z-index: 10; }
+    .leaflet-container { font-family: 'Inter', sans-serif; }
+    /* custom avatar pin */
+    .pin { display:flex; flex-direction:column; align-items:center; }
+    .pin .lbl { background:#0B192C; color:#fff; font-size:10px; font-weight:700; border-radius:6px; padding:2px 7px; white-space:nowrap; margin-bottom:3px; border:1px solid #1E3E62; box-shadow:0 2px 6px rgba(0,0,0,.25); }
+    .pin .lbl .st { color:#C9A24B; }
+    .pin .dot { width:34px; height:34px; border-radius:50%; background:#0B192C; color:#C9A24B; font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 8px rgba(0,0,0,.35); transition:transform .15s; }
+    .pin.sel .dot { border-color:#C9A24B; transform:scale(1.18); }
+    .card.sel { border-color:#C9A24B !important; border-width:2px !important; box-shadow:0 8px 24px rgba(201,162,75,.18); }
+  </style>
+</head>
+<body class="bg-gray-50 h-screen flex flex-col overflow-hidden">
+
+  <!-- ===== NAV ===== -->
+  <nav class="bg-white border-b border-gray-100 h-16 min-h-[64px] flex-shrink-0 z-50 shadow-sm flex items-center justify-between px-6">
+    <a href="index.html" class="flex items-center space-x-3">
+      <img src="assets/logo.svg" alt="LawMitran" style="height:36px;display:block" />
+    </a>
+    <div class="flex items-center space-x-6 font-medium text-xs text-slate-600">
+      <a href="lawyer-search.html" class="hover:text-navy-brand transition-colors">Find Lawyers</a>
+      <a href="index.html#documents" class="hover:text-navy-brand transition-colors">Legal Documents</a>
+      <a href="index.html#how" class="hover:text-navy-brand transition-colors">How it Works</a>
+      <a href="lawyer-signup.html" class="hover:text-navy-brand transition-colors">For Lawyers</a>
+      <a href="login.html" class="hover:text-navy-brand transition-colors">Login</a>
+      <a href="signup.html" class="bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] px-4 py-2 rounded-xl font-bold transition-all shadow-sm">Sign Up</a>
+    </div>
+  </nav>
+
+  <main class="flex-1 flex overflow-hidden relative">
+
+    <!-- ===== LEFT: results panel ===== -->
+    <section class="w-full lg:w-[480px] h-full flex flex-col bg-white border-r border-gray-100 flex-shrink-0 shadow-sm z-20">
+
+      <div class="p-4 border-b border-gray-100 bg-slate-50/60 space-y-3 flex-shrink-0">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600"><i class="fa-solid fa-sliders mr-1"></i> Filter Professionals</span>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="text-left">
+            <label class="block text-[10px] font-bold text-slate-500 mb-1 tracking-wide">City Location</label>
+            <div class="relative">
+              <input type="text" value="Bengaluru" class="w-full bg-white border border-gray-200 rounded-lg pl-8 pr-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500/20 focus:border-[#C9A24B] outline-none shadow-sm" />
+              <i class="fa-solid fa-location-dot absolute left-3 top-1/2 -translate-y-1/2 text-amber-500 text-xs"></i>
+            </div>
+          </div>
+          <div class="text-left">
+            <label class="block text-[10px] font-bold text-slate-500 mb-1 tracking-wide">Practice Expertise</label>
+            <div class="relative">
+              <select class="w-full bg-white border border-gray-200 rounded-lg pl-8 pr-6 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-amber-500/20 focus:border-[#C9A24B] outline-none appearance-none cursor-pointer shadow-sm">
+                <option>Family Law</option><option>Criminal Law</option><option>Property Law</option><option>Corporate Law</option>
+              </select>
+              <i class="fa-solid fa-gavel absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[11px] font-medium text-slate-400 pt-1">
+          <span>Found <strong class="text-slate-700 font-semibold" id="count">5 matches</strong> in Bengaluru</span>
+          <button class="text-[#C9A24B] hover:underline font-bold flex items-center"><i class="fa-solid fa-arrow-rotate-left text-[9px] mr-1"></i> Reset</button>
+        </div>
+      </div>
+
+      <div id="cards" class="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar bg-slate-50/30"></div>
+    </section>
+
+    <!-- ===== RIGHT: map ===== -->
+    <section class="flex-1 h-full relative">
+      <div id="map"></div>
+      <button id="locate" class="absolute top-4 right-4 z-[400] w-9 h-9 bg-white text-blue-600 hover:bg-gray-50 shadow-md rounded-lg flex items-center justify-center border border-gray-200 text-sm" title="Recenter">
+        <i class="fa-solid fa-crosshairs"></i>
+      </button>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script>
+    const lawyers = [
+      { id:1, name:"Adv. A. Sharma", initials:"AS", area:"Family & Divorce", skills:"Divorce, Custody + 3 more", loc:"SC Road, Bengaluru", exp:18, rating:4.8, reviews:"120+", lat:12.9779, lng:77.5713, online:true },
+      { id:2, name:"Adv. S. Bakshi", initials:"SB", area:"Family Law", skills:"Matrimonial, Maintenance + 2", loc:"Indiranagar, Bengaluru", exp:24, rating:4.9, reviews:"100+", lat:12.9719, lng:77.6412, online:true },
+      { id:3, name:"Adv. M. Reddy", initials:"MR", area:"Family & Civil", skills:"Domestic Violence + 1 more", loc:"Jayanagar, Bengaluru", exp:12, rating:4.6, reviews:"64", lat:12.9250, lng:77.5938, online:false },
+      { id:4, name:"Adv. K. Menon", initials:"KM", area:"Matrimonial", skills:"Mediation, Divorce + 2", loc:"Whitefield, Bengaluru", exp:9, rating:4.5, reviews:"41", lat:12.9698, lng:77.7499, online:false },
+      { id:5, name:"Adv. D. Gupta", initials:"DG", area:"Family & Property", skills:"Succession, Property + 3", loc:"Koramangala, Bengaluru", exp:16, rating:4.7, reviews:"88", lat:12.9352, lng:77.6245, online:true }
+    ];
+
+    const stars = r => '★'.repeat(Math.round(r));
+    const cardsEl = document.getElementById('cards');
+    cardsEl.innerHTML = lawyers.map((l,i) => `
+      <div class="card bg-white rounded-xl p-4 border ${i===0?'border-[#C9A24B] sel':'border-gray-200/60'} shadow-sm hover:shadow-md transition-all cursor-pointer relative" data-id="${l.id}">
+        ${l.online?`<span class="absolute top-3 right-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full px-2 py-0.5 font-bold text-[9px] flex items-center"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5"></span>Online</span>`:''}
+        <div class="flex items-start space-x-3 mb-3">
+          <div class="w-12 h-12 rounded-lg flex items-center justify-center text-[#C9A24B] font-extrabold text-sm shadow-sm" style="background:linear-gradient(135deg,#0B192C,#1E3E62)">${l.initials}</div>
+          <div class="pr-16">
+            <h3 class="text-sm font-bold text-slate-900">${l.name}</h3>
+            <p class="text-[11px] text-slate-500 font-medium mt-0.5"><i class="fa-solid fa-location-dot text-amber-500 mr-1.5"></i>${l.loc}</p>
+            <p class="text-[11px] text-slate-400 font-semibold mt-1"><i class="fa-solid fa-briefcase text-slate-400 mr-1.5"></i>${l.exp} years Experience</p>
+          </div>
+        </div>
+        <div class="inline-flex items-center space-x-1 text-[11px] font-bold text-amber-500 mb-3 bg-amber-50/60 px-2.5 py-1 rounded-lg border border-amber-100">
+          <i class="fa-solid fa-star text-[10px]"></i><span>${l.rating}</span><span class="text-slate-400 font-normal ml-1">| ${l.reviews} ratings</span>
+        </div>
+        <div class="space-y-1 mb-4">
+          <span class="block text-[10px] uppercase font-bold tracking-wider text-slate-400">Practice area & skills</span>
+          <p class="text-xs font-semibold text-slate-700">${l.skills}</p>
+        </div>
+        <div class="pt-3 border-t border-gray-100">
+          <a href="lawyer-details.html" class="block text-center w-full bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#C9A24B]/10 hover:-translate-y-0.5">Contact Now</a>
+        </div>
+      </div>`).join('');
+
+    const map = L.map('map', { zoomControl:true }).setView([12.9716, 77.5946], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const markers = {};
+    lawyers.forEach((l,i) => {
+      const icon = L.divIcon({
+        className: '',
+        html: `<div class="pin ${i===0?'sel':''}"><div class="lbl">${l.name} <span class="st">★${l.rating}</span></div><div class="dot">${l.initials}</div></div>`,
+        iconSize: [110, 52], iconAnchor: [55, 50]
+      });
+      const m = L.marker([l.lat, l.lng], { icon }).addTo(map);
+      m.bindPopup(`<div style="font-family:Inter,sans-serif"><b>${l.name}</b><br><span style="color:#64748b;font-size:12px">${l.area} · ${l.loc}</span><br><span style="color:#C9A24B;font-weight:700">★ ${l.rating}</span> <span style="color:#94a3b8;font-size:12px">(${l.reviews})</span><br><a href="lawyer-details.html" style="color:#1E3E62;font-weight:700;font-size:12px">View profile →</a></div>`);
+      m.on('click', () => select(l.id));
+      markers[l.id] = m;
+    });
+
+    function select(id){
+      document.querySelectorAll('.card').forEach(c => c.classList.toggle('sel', c.dataset.id == id));
+      Object.entries(markers).forEach(([mid,m]) => {
+        const el = m.getElement(); if(el){ const p = el.querySelector('.pin'); if(p) p.classList.toggle('sel', mid == id); }
+      });
+      const l = lawyers.find(x => x.id == id);
+      map.flyTo([l.lat, l.lng], 14, { duration: .6 });
+      markers[id].openPopup();
+      const card = document.querySelector(`.card[data-id="${id}"]`);
+      if(card) card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+
+    cardsEl.querySelectorAll('.card').forEach(c => c.addEventListener('click', e => {
+      if(e.target.closest('a')) return; select(c.dataset.id);
+    }));
+    document.getElementById('locate').addEventListener('click', () => map.flyTo([12.9716,77.5946], 12, { duration:.6 }));
+  </script>
+</body>
+</html>

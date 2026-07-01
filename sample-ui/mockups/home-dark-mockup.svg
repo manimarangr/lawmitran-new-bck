@@ -1,0 +1,135 @@
+<svg viewBox="0 0 1440 1040" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI',Arial,sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c1c3e"/>
+      <stop offset="0.45" stop-color="#0a1838"/>
+      <stop offset="1" stop-color="#081330"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.85" cy="0" r="0.6">
+      <stop offset="0" stop-color="#c9a24b" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#c9a24b" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14274e"/>
+      <stop offset="1" stop-color="#0e2148"/>
+    </linearGradient>
+  </defs>
+
+  <!-- page bg -->
+  <rect width="1440" height="1040" fill="url(#bg)"/>
+  <rect width="1440" height="640" fill="url(#glow)"/>
+
+  <!-- ===== Header ===== -->
+  <g>
+    <svg x="48" y="28" width="220" height="64" viewBox="0 0 250 72">
+      <path d="M33 6 V21" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+      <circle cx="33" cy="5" r="3" fill="#fff"/>
+      <path d="M13 14 H53" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+      <circle cx="13" cy="14" r="2.1" fill="#fff"/><circle cx="53" cy="14" r="2.1" fill="#fff"/>
+      <path d="M13 14 L6.5 27 H19.5 Z" fill="#C9A24B"/>
+      <path d="M53 14 L46.5 27 H59.5 Z" fill="#C9A24B"/>
+      <text x="33" y="53" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="27" letter-spacing="-1"><tspan fill="#fff">L</tspan><tspan fill="#C9A24B">M</tspan></text>
+      <rect x="22" y="58" width="22" height="3.4" rx="1.7" fill="#fff"/>
+      <rect x="17.5" y="63" width="31" height="3.6" rx="1.8" fill="#fff"/>
+      <text x="76" y="38" font-weight="800" font-size="23" letter-spacing="1.5" fill="#fff">LAWMITRAN</text>
+      <line x1="77" y1="46" x2="240" y2="46" stroke="#C9A24B" stroke-width="1.2"/>
+      <text x="78" y="58" font-weight="700" font-size="8.4" letter-spacing="3.4" fill="#C9A24B">LEGAL HELP, SIMPLIFIED.</text>
+    </svg>
+
+    <g font-size="15" font-weight="600" fill="#dfe6f5">
+      <text x="612" y="66">Find a Lawyer</text>
+      <text x="742" y="66">Legal Documents</text>
+      <text x="902" y="66">How It Works</text>
+      <text x="1032" y="66">For Lawyers</text>
+    </g>
+    <!-- login + signup -->
+    <rect x="1168" y="40" width="84" height="40" rx="10" fill="none" stroke="#43527a"/>
+    <text x="1210" y="65" text-anchor="middle" font-size="14" font-weight="600" fill="#dfe6f5">Log in</text>
+    <rect x="1264" y="40" width="128" height="40" rx="10" fill="#C9A24B"/>
+    <text x="1328" y="65" text-anchor="middle" font-size="14" font-weight="700" fill="#0E2148">Sign up</text>
+  </g>
+
+  <!-- ===== Hero ===== -->
+  <text x="720" y="190" text-anchor="middle" font-size="13" font-weight="700" letter-spacing="3" fill="#C9A24B">VERIFIED LAWYERS ACROSS INDIA</text>
+  <text x="720" y="262" text-anchor="middle" font-size="56" font-weight="800" fill="#ffffff" letter-spacing="-1">Have a legal problem?</text>
+  <text x="720" y="328" text-anchor="middle" font-size="56" font-weight="800" fill="#C9A24B" letter-spacing="-1">Start here.</text>
+  <text x="720" y="372" text-anchor="middle" font-size="19" fill="#aab6d4">Tell us what you need — we match you with verified lawyers near you, and they reach out directly.</text>
+
+  <!-- pill search -->
+  <g>
+    <rect x="360" y="410" width="600" height="74" rx="37" fill="#0f203f" stroke="#3a4a72" stroke-width="1.5"/>
+    <text x="404" y="455" font-size="18" fill="#8ea0c4">Search lawyers, practice area or city…</text>
+    <circle cx="922" cy="447" r="30" fill="#C9A24B"/>
+    <path d="M911 447h22M925 438l9 9-9 9" stroke="#0E2148" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <!-- filters pill -->
+    <rect x="980" y="410" width="140" height="74" rx="37" fill="none" stroke="#C9A24B" stroke-width="1.5"/>
+    <text x="1024" y="455" font-size="17" font-weight="600" fill="#ffffff">Filters</text>
+    <path d="M1086 440h22M1090 447h14M1094 454h6" stroke="#C9A24B" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- trust strip -->
+  <g font-size="14" fill="#c7d0e4">
+    <g transform="translate(470,530)"><circle r="4" fill="#C9A24B"/><text x="14" y="5" font-weight="600">Bar Council verified</text></g>
+    <g transform="translate(700,530)"><circle r="4" fill="#C9A24B"/><text x="14" y="5" font-weight="600">Fast &amp; confidential</text></g>
+    <g transform="translate(920,530)"><circle r="4" fill="#C9A24B"/><text x="14" y="5" font-weight="600">All India · all areas</text></g>
+  </g>
+
+  <!-- ===== Cards section ===== -->
+  <text x="720" y="640" text-anchor="middle" font-size="30" font-weight="800" fill="#ffffff" letter-spacing="-.5">Meet verified lawyers near you</text>
+  <text x="720" y="672" text-anchor="middle" font-size="15" fill="#aab6d4">A few highly-rated, verified advocates available on LawMitran.</text>
+
+  <!-- card template x positions: 60,405,750,1095 ; w=285 -->
+  <g>
+    <!-- card 1 -->
+    <g transform="translate(60,710)">
+      <rect width="285" height="280" rx="16" fill="url(#card)" stroke="#26365e"/>
+      <circle cx="142" cy="66" r="40" fill="#1c3463" stroke="#C9A24B" stroke-opacity="0.5" stroke-width="2"/>
+      <circle cx="142" cy="56" r="15" fill="#9fb0d6"/><path d="M118 92c4-14 12-20 24-20s20 6 24 20" fill="#9fb0d6"/>
+      <text x="142" y="140" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">Adv. A. Sharma</text>
+      <text x="142" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#C9A24B">Family &amp; Divorce</text>
+      <text x="142" y="190" text-anchor="middle" font-size="15" fill="#C9A24B" letter-spacing="2">★★★★★</text>
+      <text x="142" y="214" text-anchor="middle" font-size="12.5" fill="#9fb0d6">📍 Bengaluru · 18 yrs</text>
+      <rect x="42" y="232" width="200" height="36" rx="9" fill="#C9A24B"/>
+      <text x="142" y="256" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0E2148">Contact now</text>
+    </g>
+    <!-- card 2 -->
+    <g transform="translate(405,710)">
+      <rect width="285" height="280" rx="16" fill="url(#card)" stroke="#26365e"/>
+      <circle cx="142" cy="66" r="40" fill="#1c3463" stroke="#C9A24B" stroke-opacity="0.5" stroke-width="2"/>
+      <circle cx="142" cy="56" r="15" fill="#9fb0d6"/><path d="M118 92c4-14 12-20 24-20s20 6 24 20" fill="#9fb0d6"/>
+      <text x="142" y="140" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">Adv. R. Iyer</text>
+      <text x="142" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#C9A24B">Criminal Law</text>
+      <text x="142" y="190" text-anchor="middle" font-size="15" fill="#C9A24B" letter-spacing="2">★★★★★</text>
+      <text x="142" y="214" text-anchor="middle" font-size="12.5" fill="#9fb0d6">📍 Chennai · 22 yrs</text>
+      <rect x="42" y="232" width="200" height="36" rx="9" fill="#C9A24B"/>
+      <text x="142" y="256" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0E2148">Contact now</text>
+    </g>
+    <!-- card 3 -->
+    <g transform="translate(750,710)">
+      <rect width="285" height="280" rx="16" fill="url(#card)" stroke="#26365e"/>
+      <circle cx="142" cy="66" r="40" fill="#1c3463" stroke="#C9A24B" stroke-opacity="0.5" stroke-width="2"/>
+      <circle cx="142" cy="56" r="15" fill="#9fb0d6"/><path d="M118 92c4-14 12-20 24-20s20 6 24 20" fill="#9fb0d6"/>
+      <text x="142" y="140" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">Adv. P. Nair</text>
+      <text x="142" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#C9A24B">Property Law</text>
+      <text x="142" y="190" text-anchor="middle" font-size="15" fill="#C9A24B" letter-spacing="2">★★★★☆</text>
+      <text x="142" y="214" text-anchor="middle" font-size="12.5" fill="#9fb0d6">📍 Kochi · 14 yrs</text>
+      <rect x="42" y="232" width="200" height="36" rx="9" fill="#C9A24B"/>
+      <text x="142" y="256" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0E2148">Contact now</text>
+    </g>
+    <!-- card 4 -->
+    <g transform="translate(1095,710)">
+      <rect width="285" height="280" rx="16" fill="url(#card)" stroke="#26365e"/>
+      <circle cx="142" cy="66" r="40" fill="#1c3463" stroke="#C9A24B" stroke-opacity="0.5" stroke-width="2"/>
+      <circle cx="142" cy="56" r="15" fill="#9fb0d6"/><path d="M118 92c4-14 12-20 24-20s20 6 24 20" fill="#9fb0d6"/>
+      <text x="142" y="140" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">Adv. D. Gupta</text>
+      <text x="142" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#C9A24B">Family &amp; Property</text>
+      <text x="142" y="190" text-anchor="middle" font-size="15" fill="#C9A24B" letter-spacing="2">★★★★★</text>
+      <text x="142" y="214" text-anchor="middle" font-size="12.5" fill="#9fb0d6">📍 Bengaluru · 16 yrs</text>
+      <rect x="42" y="232" width="200" height="36" rx="9" fill="#C9A24B"/>
+      <text x="142" y="256" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0E2148">Contact now</text>
+    </g>
+  </g>
+
+  <!-- caption -->
+  <text x="720" y="1024" text-anchor="middle" font-size="12" fill="#6b7aa0" font-style="italic">Sample mockup — LawMitran dark theme + pill search concept (navy/gold). Not final; for preview only.</text>
+</svg>

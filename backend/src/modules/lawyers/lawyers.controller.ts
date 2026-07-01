@@ -34,6 +34,12 @@ export class LawyersController {
   }
 
   @Public()
+  @Get('markers')
+  findMarkers(@Query() query: SearchLawyersDto) {
+    return this.lawyersService.findMarkers(query);
+  }
+
+  @Public()
   @Get(':id')
   getPublicProfile(@Param('id') id: string) {
     return this.lawyersService.getPublicProfile(id);
@@ -49,10 +55,7 @@ export class LawyersController {
   @Post('me/profile')
   @UseInterceptors(
     FileFieldsInterceptor(
-      [
-        { name: 'certificate', maxCount: 1 },
-        { name: 'identityCard', maxCount: 1 },
-      ],
+      [{ name: 'certificate', maxCount: 1 }],
       { storage: memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } },
     ),
   )

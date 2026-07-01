@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify OTP | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
+    .otp-box { width:56px; height:64px; text-align:center; font-size:24px; font-weight:700; color:#0B192C; }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+
+  <!-- ===== NAV ===== -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3">
+        <img src="assets/logo.svg" alt="LawMitran" style="height:36px;display:block" />
+      </a>
+      <div class="hidden md:flex items-center space-x-8 font-medium">
+        <a href="lawyer-search.html" class="text-slate-600 hover:text-[#0B192C] transition-colors">Find Lawyers</a>
+        <a href="index.html#documents" class="text-slate-600 hover:text-[#0B192C] transition-colors">Legal Documents</a>
+        <a href="index.html#how" class="text-slate-600 hover:text-[#0B192C] transition-colors">How it Works</a>
+        <a href="lawyer-signup.html" class="text-slate-600 hover:text-[#0B192C] transition-colors">For Lawyers</a>
+        <a href="login.html" class="text-slate-600 hover:text-[#0B192C] transition-colors">Login</a>
+        <a href="signup.html" class="bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] px-6 py-2.5 rounded-xl font-bold shadow-md shadow-[#C9A24B]/10 transition-all transform hover:-translate-y-0.5">Sign Up</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-6 pt-6">
+    <nav class="text-xs text-slate-400"><a href="index.html" class="hover:text-[#C9A24B]">Home</a> <span class="mx-1">/</span> <a href="lawyer-signup.html" class="hover:text-[#C9A24B]">Lawyer Signup</a> <span class="mx-1">/</span> <span class="text-slate-700 font-medium">Verify OTP</span></nav>
+  </div>
+
+  <!-- ===== OTP ===== -->
+  <section class="max-w-7xl mx-auto px-6 py-12">
+    <h1 class="text-2xl md:text-3xl font-extrabold text-[#0B192C] mb-8">Enter the 4-digit OTP sent to <span class="text-[#C9A24B]">+91 77605&nbsp;457866</span></h1>
+
+    <div class="grid lg:grid-cols-3 gap-8 items-start">
+      <!-- form -->
+      <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-200/60 shadow-sm p-8">
+        <form onsubmit="event.preventDefault();window.location='lawyer-onboarding.html';" class="space-y-6">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-3">Enter OTP</label>
+            <div class="flex gap-3" id="otp">
+              <input class="otp-box border border-gray-200 rounded-xl focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" maxlength="1" inputmode="numeric" />
+              <input class="otp-box border border-gray-200 rounded-xl focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" maxlength="1" inputmode="numeric" />
+              <input class="otp-box border border-gray-200 rounded-xl focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" maxlength="1" inputmode="numeric" />
+              <input class="otp-box border border-gray-200 rounded-xl focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" maxlength="1" inputmode="numeric" />
+            </div>
+          </div>
+
+          <label class="flex items-start gap-2 text-[12px] text-slate-500 leading-relaxed select-none">
+            <input type="checkbox" required class="mt-0.5 rounded border-gray-300 text-[#C9A24B] focus:ring-[#C9A24B]" />
+            <span>By verifying my mobile number, I authorise LawMitran to send SMS/WhatsApp messages and follow up regarding my registration and legal-practice account.</span>
+          </label>
+
+          <div class="flex items-center justify-between">
+            <button type="submit" class="bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] font-bold py-3 px-8 rounded-xl transition-colors shadow-md">Verify &amp; Continue</button>
+            <button type="button" id="resend" class="text-sm font-semibold text-[#C9A24B] hover:underline">Resend OTP</button>
+          </div>
+          <p id="timer" class="text-xs text-slate-400">You can resend the code in <span id="t">30</span>s.</p>
+        </form>
+      </div>
+
+      <!-- side info -->
+      <aside class="space-y-5">
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6">
+          <h3 class="text-base font-bold text-[#0B192C] mb-2">India's preferred lawyer platform</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">Thousands of clients seek legal help every day. Join a fast-growing, trust-first lawyer network.</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6">
+          <h3 class="text-base font-bold text-[#0B192C] mb-2">Be where the best are</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">We onboard verified, practising advocates only — giving your profile instant credibility.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="bg-[#0B192C] text-slate-400 text-sm pt-16 pb-8">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800 pt-8 text-xs">
+      <div class="flex items-center space-x-2">
+        <img src="assets/logo-light.svg" alt="LawMitran" style="height:36px;display:block" />
+      </div>
+      <span class="text-slate-500">© 2026 LawMitran · <span class="text-[#C9A24B] font-semibold">Justice Made Accessible.</span></span>
+    </div>
+    <p class="max-w-6xl mx-auto px-6 mt-5 text-[11px] leading-relaxed text-slate-500 text-center">LawMitran is an information platform, not a law firm, and does not provide legal advice.</p>
+  </footer>
+
+  <script>
+    const boxes = [...document.querySelectorAll('#otp .otp-box')];
+    boxes.forEach((b,i) => {
+      b.addEventListener('input', () => { b.value = b.value.replace(/\D/g,''); if(b.value && i<boxes.length-1) boxes[i+1].focus(); });
+      b.addEventListener('keydown', e => { if(e.key==='Backspace' && !b.value && i>0) boxes[i-1].focus(); });
+    });
+    boxes[0].focus();
+    let t = 30; const tEl = document.getElementById('t'), resend = document.getElementById('resend'), timer = document.getElementById('timer');
+    resend.style.pointerEvents='none'; resend.style.opacity='.5';
+    const iv = setInterval(() => { t--; tEl.textContent = t; if(t<=0){ clearInterval(iv); timer.style.display='none'; resend.style.pointerEvents='auto'; resend.style.opacity='1'; } }, 1000);
+    resend.addEventListener('click', () => alert('Sample — POST /api/auth/mobile/send-otp'));
+  </script>
+</body>
+</html>

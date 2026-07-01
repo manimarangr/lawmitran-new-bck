@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practice &amp; review | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
+    .chip { cursor:pointer; transition:.15s; }
+    .chip.on { background:#0B192C; color:#fff; border-color:#0B192C; }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+
+  <!-- ===== NAV ===== -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3">
+        <img src="assets/logo.svg" alt="LawMitran" style="height:36px;display:block" />
+      </a>
+      <span class="flex items-center gap-2 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full"><i class="fa-solid fa-clock"></i> Verification pending</span>
+    </div>
+  </nav>
+
+  <section class="max-w-3xl mx-auto px-6 py-10">
+    <span class="text-xs font-bold uppercase tracking-widest text-amber-600">Step 3 of 3</span>
+    <h1 class="text-2xl md:text-3xl font-extrabold text-[#0B192C] mt-2">Practice &amp; review</h1>
+    <p class="text-sm text-slate-500 mt-1">Tell clients what you do, then review and submit for verification.</p>
+
+    <form onsubmit="event.preventDefault();window.location='lawyer-plan.html';" class="mt-8 space-y-6">
+
+      <!-- practice form -->
+      <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6 md:p-8 space-y-5">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Practice areas <span class="text-red-500">*</span></label>
+          <div class="flex flex-wrap gap-2" id="areas">
+            <span class="chip border border-gray-200 rounded-full px-3.5 py-1.5 text-sm font-medium text-slate-600">Family</span>
+            <span class="chip border border-gray-200 rounded-full px-3.5 py-1.5 text-sm font-medium text-slate-600">Divorce</span>
+            <span class="chip border border-gray-200 rounded-full px-3.5 py-1.5 text-sm font-medium text-slate-600">Criminal</span>
+            <span class="chip border border-gray-200 rounded-full px-3.5 py-1.5 text-sm font-medium text-slate-600">Property</span>
+            <span class="chip border border-gray-200 rounded-full px-3.5 py-1.5 text-sm font-medium text-slate-600">Civil</span>
+            <span class="chip border border-gray-200 rounded-full px-3.5 py-1.5 text-sm font-medium text-slate-600">Corporate</span>
+            <span class="chip border border-gray-200 rounded-full px-3.5 py-1.5 text-sm font-medium text-slate-600">Consumer</span>
+            <span class="chip border border-gray-200 rounded-full px-3.5 py-1.5 text-sm font-medium text-slate-600">Employment</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">Tap to select the areas you practise in.</p>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">City <span class="text-red-500">*</span></label>
+            <select required class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm appearance-none cursor-pointer focus:outline-none focus:border-[#C9A24B]">
+              <option value="" selected disabled>Select</option><option>Bengaluru</option><option>Chennai</option><option>Mumbai</option><option>Delhi</option><option>Hyderabad</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Languages</label>
+            <input type="text" placeholder="English, Hindi, Kannada" class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[#C9A24B]" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Short bio</label>
+          <textarea rows="4" placeholder="Describe your practice and approach…" class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[#C9A24B]"></textarea>
+        </div>
+      </div>
+
+      <!-- review summary -->
+      <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6 md:p-8">
+        <h2 class="text-base font-bold text-[#0B192C] mb-4">Review your details</h2>
+        <div class="divide-y divide-gray-100 text-sm">
+          <div class="flex items-center justify-between py-3"><span class="text-slate-500">Name</span><span class="font-semibold text-slate-800">Adv. A. Sharma <a href="lawyer-onboarding.html" class="text-[#C9A24B] text-xs ml-2">Edit</a></span></div>
+          <div class="flex items-center justify-between py-3"><span class="text-slate-500">Bar Council</span><span class="font-semibold text-slate-800">KAR/1234/2010 · Karnataka</span></div>
+          <div class="flex items-center justify-between py-3"><span class="text-slate-500">Experience</span><span class="font-semibold text-slate-800">18 years</span></div>
+          <div class="flex items-center justify-between py-3"><span class="text-slate-500">Profile photo</span><span class="font-semibold text-green-600"><i class="fa-solid fa-circle-check"></i> Uploaded <a href="lawyer-documents.html" class="text-[#C9A24B] text-xs ml-2">Edit</a></span></div>
+          <div class="flex items-center justify-between py-3"><span class="text-slate-500">Bar certificate</span><span class="font-semibold text-green-600"><i class="fa-solid fa-circle-check"></i> Uploaded</span></div>
+          <div class="flex items-center justify-between py-3"><span class="text-slate-500">Mobile</span><span class="font-semibold text-green-600"><i class="fa-solid fa-circle-check"></i> Verified</span></div>
+        </div>
+      </div>
+
+      <label class="flex items-start gap-2 text-xs text-slate-600 select-none">
+        <input type="checkbox" required class="mt-0.5 rounded border-gray-300 text-[#C9A24B] focus:ring-[#C9A24B]" />
+        <span>I confirm the details and documents above are accurate, and I agree to the <a href="#" class="text-[#C9A24B] font-semibold hover:underline">Verification Terms</a>.</span>
+      </label>
+
+      <div class="flex items-center justify-between pt-2">
+        <a href="lawyer-documents.html" class="text-sm font-semibold text-slate-500 hover:text-[#0B192C]"><i class="fa-solid fa-arrow-left mr-1"></i> Back</a>
+        <button type="submit" class="bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] font-bold py-3 px-7 rounded-xl text-sm transition-colors">Submit &amp; choose plan</button>
+      </div>
+    </form>
+  </section>
+
+  <script>
+    document.querySelectorAll('#areas .chip').forEach(c => c.addEventListener('click', () => c.classList.toggle('on')));
+  </script>
+</body>
+</html>

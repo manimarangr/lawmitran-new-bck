@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete your profile | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
+    .drop { border:2px dashed #d6dae2; transition:.15s; }
+    .drop:hover { border-color:#C9A24B; background:#fffdf7; }
+    .step-pane { display:none; } .step-pane.active { display:block; }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+
+  <!-- ===== NAV ===== -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3">
+        <img src="assets/logo.svg" alt="LawMitran" style="height:36px;display:block" />
+      </a>
+      <div class="flex items-center gap-3 text-sm">
+        <span class="hidden sm:flex items-center gap-2 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full"><i class="fa-solid fa-clock"></i> Verification pending</span>
+        <a href="login.html" class="text-slate-500 hover:text-[#0B192C] font-medium">Save &amp; exit</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="max-w-3xl mx-auto px-6 py-10">
+    <span class="text-xs font-bold uppercase tracking-widest text-amber-600">Lawyer Onboarding</span>
+    <h1 class="text-2xl md:text-3xl font-extrabold text-[#0B192C] mt-2">Complete your advocate profile</h1>
+    <p class="text-sm text-slate-500 mt-1">Your mobile is verified. Add your bar details and photo to submit for verification.</p>
+
+    <!-- progress -->
+    <div class="flex items-center mt-8 mb-8">
+      <div class="flex-1 flex items-center">
+        <div id="dot1" class="w-9 h-9 rounded-full bg-[#0B192C] text-white flex items-center justify-center text-sm font-bold">1</div>
+        <div id="bar1" class="flex-1 h-1 bg-gray-200 mx-2 rounded"></div>
+      </div>
+      <div class="flex-1 flex items-center">
+        <div id="dot2" class="w-9 h-9 rounded-full bg-gray-200 text-slate-500 flex items-center justify-center text-sm font-bold">2</div>
+        <div id="bar2" class="flex-1 h-1 bg-gray-200 mx-2 rounded"></div>
+      </div>
+      <div>
+        <div id="dot3" class="w-9 h-9 rounded-full bg-gray-200 text-slate-500 flex items-center justify-center text-sm font-bold">3</div>
+      </div>
+    </div>
+    <div class="flex justify-between text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-6 -mt-4">
+      <span>Bar details</span><span>Photo &amp; documents</span><span>Practice &amp; review</span>
+    </div>
+
+    <form onsubmit="event.preventDefault();submitForReview();" class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6 md:p-8">
+
+      <!-- STEP 1 -->
+      <div class="step-pane active" data-step="1">
+        <h2 class="text-lg font-bold text-[#0B192C] mb-5">Bar Council details</h2>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Full name (as per Bar Council) <span class="text-red-500">*</span></label>
+            <input required type="text" placeholder="Adv. Full Name" class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Bar Council Enrollment Number <span class="text-red-500">*</span></label>
+            <input required type="text" placeholder="e.g. KAR/1234/2010" class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Bar Council state <span class="text-red-500">*</span></label>
+            <select required class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm appearance-none cursor-pointer focus:outline-none focus:border-[#C9A24B]">
+              <option value="" selected disabled>Select state</option><option>Karnataka</option><option>Maharashtra</option><option>Tamil Nadu</option><option>Delhi</option><option>Telangana</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Years of experience <span class="text-red-500">*</span></label>
+            <input required type="number" min="0" placeholder="e.g. 12" class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[#C9A24B]" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Gender</label>
+            <select class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm appearance-none cursor-pointer focus:outline-none focus:border-[#C9A24B]">
+              <option value="" selected disabled>Select</option><option>Male</option><option>Female</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-pane" data-step="2">
+        <h2 class="text-lg font-bold text-[#0B192C] mb-2">Photo &amp; documents</h2>
+        <p class="text-xs text-slate-500 mb-5">A clear photo and your Bar Council certificate are required for verification.</p>
+
+        <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Profile photo <span class="text-red-500">*</span></label>
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-20 h-20 rounded-2xl hero-gradient flex items-center justify-center text-[#C9A24B] text-2xl"><i class="fa-solid fa-user"></i></div>
+          <label class="drop flex-1 rounded-xl p-4 text-center cursor-pointer text-sm text-slate-500">
+            <i class="fa-solid fa-camera text-[#C9A24B] mr-1"></i> Upload a passport-style photo (JPG/PNG, max 5MB)
+            <input type="file" accept="image/*" class="hidden" required onchange="this.previousSibling.textContent=' '+(this.files[0]?.name||'')" />
+          </label>
+        </div>
+
+        <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Bar Council certificate <span class="text-red-500">*</span></label>
+        <label class="drop block rounded-xl p-6 text-center cursor-pointer text-sm text-slate-500">
+          <i class="fa-solid fa-file-arrow-up text-[#C9A24B] text-xl block mb-2"></i> Upload certificate (PDF/JPG/PNG, max 10MB)
+          <input type="file" accept=".pdf,image/*" class="hidden" required onchange="this.previousSibling.textContent=' '+(this.files[0]?.name||'')" />
+        </label>
+        <p class="text-[11px] text-slate-400 mt-3"><i class="fa-solid fa-shield-halved text-[#C9A24B] mr-1"></i> We verify your enrollment against the Bar Council certificate — no separate ID upload needed.</p>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step-pane" data-step="3">
+        <h2 class="text-lg font-bold text-[#0B192C] mb-5">Practice &amp; location</h2>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Primary practice area <span class="text-red-500">*</span></label>
+            <select required class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm appearance-none cursor-pointer focus:outline-none focus:border-[#C9A24B]">
+              <option value="" selected disabled>Select</option><option>Family</option><option>Criminal</option><option>Property</option><option>Civil</option><option>Corporate</option><option>Consumer</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">City <span class="text-red-500">*</span></label>
+            <select required class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm appearance-none cursor-pointer focus:outline-none focus:border-[#C9A24B]">
+              <option value="" selected disabled>Select</option><option>Bengaluru</option><option>Chennai</option><option>Mumbai</option><option>Delhi</option><option>Hyderabad</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Languages</label>
+            <input type="text" placeholder="e.g. English, Hindi, Kannada" class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[#C9A24B]" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Short bio</label>
+            <textarea rows="4" placeholder="Tell clients about your practice and approach…" class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[#C9A24B]"></textarea>
+          </div>
+        </div>
+        <div class="mt-5 text-[12px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3"><i class="fa-solid fa-circle-info mr-1"></i> After you submit, our team reviews your Bar Council details. You'll appear in public search once <b>approved</b>. Your 30-day free trial has already started.</div>
+      </div>
+
+      <!-- nav buttons -->
+      <div class="flex items-center justify-between mt-8 pt-6 border-t border-gray-100">
+        <button type="button" id="back" onclick="go(-1)" class="text-sm font-semibold text-slate-500 hover:text-[#0B192C] invisible"><i class="fa-solid fa-arrow-left mr-1"></i> Back</button>
+        <button type="button" id="next" onclick="go(1)" class="bg-[#0B192C] hover:bg-slate-800 text-white font-bold py-3 px-7 rounded-xl text-sm transition-colors">Continue</button>
+        <button type="submit" id="finish" class="hidden bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] font-bold py-3 px-7 rounded-xl text-sm transition-colors">Submit for verification</button>
+      </div>
+    </form>
+  </section>
+
+  <script>
+    let step = 1; const total = 3;
+    const panes = [...document.querySelectorAll('.step-pane')];
+    function render(){
+      panes.forEach(p => p.classList.toggle('active', +p.dataset.step === step));
+      for(let i=1;i<=total;i++){
+        const dot = document.getElementById('dot'+i);
+        const done = i < step, cur = i === step;
+        dot.className = 'w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ' + (done||cur ? 'bg-[#0B192C] text-white' : 'bg-gray-200 text-slate-500');
+        dot.innerHTML = done ? '<i class="fa-solid fa-check"></i>' : i;
+      }
+      document.getElementById('bar1').className = 'flex-1 h-1 mx-2 rounded ' + (step>1?'bg-[#0B192C]':'bg-gray-200');
+      document.getElementById('bar2').className = 'flex-1 h-1 mx-2 rounded ' + (step>2?'bg-[#0B192C]':'bg-gray-200');
+      document.getElementById('back').classList.toggle('invisible', step===1);
+      document.getElementById('next').classList.toggle('hidden', step===total);
+      document.getElementById('finish').classList.toggle('hidden', step!==total);
+    }
+    function go(d){
+      const active = panes.find(p => +p.dataset.step === step);
+      if(d>0){ const inv = active.querySelector('input[required], select[required]');
+        const invalids = [...active.querySelectorAll('[required]')].filter(el => !el.value);
+        if(invalids.length){ invalids[0].reportValidity?.(); invalids[0].focus(); return; } }
+      step = Math.min(total, Math.max(1, step + d)); render();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function submitForReview(){ alert('Sample — POST /api/lawyers/me/verification → status UNDER_REVIEW'); }
+    render();
+  </script>
+</body>
+</html>

@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, Role, VerificationStatus } from '@prisma/client';
+import { Gender, Prisma, Role, VerificationStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../common/mail/mail.service';
 import { StorageService } from '../../common/storage/storage.service';
@@ -16,19 +16,37 @@ import { UpdateLawyerProfileDto } from './dto/update-lawyer-profile.dto';
 
 export interface LawyerProfileFiles {
   certificate?: Express.Multer.File[];
-  identityCard?: Express.Multer.File[];
 }
 
 const PUBLIC_SELECT = {
   id: true,
   fullName: true,
   barCouncilState: true,
-  practiceAreas: true,
   experienceYears: true,
-  city: true,
+  gender: true,
+  bio: true,
   profileImageUrl: true,
+  latitude: true,
+  longitude: true,
+  ratingAvg: true,
+  ratingCount: true,
   verificationStatus: true,
   createdAt: true,
+  city: { select: { id: true, name: true, district: { select: { name: true, state: { select: { name: true } } } } } },
+  practiceAreas: { select: { practiceArea: { select: { id: true, name: true, slug: true } }, proficiency: true } },
+  languages: { select: { language: { select: { id: true, name: true, code: true } } } },
+  courts: { select: { court: { select: { id: true, name: true, type: true } } } },
+} satisfies Prisma.LawyerSelect;
+
+const MARKER_SELECT = {
+  id: true,
+  fullName: true,
+  latitude: true,
+  longitude: true,
+  ratingAvg: true,
+  ratingCount: true,
+  city: { select: { name: true } },
+  practiceAreas: { take: 2, select: { practiceArea: { select: { name: true } } } },
 } satisfies Prisma.LawyerSelect;
 
 @Injectable()
@@ -67,48 +85,31 @@ export class LawyersService {
       certificateFile,
       'certificates',
     );
-    const identityFile = files.identityCard?.[0];
-    const identityCardImageUrl = identityFile
-      ? await this.storage.upload(identityFile, 'identity-cards')
-      : undefined;
 
     // trialEndDate is non-nullable but the trial only actually starts once an
     // admin approves the profile (see review()) — this is just a placeholder.
     const placeholderTrialEnd = new Date();
     placeholderTrialEnd.setDate(placeholderTrialEnd.getDate() + 30);
 
+    // city and practiceAreas are relational; connect them via dedicated endpoints
     const lawyer = await this.prisma.lawyer.create({
       data: {
         userId,
         fullName: dto.fullName,
         barCouncilNumber: dto.barCouncilNumber,
         barCouncilState: dto.barCouncilState,
-        practiceAreas: dto.practiceAreas,
         experienceYears: dto.experienceYears,
-        city: dto.city,
         certificateImageUrl,
-        identityCardImageUrl,
         trialEndDate: placeholderTrialEnd,
       },
     });
 
-    await this.prisma.verification.createMany({
-      data: [
-        {
-          lawyerId: lawyer.id,
-          documentType: 'BAR_COUNCIL_CERTIFICATE',
-          documentUrl: certificateImageUrl,
-        },
-        ...(identityCardImageUrl
-          ? [
-              {
-                lawyerId: lawyer.id,
-                documentType: 'ID_CARD',
-                documentUrl: identityCardImageUrl,
-              },
-            ]
-          : []),
-      ],
+    await this.prisma.verification.create({
+      data: {
+        lawyerId: lawyer.id,
+        documentType: 'BAR_COUNCIL_CERTIFICATE',
+        documentUrl: certificateImageUrl,
+      },
     });
 
     return lawyer;
@@ -127,37 +128,111 @@ export class LawyersService {
     if (!lawyer) {
       throw new NotFoundException('Lawyer profile not found');
     }
-    return this.prisma.lawyer.update({ where: { userId }, data: dto });
+    // Only update scalar fields; city/practiceAreas are managed via dedicated endpoints
+    const { city: _city, practiceAreas: _pa, ...scalarFields } = dto;
+    void _city; void _pa;
+    return this.prisma.lawyer.update({ where: { userId }, data: scalarFields });
   }
 
   async search(query: SearchLawyersDto) {
-    const { city, practiceArea, page, limit } = query;
-    const where: Prisma.LawyerWhereInput = {
-      verificationStatus: VerificationStatus.APPROVED,
-      ...(city ? { city: { equals: city, mode: 'insensitive' } } : {}),
-      ...(practiceArea ? { practiceAreas: { has: practiceArea } } : {}),
-    };
+    const {
+      city, practiceArea, courtId,
+      experienceMin, experienceMax,
+      language, gender, ratingMin, sort,
+      swLat, swLng, neLat, neLng,
+      page, limit,
+    } = query;
+
+    const where = this.buildWhere({
+      city, practiceArea, courtId,
+      experienceMin, experienceMax,
+      language, gender, ratingMin,
+      swLat, swLng, neLat, neLng,
+    });
+
+    const orderBy: Prisma.LawyerOrderByWithRelationInput =
+      sort === 'rating' ? { ratingAvg: 'desc' }
+      : sort === 'experience' ? { experienceYears: 'desc' }
+      : { createdAt: 'desc' };
 
     const [items, total] = await Promise.all([
       this.prisma.lawyer.findMany({
         where,
         select: PUBLIC_SELECT,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         skip: (page - 1) * limit,
         take: limit,
       }),
       this.prisma.lawyer.count({ where }),
     ]);
 
-    return { items, total, page, limit };
+    return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  async findMarkers(query: SearchLawyersDto) {
+    const {
+      city, practiceArea, courtId,
+      experienceMin, experienceMax,
+      language, gender, ratingMin,
+      swLat, swLng, neLat, neLng,
+    } = query;
+
+    const where = this.buildWhere({
+      city, practiceArea, courtId,
+      experienceMin, experienceMax,
+      language, gender, ratingMin,
+      swLat, swLng, neLat, neLng,
+    });
+
+    return this.prisma.lawyer.findMany({
+      where,
+      select: MARKER_SELECT,
+      take: 200,
+    });
+  }
+
+  private buildWhere(params: {
+    city?: string;
+    practiceArea?: string;
+    courtId?: string;
+    experienceMin?: number;
+    experienceMax?: number;
+    language?: string;
+    gender?: Gender;
+    ratingMin?: number;
+    swLat?: number;
+    swLng?: number;
+    neLat?: number;
+    neLng?: number;
+  }): Prisma.LawyerWhereInput {
+    const {
+      city, practiceArea, courtId,
+      experienceMin, experienceMax,
+      language, gender, ratingMin,
+      swLat, swLng, neLat, neLng,
+    } = params;
+
+    return {
+      verificationStatus: VerificationStatus.APPROVED,
+      ...(city ? { city: { is: { name: { equals: city, mode: 'insensitive' } } } } : {}),
+      ...(practiceArea ? { practiceAreas: { some: { practiceArea: { name: { equals: practiceArea, mode: 'insensitive' } } } } } : {}),
+      ...(courtId ? { courts: { some: { courtId } } } : {}),
+      ...(experienceMin !== undefined ? { experienceYears: { gte: experienceMin } } : {}),
+      ...(experienceMax !== undefined ? { experienceYears: { lte: experienceMax } } : {}),
+      ...(language ? { languages: { some: { language: { name: { equals: language, mode: 'insensitive' } } } } } : {}),
+      ...(gender ? { gender } : {}),
+      ...(ratingMin !== undefined ? { ratingAvg: { gte: ratingMin } } : {}),
+      ...(swLat !== undefined && neLat !== undefined ? { latitude: { gte: swLat, lte: neLat } } : {}),
+      ...(swLng !== undefined && neLng !== undefined ? { longitude: { gte: swLng, lte: neLng } } : {}),
+    };
   }
 
   async getPublicProfile(id: string) {
-    const lawyer = await this.prisma.lawyer.findUnique({
-      where: { id },
+    const lawyer = await this.prisma.lawyer.findFirst({
+      where: { id, verificationStatus: VerificationStatus.APPROVED },
       select: PUBLIC_SELECT,
     });
-    if (!lawyer || lawyer.verificationStatus !== VerificationStatus.APPROVED) {
+    if (!lawyer) {
       throw new NotFoundException('Lawyer not found');
     }
     return lawyer;

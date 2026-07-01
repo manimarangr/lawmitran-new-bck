@@ -30,6 +30,7 @@ enum SubscriptionStatus {
 
 enum LeadStatus {
   NEW
+  ASSIGNED
   CONTACTED
   CLOSED
 }
@@ -38,6 +39,32 @@ enum PaymentStatus {
   CREATED
   PAID
   FAILED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum DocumentStatus {
+  DRAFT
+  GENERATED
+  PAID
+  DELIVERED
+}
+
+enum DeliveryType {
+  DIGITAL
+  ESTAMP
+  PHYSICAL
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  IN_APP
 }
 
 model User {
@@ -53,14 +80,23 @@ model User {
   emailVerificationToken     String?   @unique
   emailVerificationExpiresAt DateTime?
 
-  mobileVerified     Boolean   @default(false)
-  mobileOtpCode      String?
-  mobileOtpExpiresAt DateTime?
+  mobileVerified       Boolean   @default(false)
+  mobileOtpHash        String? // SHA-256 of the OTP (never the raw code)
+  mobileOtpExpiresAt   DateTime?
+  mobileOtpAttempts    Int       @default(0) // failed verify attempts in the current cycle
+  mobileOtpLockedUntil DateTime? // set after too many failed attempts
+  mobileOtpLastSentAt  DateTime? // for resend throttling
+
+  passwordResetToken     String?   @unique
+  passwordResetExpiresAt DateTime?
 
   lawyer        Lawyer?
-  leads         Lead[]         @relation("ClientLeads")
+  leads         Lead[]             @relation("ClientLeads")
   refreshTokens RefreshToken[]
   ratings       Rating[]
+  documents     CustomerDocument[]
+  bookmarks     Bookmark[]
+  notifications Notification[]
 }
 
 model RefreshToken {
@@ -74,18 +110,26 @@ model RefreshToken {
 }
 
 model Lawyer {
-  id                   String   @id @default(uuid())
-  userId               String   @unique
-  user                 User     @relation(fields: [userId], references: [id])
+  id                   String  @id @default(uuid())
+  userId               String  @unique
+  user                 User    @relation(fields: [userId], references: [id])
   fullName             String
-  barCouncilNumber     String   @unique
+  barCouncilNumber     String  @unique
   barCouncilState      String
-  practiceAreas        String[]
   experienceYears      Int
-  city                 String
+  gender               Gender?
+  bio                  String?
   profileImageUrl      String?
   certificateImageUrl  String
-  identityCardImageUrl String?
+
+  cityId String?
+  city   City?   @relation(fields: [cityId], references: [id])
+
+  latitude  Float?
+  longitude Float?
+
+  ratingAvg   Decimal? @db.Decimal(3, 2)
+  ratingCount Int      @default(0)
 
   verificationStatus VerificationStatus @default(PENDING)
   approvedBy         String?
@@ -100,11 +144,15 @@ model Lawyer {
 
   verifications Verification[]
   subscriptions Subscription[]
-  leads         Lead[]         @relation("LawyerLeads")
+  leads         Lead[]               @relation("LawyerLeads")
   ratings       Rating[]
   payments      Payment[]
+  practiceAreas LawyerPracticeArea[]
+  languages     LawyerLanguage[]
+  courts        LawyerCourt[]
+  bookmarkedBy  Bookmark[]
 
-  @@index([city, verificationStatus])
+  @@index([cityId, verificationStatus])
 }
 
 model Verification {
@@ -134,9 +182,25 @@ model Subscription {
 }
 
 model SubscriptionPlanPrice {
-  planName  String   @id
-  amount    Decimal  @db.Decimal(10, 2)
-  updatedAt DateTime @updatedAt
+  planName       String   @id
+  amount         Decimal  @db.Decimal(10, 2)
+  monthlyLeadCap Int? // max new leads a lawyer on this plan receives per month; null = unlimited
+  updatedAt      DateTime @updatedAt
+}
+
+// Duration-based pricing: one row per (plan, duration). Lets a lawyer buy a plan
+// for 30 days / 3 months / 6 months / 1 year, each at its own (usually discounted) price.
+model SubscriptionPlanTier {
+  id           String   @id @default(uuid())
+  planName     String // BASIC | PREMIUM
+  durationDays Int // 30, 90, 180, 365
+  label        String // "30 days", "3 months", "6 months", "1 year"
+  amount       Decimal  @db.Decimal(10, 2)
+  active       Boolean  @default(true)
+  updatedAt    DateTime @updatedAt
+
+  @@unique([planName, durationDays])
+  @@index([planName, active])
 }
 
 model Payment {
@@ -157,19 +221,33 @@ model Payment {
 }
 
 model Lead {
-  id           String     @id @default(uuid())
+  id           String        @id @default(uuid())
   clientId     String
-  client       User       @relation("ClientLeads", fields: [clientId], references: [id])
+  client       User          @relation("ClientLeads", fields: [clientId], references: [id])
   lawyerId     String
-  lawyer       Lawyer     @relation("LawyerLeads", fields: [lawyerId], references: [id])
+  lawyer       Lawyer        @relation("LawyerLeads", fields: [lawyerId], references: [id])
   practiceArea String
   description  String
-  status       LeadStatus @default(NEW)
-  createdAt    DateTime   @default(now())
+  status       LeadStatus    @default(NEW)
+  createdAt    DateTime      @default(now())
 
-  rating Rating?
+  rating  Rating?
+  history LeadHistory[]
 
   @@index([lawyerId, status])
+}
+
+model LeadHistory {
+  id         String      @id @default(uuid())
+  leadId     String
+  lead       Lead        @relation(fields: [leadId], references: [id])
+  fromStatus LeadStatus?
+  toStatus   LeadStatus
+  changedBy  String
+  note       String?
+  createdAt  DateTime    @default(now())
+
+  @@index([leadId])
 }
 
 model Rating {
@@ -185,4 +263,179 @@ model Rating {
   createdAt DateTime @default(now())
 
   @@index([lawyerId])
+}
+
+// ---------- Reference data: location, practice area, language, court ----------
+
+model State {
+  id        String     @id @default(uuid())
+  name      String
+  code      String     @unique
+  districts District[]
+  createdAt DateTime   @default(now())
+}
+
+model District {
+  id      String @id @default(uuid())
+  stateId String
+  state   State  @relation(fields: [stateId], references: [id])
+  name    String
+  cities  City[]
+
+  @@unique([stateId, name])
+}
+
+model City {
+  id         String   @id @default(uuid())
+  districtId String
+  district   District @relation(fields: [districtId], references: [id])
+  name       String
+  lawyers    Lawyer[]
+
+  @@unique([districtId, name])
+  @@index([name])
+}
+
+model PracticeArea {
+  id      String               @id @default(uuid())
+  name    String               @unique
+  slug    String               @unique
+  lawyers LawyerPracticeArea[]
+}
+
+model LawyerPracticeArea {
+  lawyerId       String
+  lawyer         Lawyer       @relation(fields: [lawyerId], references: [id])
+  practiceAreaId String
+  practiceArea   PracticeArea @relation(fields: [practiceAreaId], references: [id])
+  proficiency    Int?
+  skills         String[]
+
+  @@id([lawyerId, practiceAreaId])
+  @@index([practiceAreaId])
+}
+
+model Language {
+  id      String           @id @default(uuid())
+  name    String           @unique
+  code    String           @unique
+  lawyers LawyerLanguage[]
+}
+
+model LawyerLanguage {
+  lawyerId   String
+  lawyer     Lawyer   @relation(fields: [lawyerId], references: [id])
+  languageId String
+  language   Language @relation(fields: [languageId], references: [id])
+
+  @@id([lawyerId, languageId])
+}
+
+model Court {
+  id      String        @id @default(uuid())
+  name    String        @unique
+  code    String        @unique
+  type    String
+  lawyers LawyerCourt[]
+}
+
+model LawyerCourt {
+  lawyerId String
+  lawyer   Lawyer @relation(fields: [lawyerId], references: [id])
+  courtId  String
+  court    Court  @relation(fields: [courtId], references: [id])
+
+  @@id([lawyerId, courtId])
+  @@index([courtId])
+}
+
+// ---------- Document marketplace ----------
+
+model DocumentCategory {
+  id          String             @id @default(uuid())
+  name        String
+  slug        String             @unique
+  description String?
+  templates   DocumentTemplate[]
+}
+
+model DocumentTemplate {
+  id            String             @id @default(uuid())
+  categoryId    String
+  category      DocumentCategory   @relation(fields: [categoryId], references: [id])
+  title         String
+  keywords      String[]
+  price         Decimal            @db.Decimal(10, 2)
+  schemaJson    Json
+  bodyTemplate  String
+  requiresStamp Boolean            @default(false)
+  stampBasis    String?
+  active        Boolean            @default(true)
+  documents     CustomerDocument[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([categoryId, active])
+}
+
+model CustomerDocument {
+  id              String           @id @default(uuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id])
+  templateId      String
+  template        DocumentTemplate @relation(fields: [templateId], references: [id])
+  inputJson       Json
+  pdfUrl          String?
+  status          DocumentStatus   @default(DRAFT)
+  deliveryType    DeliveryType     @default(DIGITAL)
+  eStamped        Boolean          @default(false)
+  eSigned         Boolean          @default(false)
+  stampDuty       Decimal?         @db.Decimal(10, 2)
+  deliveryFee     Decimal?         @db.Decimal(10, 2)
+  deliveryAddress Json?
+  paymentId       String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([userId, status])
+}
+
+// ---------- Platform: bookmarks, notifications, audit ----------
+
+model Bookmark {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  lawyerId  String
+  lawyer    Lawyer   @relation(fields: [lawyerId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, lawyerId])
+  @@index([lawyerId])
+}
+
+model Notification {
+  id          String              @id @default(uuid())
+  userId      String
+  user        User                @relation(fields: [userId], references: [id])
+  channel     NotificationChannel
+  type        String
+  payloadJson Json?
+  readAt      DateTime?
+  createdAt   DateTime            @default(now())
+
+  @@index([userId, readAt])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String
+  metaJson  Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId])
 }

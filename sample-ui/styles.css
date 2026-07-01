@@ -1,0 +1,63 @@
+/* ===== LawMitran shared design system ===== */
+:root{
+  --navy:#0E2148; --navy-2:#16306b; --gold:#C9A24B; --gold-soft:#e7d6a8;
+  --ink:#1f2733; --muted:#5b6678; --bg:#fff; --bg-soft:#f5f7fb; --line:#e6e9f0;
+  --radius:14px; --shadow:0 10px 30px rgba(14,33,72,.10); --shadow-sm:0 4px 14px rgba(14,33,72,.08);
+  --font:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.55}
+a{text-decoration:none;color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;cursor:pointer;font-weight:600;
+  border-radius:10px;padding:13px 22px;font-size:15px;transition:.18s ease;font-family:var(--font)}
+.btn-gold{background:var(--gold);color:var(--navy)} .btn-gold:hover{background:#b8902f;transform:translateY(-1px)}
+.btn-navy{background:var(--navy);color:#fff} .btn-navy:hover{background:var(--navy-2)}
+.btn-ghost{background:transparent;color:var(--navy);border:1.5px solid var(--line)} .btn-ghost:hover{border-color:var(--gold)}
+.btn-sm{padding:9px 15px;font-size:13.5px}
+.eyebrow{color:var(--gold);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12.5px}
+section{padding:60px 0}
+h2.section-title{font-size:32px;color:var(--navy);text-align:center;margin-bottom:8px;letter-spacing:-.5px}
+.section-sub{text-align:center;color:var(--muted);max-width:620px;margin:0 auto 42px}
+
+/* header */
+header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.93);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:74px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .mark{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0B192C,#1E3E62);box-shadow:0 4px 10px rgba(11,25,44,.25);border:1px solid rgba(201,162,75,.25)}
+.brand .mark svg{width:22px;height:22px}
+.brand .word{font-size:23px;font-weight:800;letter-spacing:-.5px;color:#0B192C}
+.brand .word span{color:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:28px;margin-left:auto;margin-right:24px}
+.nav-links a{font-weight:600;color:var(--ink);font-size:15px}.nav-links a:hover{color:var(--gold)}
+.nav-actions{display:flex;align-items:center;gap:14px}
+.nav-toggle{display:none;background:none;border:0;cursor:pointer}
+
+/* breadcrumb */
+.crumb{font-size:13.5px;color:var(--muted);padding:18px 0}
+.crumb a:hover{color:var(--gold)} .crumb b{color:var(--navy)}
+
+/* lawyer card (shared) */
+.verified{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:#2f8f57;background:#eaf7ef;border-radius:20px;padding:3px 9px;font-weight:700}
+.stars{color:var(--gold);letter-spacing:2px;font-size:14px}
+.stars small{color:var(--muted);letter-spacing:0;margin-left:6px}
+.avatar{border-radius:50%;background:var(--bg-soft);border:2px solid var(--gold-soft);overflow:hidden;flex:0 0 auto}
+
+/* footer */
+footer{background:#0a1838;color:#c7d0e4;padding:54px 0 26px;margin-top:20px}
+.foot-top{display:grid;grid-template-columns:1.6fr repeat(4,1fr);gap:30px;padding-bottom:34px;border-bottom:1px solid rgba(255,255,255,.08)}
+footer h4{color:#fff;font-size:14px;margin-bottom:14px} footer ul{list-style:none}
+footer ul li{margin-bottom:9px;font-size:14px} footer ul li a:hover{color:var(--gold)}
+.foot-brand img{height:46px;margin-bottom:14px}.foot-brand p{font-size:13.5px;max-width:280px}
+.foot-contact{display:flex;flex-wrap:wrap;gap:20px;padding:22px 0;font-size:13.5px}
+.foot-contact span{display:flex;align-items:center;gap:8px}
+.foot-bottom{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:12.5px;color:#8895b3}
+.foot-bottom .tagline{color:var(--gold);font-weight:700}
+
+@media(max-width:900px){
+  .nav-links{display:none}.nav-toggle{display:inline-flex}
+  .foot-top{grid-template-columns:1fr 1fr;gap:24px}
+}
+@media(max-width:560px){ h2.section-title{font-size:26px} .foot-top{grid-template-columns:1fr} }

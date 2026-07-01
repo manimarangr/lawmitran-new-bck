@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Lawyer Approvals | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .nav-item.active { background:#16306b; color:#fff; } .nav-item.active i { color:#C9A24B; }
+    .qrow.sel { background:#fffdf7; border-color:#C9A24B; }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+  <div class="flex min-h-screen">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 bg-[#0B192C] text-slate-300 flex-shrink-0 hidden lg:flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 px-6 h-20 border-b border-slate-800">
+        <img src="assets/logo-light.svg" alt="LawMitran" style="height:36px;display:block" />
+      </a>
+      <nav class="flex-1 p-4 space-y-1 text-sm font-medium">
+        <a href="admin-dashboard.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-gauge-high w-4"></i> Dashboard</a>
+        <a href="admin-lawyers.html" class="nav-item active flex items-center gap-3 px-4 py-2.5 rounded-xl"><i class="fa-solid fa-user-check w-4"></i> Lawyer Approvals <span class="ml-auto text-[10px] bg-[#C9A24B] text-[#0B192C] font-bold px-2 py-0.5 rounded-full">7</span></a>
+        <a href="admin-users.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-users w-4"></i> Users</a>
+        <a href="admin-documents.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-folder-open w-4"></i> Documents</a>
+        <a href="#" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-tags w-4"></i> Plans</a>
+        <a href="#" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-chart-line w-4"></i> Reports</a>
+      </nav>
+      <div class="p-4 border-t border-slate-800"><a href="login.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm hover:bg-slate-800/60"><i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Sign out</a></div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-40">
+        <div><h1 class="text-xl font-extrabold text-[#0B192C]">Lawyer Approvals</h1><p class="text-xs text-slate-400">Review Bar Council documents before approving</p></div>
+        <span class="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full">7 awaiting review</span>
+      </header>
+
+      <main class="p-6 grid lg:grid-cols-5 gap-6 items-start">
+        <!-- queue list -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4">
+          <h2 class="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3 px-1">Review queue</h2>
+          <div id="queue" class="space-y-2"></div>
+        </div>
+
+        <!-- detail / review panel -->
+        <div class="lg:col-span-3 bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6" id="detail"></div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const queue = [
+      { id:1, name:'Adv. R. Khanna', i:'RK', bar:'KAR/4521/2018', state:'Karnataka', city:'Bengaluru', exp:11, area:'Criminal', mobile:'+91 98XXXX11', emailV:true, mobileV:true, dupes:false },
+      { id:2, name:'Adv. P. Verma', i:'PV', bar:'MH/9921/2015', state:'Maharashtra', city:'Mumbai', exp:14, area:'Property', mobile:'+91 98XXXX12', emailV:true, mobileV:true, dupes:false },
+      { id:3, name:'Adv. S. Nair', i:'SN', bar:'KL/1180/2012', state:'Kerala', city:'Kochi', exp:17, area:'Family', mobile:'+91 98XXXX13', emailV:false, mobileV:true, dupes:true },
+    ];
+    let cur = 1;
+    const qEl = document.getElementById('queue');
+    function renderQueue(){
+      qEl.innerHTML = queue.map(q => `
+        <button onclick="select(${q.id})" class="qrow w-full text-left flex items-center gap-3 border ${q.id===cur?'sel':'border-gray-100'} rounded-xl p-3 hover:border-[#C9A24B] transition">
+          <div class="w-10 h-10 rounded-lg bg-[#0B192C] text-[#C9A24B] flex items-center justify-center font-bold text-xs">${q.i}</div>
+          <div class="min-w-0"><p class="text-sm font-bold text-slate-800 truncate">${q.name}</p><p class="text-[11px] text-slate-400">${q.bar} · ${q.city}</p></div>
+          <span class="ml-auto text-[9px] font-bold bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">PENDING</span>
+        </button>`).join('');
+    }
+    function chk(ok){ return ok
+      ? '<span class="text-green-600"><i class="fa-solid fa-circle-check"></i> Pass</span>'
+      : '<span class="text-red-600"><i class="fa-solid fa-circle-xmark"></i> Check</span>'; }
+    function renderDetail(){
+      const q = queue.find(x => x.id===cur);
+      document.getElementById('detail').innerHTML = `
+        <div class="flex items-start gap-4 mb-6">
+          <div class="w-16 h-16 rounded-xl bg-[#0B192C] text-[#C9A24B] flex items-center justify-center font-extrabold text-xl">${q.i}</div>
+          <div class="flex-1">
+            <h2 class="text-xl font-extrabold text-[#0B192C]">${q.name}</h2>
+            <p class="text-sm text-slate-500">${q.area} Law · ${q.exp} yrs · ${q.city}, ${q.state}</p>
+            <p class="text-xs text-slate-500 mt-1"><span class="font-bold uppercase tracking-wide text-slate-400">Enrollment No.</span> <span class="font-semibold text-[#0B192C]">${q.bar}</span> <span class="text-slate-400">— verify against the certificate</span></p>
+          </div>
+          <span class="text-xs font-bold bg-amber-50 text-amber-700 px-3 py-1 rounded-full">UNDER REVIEW</span>
+        </div>
+
+        <h3 class="text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">Automated pre-checks</h3>
+        <div class="grid sm:grid-cols-2 gap-2 text-sm mb-6">
+          <div class="flex justify-between border border-gray-100 rounded-lg px-3 py-2"><span class="text-slate-500">Bar number format</span>${chk(true)}</div>
+          <div class="flex justify-between border border-gray-100 rounded-lg px-3 py-2"><span class="text-slate-500">Bar number unique</span>${chk(!q.dupes)}</div>
+          <div class="flex justify-between border border-gray-100 rounded-lg px-3 py-2"><span class="text-slate-500">Mobile verified</span>${chk(q.mobileV)}</div>
+          <div class="flex justify-between border border-gray-100 rounded-lg px-3 py-2"><span class="text-slate-500">Email verified</span>${chk(q.emailV)}</div>
+          ${q.dupes ? '<div class="sm:col-span-2 text-[12px] text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Possible duplicate bar number — verify carefully.</div>' : ''}
+        </div>
+
+        <h3 class="text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">Documents <span class="normal-case font-normal text-slate-400">(open to verify — required before approval)</span></h3>
+        <div class="grid sm:grid-cols-2 gap-3 mb-6">
+          <button onclick="openDoc('cert')" class="border border-gray-200 rounded-xl p-4 text-center hover:border-[#C9A24B] hover:shadow-sm transition"><i class="fa-solid fa-file-shield text-[#C9A24B] text-xl"></i><p class="text-xs font-semibold text-slate-700 mt-2">Bar certificate</p><p class="text-[10px] text-slate-400">Click to view</p></button>
+          <button onclick="openDoc('photo')" class="border border-gray-200 rounded-xl p-4 text-center hover:border-[#C9A24B] hover:shadow-sm transition"><i class="fa-solid fa-id-badge text-[#C9A24B] text-xl"></i><p class="text-xs font-semibold text-slate-700 mt-2">Profile photo</p><p class="text-[10px] text-slate-400">Click to view</p></button>
+        </div>
+
+        <div class="border-t border-gray-100 pt-5">
+          <label class="block text-xs font-bold uppercase tracking-wide text-slate-400 mb-1.5">Decision note / rejection reason</label>
+          <textarea id="note" rows="2" placeholder="Visible to the lawyer if rejected…" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B] mb-4"></textarea>
+          <div class="flex flex-wrap gap-3">
+            <button onclick="decide('APPROVED')" class="bg-green-600 hover:bg-green-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl flex items-center gap-2"><i class="fa-solid fa-check"></i> Approve</button>
+            <button onclick="decide('REJECTED')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl flex items-center gap-2"><i class="fa-solid fa-xmark"></i> Reject</button>
+            <button onclick="decide('SUSPENDED')" class="border border-gray-200 hover:border-orange-400 text-orange-600 font-bold text-sm px-5 py-2.5 rounded-xl flex items-center gap-2"><i class="fa-solid fa-ban"></i> Suspend</button>
+          </div>
+        </div>`;
+    }
+    function select(id){ cur = id; renderQueue(); renderDetail(); }
+    function decide(status){
+      const q = queue.find(x => x.id===cur);
+      alert(`${q.name}\\nSample — PATCH /api/admin/lawyers/${q.id}/verification { status: ${status} }\\n→ writes Verification + AuditLog`);
+    }
+    renderQueue(); renderDetail();
+  </script>
+
+  <!-- ===== DOCUMENT VIEWER (lightbox) ===== -->
+  <div id="viewer" class="fixed inset-0 z-[60] bg-black/70 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+      <!-- toolbar -->
+      <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+        <div class="min-w-0">
+          <h3 id="vTitle" class="font-bold text-[#0B192C] truncate">Document</h3>
+          <p id="vSub" class="text-[11px] text-slate-400"></p>
+        </div>
+        <div class="flex items-center gap-1 text-slate-500">
+          <button onclick="vZoom(-1)" title="Zoom out" class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+          <span id="vZoomLbl" class="text-xs font-semibold w-12 text-center">100%</span>
+          <button onclick="vZoom(1)" title="Zoom in" class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+          <button onclick="vRotate()" title="Rotate" class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-rotate-right"></i></button>
+          <button onclick="vDownload()" title="Download" class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-download"></i></button>
+          <button onclick="vOpenTab()" title="Open in new tab" class="w-9 h-9 rounded-lg hover:bg-slate-100"><i class="fa-solid fa-up-right-from-square"></i></button>
+          <button onclick="closeViewer()" title="Close" class="w-9 h-9 rounded-lg hover:bg-red-50 hover:text-red-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+      </div>
+      <!-- stage -->
+      <div class="flex-1 overflow-auto bg-slate-200/70 flex items-center justify-center p-6">
+        <div id="vStage" style="transform-origin:center center; transition:transform .15s ease;"></div>
+      </div>
+      <!-- thumbnails -->
+      <div class="flex items-center gap-2 px-5 py-3 border-t border-gray-100 bg-white">
+        <span class="text-[11px] font-bold uppercase tracking-wide text-slate-400 mr-1">Documents:</span>
+        <div id="vThumbs" class="flex gap-2"></div>
+        <span class="ml-auto text-[11px] text-slate-400 italic">Served via short-lived signed URL · not on public profile</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- Document mocks (in production these are <img src="signed-url"> or a PDF embed) ----
+    const META = { cert:{ label:'Bar Council Certificate', icon:'fa-file-shield', file:'bar-certificate.pdf' },
+                   photo:{ label:'Profile Photo', icon:'fa-id-badge', file:'profile-photo.jpg' } };
+    const ORDER = ['cert','photo'];
+    let vType = 'cert', vScale = 1, vRot = 0;
+
+    function lawyerNow(){ return queue.find(x => x.id === cur); }
+
+    function docSVG(type){
+      const q = lawyerNow();
+      if(type === 'photo'){
+        return `<svg width="320" height="400" viewBox="0 0 320 400" xmlns="http://www.w3.org/2000/svg">
+          <rect width="320" height="400" fill="#fff" stroke="#e2e8f0"/>
+          <rect width="320" height="400" fill="url(#g)"/>
+          <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef1f7"/><stop offset="1" stop-color="#dfe5f0"/></linearGradient></defs>
+          <circle cx="160" cy="150" r="62" fill="#c2cbdc"/><path d="M60 360c8-66 50-100 100-100s92 34 100 100" fill="#c2cbdc"/>
+          <rect x="0" y="362" width="320" height="38" fill="#0B192C"/>
+          <text x="160" y="386" text-anchor="middle" fill="#fff" font-family="Inter,sans-serif" font-size="14" font-weight="700">${q.name}</text>
+        </svg>`;
+      }
+      // certificate
+      return `<svg width="600" height="780" viewBox="0 0 600 780" xmlns="http://www.w3.org/2000/svg" font-family="Inter,sans-serif">
+        <rect width="600" height="780" fill="#fff" stroke="#e2e8f0"/>
+        <rect x="18" y="18" width="564" height="744" fill="none" stroke="#C9A24B" stroke-width="2"/>
+        <rect x="26" y="26" width="548" height="728" fill="none" stroke="#0B192C" stroke-width="1"/>
+        <text x="300" y="86" text-anchor="middle" fill="#0B192C" font-size="22" font-weight="800" letter-spacing="1">BAR COUNCIL OF ${q.state.toUpperCase()}</text>
+        <text x="300" y="112" text-anchor="middle" fill="#64748b" font-size="12" letter-spacing="3">CONSTITUTED UNDER THE ADVOCATES ACT, 1961</text>
+        <circle cx="300" cy="180" r="40" fill="none" stroke="#C9A24B" stroke-width="2"/>
+        <path d="M300 150v60M270 180h60" stroke="#C9A24B" stroke-width="1.5"/>
+        <text x="300" y="280" text-anchor="middle" fill="#0B192C" font-size="26" font-weight="800">CERTIFICATE OF ENROLMENT</text>
+        <text x="300" y="330" text-anchor="middle" fill="#475569" font-size="14">This is to certify that</text>
+        <text x="300" y="372" text-anchor="middle" fill="#0B192C" font-size="24" font-weight="700">${q.name}</text>
+        <line x1="150" y1="388" x2="450" y2="388" stroke="#cbd5e1"/>
+        <text x="300" y="424" text-anchor="middle" fill="#475569" font-size="14">has been duly enrolled as an Advocate</text>
+        <text x="300" y="470" text-anchor="middle" fill="#0B192C" font-size="16" font-weight="700">Enrolment No: ${q.bar}</text>
+        <text x="300" y="498" text-anchor="middle" fill="#475569" font-size="13">Practice area: ${q.area} Law &nbsp;·&nbsp; Experience: ${q.exp} years</text>
+        <g>
+          <line x1="90" y1="660" x2="240" y2="660" stroke="#94a3b8"/>
+          <text x="165" y="680" text-anchor="middle" fill="#64748b" font-size="12">Registrar</text>
+          <line x1="360" y1="660" x2="510" y2="660" stroke="#94a3b8"/>
+          <text x="435" y="680" text-anchor="middle" fill="#64748b" font-size="12">Seal &amp; Date</text>
+        </g>
+        <text x="300" y="730" text-anchor="middle" fill="#94a3b8" font-size="11">Sample certificate for design preview — verify the real upload before approving</text>
+      </svg>`;
+    }
+
+    function applyTransform(){
+      document.getElementById('vStage').style.transform = `scale(${vScale}) rotate(${vRot}deg)`;
+      document.getElementById('vZoomLbl').textContent = Math.round(vScale*100)+'%';
+    }
+    function renderThumbs(){
+      document.getElementById('vThumbs').innerHTML = ORDER.map(t => `
+        <button onclick="setDoc('${t}')" class="px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-2 ${t===vType?'border-[#C9A24B] bg-[#fffdf7] text-[#0B192C]':'border-gray-200 text-slate-500 hover:border-slate-300'}">
+          <i class="fa-solid ${META[t].icon} ${t===vType?'text-[#C9A24B]':''}"></i> ${META[t].label}
+        </button>`).join('');
+    }
+    function setDoc(type){
+      vType = type; vScale = 1; vRot = 0;
+      const q = lawyerNow();
+      document.getElementById('vTitle').textContent = META[type].label;
+      document.getElementById('vSub').textContent = `${q.name} · ${META[type].file}`;
+      document.getElementById('vStage').innerHTML = docSVG(type);
+      applyTransform(); renderThumbs();
+    }
+    function openDoc(type){
+      const v = document.getElementById('viewer');
+      v.classList.remove('hidden'); v.classList.add('flex');
+      setDoc(type);
+    }
+    function closeViewer(){ const v = document.getElementById('viewer'); v.classList.add('hidden'); v.classList.remove('flex'); }
+    function vZoom(d){ vScale = Math.min(3, Math.max(0.5, +(vScale + d*0.25).toFixed(2))); applyTransform(); }
+    function vRotate(){ vRot = (vRot + 90) % 360; applyTransform(); }
+    function vDownload(){ alert('Sample — download via signed URL: '+META[vType].file); }
+    function vOpenTab(){ alert('Sample — open signed URL in new tab: '+META[vType].file); }
+
+    // close on backdrop click / Esc
+    document.getElementById('viewer').addEventListener('click', e => { if(e.target.id === 'viewer') closeViewer(); });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') closeViewer(); });
+  </script>
+</body>
+</html>

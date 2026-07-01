@@ -12,7 +12,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { ActivateSubscriptionDto } from './dto/activate-subscription.dto';
 import { VerifyPaymentDto } from './dto/verify-payment.dto';
 
-const DEFAULT_PLAN_NAME = 'STANDARD';
+const DEFAULT_PLAN_NAME = 'BASIC';
 const DEFAULT_DURATION_DAYS = 30;
 
 @Injectable()
@@ -53,15 +53,19 @@ export class SubscriptionsService {
     }
 
     const planName = dto.planName ?? DEFAULT_PLAN_NAME;
-    const planPrice = await this.prisma.subscriptionPlanPrice.findUnique({
-      where: { planName },
+    const durationDays = dto.durationDays ?? DEFAULT_DURATION_DAYS;
+
+    // Price is determined by the (plan, duration) tier — longer terms are discounted.
+    const tier = await this.prisma.subscriptionPlanTier.findUnique({
+      where: { planName_durationDays: { planName, durationDays } },
     });
-    if (!planPrice) {
-      throw new NotFoundException(`Unknown subscription plan: ${planName}`);
+    if (!tier || !tier.active) {
+      throw new NotFoundException(
+        `No active price for plan "${planName}" with duration ${durationDays} days`,
+      );
     }
 
-    const durationDays = dto.durationDays ?? DEFAULT_DURATION_DAYS;
-    const amountInPaise = Math.round(Number(planPrice.amount) * 100);
+    const amountInPaise = Math.round(Number(tier.amount) * 100);
     const order = await this.razorpay.createOrder(
       amountInPaise,
       `lawyer_${lawyer.id}_${Date.now()}`,
@@ -71,8 +75,8 @@ export class SubscriptionsService {
       data: {
         lawyerId: lawyer.id,
         planName,
-        amount: planPrice.amount,
-        durationDays,
+        amount: tier.amount,
+        durationDays: tier.durationDays,
         providerOrderId: order.id,
         status: PaymentStatus.CREATED,
       },
@@ -177,12 +181,61 @@ export class SubscriptionsService {
     });
   }
 
-  setPlanPrice(planName: string, amount: number) {
+  setPlanPrice(
+    planName: string,
+    amount: number,
+    monthlyLeadCap?: number | null,
+  ) {
     return this.prisma.subscriptionPlanPrice.upsert({
       where: { planName },
-      create: { planName, amount },
-      update: { amount },
+      create: { planName, amount, monthlyLeadCap: monthlyLeadCap ?? null },
+      update: {
+        amount,
+        ...(monthlyLeadCap !== undefined ? { monthlyLeadCap } : {}),
+      },
     });
+  }
+
+  /** Public: all active duration tiers, for rendering the pricing page. */
+  listPlanTiers() {
+    return this.prisma.subscriptionPlanTier.findMany({
+      where: { active: true },
+      orderBy: [{ planName: 'asc' }, { durationDays: 'asc' }],
+    });
+  }
+
+  /** Admin: create or update the price/label/active flag for a (plan, duration) tier. */
+  setPlanTier(
+    planName: string,
+    durationDays: number,
+    data: { amount: number; label?: string; active?: boolean },
+  ) {
+    const label =
+      data.label ?? this.defaultLabelForDuration(durationDays) ?? `${durationDays} days`;
+    return this.prisma.subscriptionPlanTier.upsert({
+      where: { planName_durationDays: { planName, durationDays } },
+      create: {
+        planName,
+        durationDays,
+        label,
+        amount: data.amount,
+        active: data.active ?? true,
+      },
+      update: {
+        amount: data.amount,
+        ...(data.label !== undefined ? { label: data.label } : {}),
+        ...(data.active !== undefined ? { active: data.active } : {}),
+      },
+    });
+  }
+
+  private defaultLabelForDuration(durationDays: number): string | undefined {
+    return {
+      30: '30 days',
+      90: '3 months',
+      180: '6 months',
+      365: '1 year',
+    }[durationDays];
   }
 
   async expireDueSubscriptions() {

@@ -10,17 +10,21 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { createHash, randomUUID } from 'crypto';
+import { createHash, randomBytes, randomUUID } from 'crypto';
 import { MailService } from '../../common/mail/mail.service';
+import { OtpService } from '../../common/otp/otp.service';
 import { RecaptchaService } from '../../common/recaptcha/recaptcha.service';
-import { SmsService } from '../../common/sms/sms.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { RegisterDto } from './dto/register.dto';
 
 const EMAIL_VERIFICATION_TTL_HOURS = 24;
-const MOBILE_OTP_TTL_MINUTES = 10;
+const PASSWORD_RESET_TTL_HOURS = 1;
+// OTP is only sent at signup verification (keeps SMS/WhatsApp cost ~1 per user).
+const OTP_RESEND_COOLDOWN_SECONDS = 30;
+const OTP_MAX_ATTEMPTS = 5;
+const OTP_LOCK_MINUTES = 15;
 
 @Injectable()
 export class AuthService {
@@ -30,7 +34,7 @@ export class AuthService {
     private config: ConfigService,
     private recaptcha: RecaptchaService,
     private mail: MailService,
-    private sms: SmsService,
+    private otp: OtpService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -68,16 +72,17 @@ export class AuthService {
       },
     });
 
+    // Email verification link is free — send it, but it's a soft prompt (login is not blocked on it).
     await this.mail.sendEmailVerification(user.email, emailVerificationToken);
 
-    if (user.role === Role.LAWYER) {
-      await this.sendMobileOtp(user.mobile);
-    }
+    // Signup verification uses ONE mobile OTP for every role (WhatsApp-first).
+    // This is the hard gate before login; no OTP is sent on subsequent logins.
+    await this.sendMobileOtp(user.mobile);
 
     return {
       userId: user.id,
-      emailVerificationRequired: true,
-      mobileVerificationRequired: user.role === Role.LAWYER,
+      mobileVerificationRequired: true,
+      emailVerificationRequired: false, // soft — verify anytime to receive emails
     };
   }
 
@@ -92,17 +97,71 @@ export class AuthService {
     if (!matches) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    if (!user.emailVerified) {
+    // Mobile OTP is the signup verification gate for every role.
+    // Email verification is a soft prompt and does NOT block login.
+    if (!user.mobileVerified) {
       throw new ForbiddenException(
-        'Please verify your email before logging in',
+        'Please verify your mobile number to finish signing up',
       );
     }
-    if (user.role === Role.LAWYER && !user.mobileVerified) {
-      throw new ForbiddenException(
-        'Please verify your mobile number before logging in',
-      );
+    return this.issueTokens(user.id, user.role, dto.rememberMe ?? false);
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    const SAFE_RESPONSE = {
+      message: 'If an account with that email exists, a reset link has been sent.',
+    };
+
+    if (!user) return SAFE_RESPONSE;
+
+    const rawToken = randomBytes(32).toString('hex');
+    const tokenHash = this.hashToken(rawToken);
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + PASSWORD_RESET_TTL_HOURS);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { passwordResetToken: tokenHash, passwordResetExpiresAt: expiresAt },
+    });
+
+    const frontendOrigin = this.config.get<string>('FRONTEND_ORIGIN', 'http://localhost:3000');
+    const resetUrl = `${frontendOrigin}/reset-password?token=${rawToken}`;
+    await this.mail.sendPasswordResetEmail(email, resetUrl);
+
+    return SAFE_RESPONSE;
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const tokenHash = this.hashToken(token);
+    const user = await this.prisma.user.findFirst({
+      where: {
+        passwordResetToken: tokenHash,
+        passwordResetExpiresAt: { gt: new Date() },
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired password reset token');
     }
-    return this.issueTokens(user.id, user.role);
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          passwordHash,
+          passwordResetToken: null,
+          passwordResetExpiresAt: null,
+        },
+      }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId: user.id, revoked: false },
+        data: { revoked: true },
+      }),
+    ]);
+
+    return { message: 'Password updated successfully.' };
   }
 
   async verifyEmail(token: string) {
@@ -134,37 +193,76 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('No account found for this mobile number');
     }
-    if (user.role !== Role.LAWYER) {
-      throw new BadRequestException(
-        'Mobile verification only applies to lawyer accounts',
-      );
-    }
     if (user.mobileVerified) {
       throw new ConflictException('Mobile number is already verified');
     }
 
-    const code = this.generateOtpCode();
-    const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + MOBILE_OTP_TTL_MINUTES);
+    // Resend throttle — protects against SMS/WhatsApp bill abuse.
+    if (user.mobileOtpLastSentAt) {
+      const elapsedSec =
+        (Date.now() - user.mobileOtpLastSentAt.getTime()) / 1000;
+      if (elapsedSec < OTP_RESEND_COOLDOWN_SECONDS) {
+        throw new BadRequestException(
+          `Please wait ${Math.ceil(
+            OTP_RESEND_COOLDOWN_SECONDS - elapsedSec,
+          )}s before requesting another code`,
+        );
+      }
+    }
+
+    const code = this.otp.generateCode();
+    const expiresAt = new Date(Date.now() + this.otp.ttlMs);
 
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { mobileOtpCode: code, mobileOtpExpiresAt: expiresAt },
+      data: {
+        mobileOtpHash: this.otp.hash(code),
+        mobileOtpExpiresAt: expiresAt,
+        mobileOtpAttempts: 0,
+        mobileOtpLockedUntil: null,
+        mobileOtpLastSentAt: new Date(),
+      },
     });
 
-    await this.sms.sendOtp(mobile, code);
-
-    return { success: true };
+    const channel = await this.otp.deliver(mobile, code);
+    return { success: true, channel };
   }
 
   async verifyMobileOtp(mobile: string, code: string) {
     const user = await this.prisma.user.findUnique({ where: { mobile } });
-    if (
-      !user ||
-      user.mobileOtpCode !== code ||
-      !user.mobileOtpExpiresAt ||
-      user.mobileOtpExpiresAt < new Date()
-    ) {
+    if (!user) {
+      throw new BadRequestException('Invalid or expired OTP code');
+    }
+    if (user.mobileVerified) {
+      throw new ConflictException('Mobile number is already verified');
+    }
+    if (user.mobileOtpLockedUntil && user.mobileOtpLockedUntil > new Date()) {
+      throw new ForbiddenException(
+        'Too many incorrect attempts. Please request a new code shortly.',
+      );
+    }
+    if (!user.mobileOtpHash || !user.mobileOtpExpiresAt) {
+      throw new BadRequestException('Please request a verification code first');
+    }
+    if (user.mobileOtpExpiresAt < new Date()) {
+      throw new BadRequestException('Invalid or expired OTP code');
+    }
+
+    const isMatch = user.mobileOtpHash === this.otp.hash(code);
+    if (!isMatch) {
+      const attempts = user.mobileOtpAttempts + 1;
+      const lock = attempts >= OTP_MAX_ATTEMPTS;
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          mobileOtpAttempts: attempts,
+          mobileOtpLockedUntil: lock
+            ? new Date(Date.now() + OTP_LOCK_MINUTES * 60 * 1000)
+            : null,
+          // On lockout, invalidate the code so a new one must be requested.
+          ...(lock ? { mobileOtpHash: null, mobileOtpExpiresAt: null } : {}),
+        },
+      });
       throw new BadRequestException('Invalid or expired OTP code');
     }
 
@@ -172,16 +270,14 @@ export class AuthService {
       where: { id: user.id },
       data: {
         mobileVerified: true,
-        mobileOtpCode: null,
+        mobileOtpHash: null,
         mobileOtpExpiresAt: null,
+        mobileOtpAttempts: 0,
+        mobileOtpLockedUntil: null,
       },
     });
 
     return { success: true };
-  }
-
-  private generateOtpCode(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
   async refresh(dto: RefreshDto) {
@@ -207,7 +303,7 @@ export class AuthService {
       data: { revoked: true },
     });
 
-    return this.issueTokens(payload.sub, payload.role);
+    return this.issueTokens(payload.sub, payload.role, false);
   }
 
   async logout(userId: string, refreshToken: string) {
@@ -219,20 +315,26 @@ export class AuthService {
     return { success: true };
   }
 
-  private async issueTokens(userId: string, role: string) {
+  private async issueTokens(userId: string, role: string, rememberMe: boolean) {
     const payload = { sub: userId, role };
     const accessToken: string = this.jwt.sign(payload, {
       secret: this.config.get<string>('JWT_ACCESS_SECRET'),
       expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRES_IN', '15m'),
     } as JwtSignOptions);
+
+    const refreshExpiresIn = rememberMe
+      ? this.config.get<string>('JWT_REFRESH_EXPIRES_IN_LONG', '30d')
+      : this.config.get<string>('JWT_REFRESH_EXPIRES_IN', '7d');
+    const refreshExpiryDays = rememberMe ? 30 : 7;
+
     const refreshToken: string = this.jwt.sign(payload, {
       secret: this.config.get<string>('JWT_REFRESH_SECRET'),
-      expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
+      expiresIn: refreshExpiresIn,
       jwtid: randomUUID(),
     } as JwtSignOptions);
 
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
+    expiresAt.setDate(expiresAt.getDate() + refreshExpiryDays);
 
     await this.prisma.refreshToken.create({
       data: {

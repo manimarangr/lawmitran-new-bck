@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo &amp; documents | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
+    .drop { border:2px dashed #d6dae2; transition:.15s; }
+    .drop:hover, .drop.drag { border-color:#C9A24B; background:#fffdf7; }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+
+  <!-- ===== NAV ===== -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3">
+        <img src="assets/logo.svg" alt="LawMitran" style="height:36px;display:block" />
+      </a>
+      <div class="flex items-center gap-3 text-sm">
+        <span class="hidden sm:flex items-center gap-2 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full"><i class="fa-solid fa-clock"></i> Verification pending</span>
+        <a href="login.html" class="text-slate-500 hover:text-[#0B192C] font-medium">Save &amp; exit</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="max-w-6xl mx-auto px-6 py-10">
+    <a href="lawyer-onboarding.html" class="text-xs text-slate-500 hover:text-[#0B192C] font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Back to onboarding</a>
+    <h1 class="text-2xl md:text-3xl font-extrabold text-[#0B192C] mt-3">Photo &amp; documents</h1>
+    <p class="text-sm text-slate-500 mt-1">Upload a clear photo and your Bar Council certificate. These are required for verification.</p>
+
+    <div class="grid lg:grid-cols-3 gap-8 mt-8 items-start">
+
+      <!-- ===== uploads ===== -->
+      <form id="docForm" onsubmit="event.preventDefault();submitDocs();" class="lg:col-span-2 space-y-6">
+
+        <!-- profile photo -->
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-bold text-[#0B192C]">Profile photo <span class="text-red-500">*</span></h2>
+            <span id="status-photo" class="text-[11px] font-bold text-slate-400">Not uploaded</span>
+          </div>
+          <div class="flex items-center gap-5">
+            <div class="relative w-24 h-24 shrink-0">
+              <div id="photoPreview" class="w-24 h-24 rounded-2xl hero-gradient flex items-center justify-center text-[#C9A24B] text-3xl overflow-hidden bg-cover bg-center"><i class="fa-solid fa-user"></i></div>
+            </div>
+            <label class="drop flex-1 rounded-xl p-5 text-center cursor-pointer text-sm text-slate-500" id="dropPhoto">
+              <i class="fa-solid fa-camera text-[#C9A24B] text-lg block mb-1"></i>
+              <span class="font-semibold text-[#0B192C]">Click to upload</span> or drag a photo here
+              <p class="text-[11px] text-slate-400 mt-1">Passport-style, JPG or PNG, max 5MB</p>
+              <input id="photo" type="file" accept="image/*" class="hidden" />
+            </label>
+          </div>
+        </div>
+
+        <!-- certificate -->
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-bold text-[#0B192C]">Bar Council certificate <span class="text-red-500">*</span></h2>
+            <span id="status-cert" class="text-[11px] font-bold text-slate-400">Not uploaded</span>
+          </div>
+          <label class="drop block rounded-xl p-7 text-center cursor-pointer text-sm text-slate-500" id="dropCert">
+            <i class="fa-solid fa-file-arrow-up text-[#C9A24B] text-2xl block mb-2"></i>
+            <span class="font-semibold text-[#0B192C]">Click to upload</span> or drag your certificate here
+            <p class="text-[11px] text-slate-400 mt-1">PDF, JPG or PNG, max 10MB</p>
+            <input id="cert" type="file" accept=".pdf,image/*" class="hidden" />
+          </label>
+          <div id="file-cert" class="hidden mt-3 flex items-center justify-between bg-slate-50 border border-gray-200 rounded-xl px-4 py-3">
+            <span class="flex items-center gap-3 text-sm text-slate-700 min-w-0"><i class="fa-solid fa-file-lines text-[#C9A24B]"></i><span class="truncate" id="name-cert"></span><span class="text-xs text-slate-400" id="size-cert"></span></span>
+            <button type="button" onclick="clearFile('cert')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <a href="lawyer-onboarding.html" class="text-sm font-semibold text-slate-500 hover:text-[#0B192C]"><i class="fa-solid fa-arrow-left mr-1"></i> Back</a>
+          <button id="submitBtn" type="submit" disabled class="bg-[#C9A24B] text-[#0B192C] font-bold py-3 px-7 rounded-xl text-sm transition-all opacity-50 cursor-not-allowed">Submit for verification</button>
+        </div>
+      </form>
+
+      <!-- ===== guidance ===== -->
+      <aside class="space-y-5">
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6">
+          <h3 class="text-sm font-bold text-[#0B192C] mb-3">What you'll need</h3>
+          <ul class="space-y-2.5 text-sm text-slate-600">
+            <li class="flex gap-2.5"><i class="fa-solid fa-circle-check text-[#C9A24B] mt-0.5"></i> A clear, front-facing photo</li>
+            <li class="flex gap-2.5"><i class="fa-solid fa-circle-check text-[#C9A24B] mt-0.5"></i> Bar Council enrolment certificate</li>
+            <li class="flex gap-2.5"><i class="fa-solid fa-circle-check text-[#C9A24B] mt-0.5"></i> Your Bar Council enrollment number</li>
+          </ul>
+        </div>
+        <div class="hero-gradient text-white rounded-2xl shadow-sm p-6">
+          <h3 class="text-sm font-bold mb-2"><i class="fa-solid fa-shield-halved text-[#C9A24B] mr-1"></i> Your documents are private</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">Files are stored securely and shown only to our verification team via short-lived links — never on your public profile.</p>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-[12px] text-amber-800 leading-relaxed">
+          <i class="fa-solid fa-circle-info mr-1"></i> After you submit, your status moves to <b>Under review</b>. You'll appear in public search once <b>approved</b>. Your 30-day free trial has already started.
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <script>
+    const fmt = b => b < 1024*1024 ? (b/1024).toFixed(0)+' KB' : (b/1024/1024).toFixed(1)+' MB';
+    let has = { photo:false, cert:false };
+
+    // photo
+    const photo = document.getElementById('photo');
+    photo.addEventListener('change', () => {
+      const f = photo.files[0]; if(!f) return;
+      const r = new FileReader();
+      r.onload = e => { const p = document.getElementById('photoPreview'); p.style.backgroundImage = `url(${e.target.result})`; p.innerHTML=''; };
+      r.readAsDataURL(f);
+      mark('photo', f); has.photo = true; refresh();
+    });
+
+    function bindDoc(inputId, key){
+      const inp = document.getElementById(inputId);
+      inp.addEventListener('change', () => {
+        const f = inp.files[0]; if(!f) return;
+        document.getElementById('file-'+key).classList.remove('hidden');
+        document.getElementById('file-'+key).classList.add('flex');
+        document.getElementById('name-'+key).textContent = f.name;
+        document.getElementById('size-'+key).textContent = '· '+fmt(f.size);
+        mark(key==='cert'?'cert':'id', f);
+        if(key==='cert') has.cert = true;
+        refresh();
+      });
+    }
+    bindDoc('cert','cert');
+
+    function mark(key, f){
+      const el = document.getElementById('status-'+key);
+      if(el){ el.textContent = 'Uploaded'; el.className = 'text-[11px] font-bold text-green-600'; }
+    }
+    function clearFile(key){
+      document.getElementById(key).value = '';
+      document.getElementById('file-'+key).classList.add('hidden');
+      const st = document.getElementById('status-'+key);
+      st.textContent = 'Not uploaded'; st.className = 'text-[11px] font-bold text-slate-400';
+      if(key==='cert'){ has.cert = false; refresh(); }
+    }
+    function refresh(){
+      const ok = has.photo && has.cert;
+      const b = document.getElementById('submitBtn');
+      b.disabled = !ok;
+      b.className = 'font-bold py-3 px-7 rounded-xl text-sm transition-all ' + (ok ? 'bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C]' : 'bg-[#C9A24B] text-[#0B192C] opacity-50 cursor-not-allowed');
+    }
+    function submitDocs(){ alert('Sample — upload to S3 then POST /api/lawyers/me/verification → UNDER_REVIEW'); }
+
+    // drag styling
+    ['dropPhoto','dropCert','dropId'].forEach(id => {
+      const el = document.getElementById(id); const input = el.querySelector('input');
+      ['dragenter','dragover'].forEach(ev => el.addEventListener(ev, e => { e.preventDefault(); el.classList.add('drag'); }));
+      ['dragleave','drop'].forEach(ev => el.addEventListener(ev, e => { e.preventDefault(); el.classList.remove('drag'); }));
+      el.addEventListener('drop', e => { if(e.dataTransfer.files.length){ input.files = e.dataTransfer.files; input.dispatchEvent(new Event('change')); } });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Plans | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .nav-item.active { background:#16306b; color:#fff; } .nav-item.active i { color:#C9A24B; }
+    .modal { display:none; } .modal.open { display:flex; }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+  <div class="flex min-h-screen">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 bg-[#0B192C] text-slate-300 flex-shrink-0 hidden lg:flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 px-6 h-20 border-b border-slate-800">
+        <img src="assets/logo-light.svg" alt="LawMitran" style="height:36px;display:block" />
+      </a>
+      <nav class="flex-1 p-4 space-y-1 text-sm font-medium">
+        <a href="admin-dashboard.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-gauge-high w-4"></i> Dashboard</a>
+        <a href="admin-lawyers.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-user-check w-4"></i> Lawyer Approvals <span class="ml-auto text-[10px] bg-[#C9A24B] text-[#0B192C] font-bold px-2 py-0.5 rounded-full">7</span></a>
+        <a href="admin-users.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-users w-4"></i> Users</a>
+        <a href="admin-documents.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-folder-open w-4"></i> Documents</a>
+        <a href="admin-plans.html" class="nav-item active flex items-center gap-3 px-4 py-2.5 rounded-xl"><i class="fa-solid fa-tags w-4"></i> Plans</a>
+        <a href="admin-reports.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-chart-line w-4"></i> Reports</a>
+      </nav>
+      <div class="p-4 border-t border-slate-800"><a href="login.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm hover:bg-slate-800/60"><i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Sign out</a></div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-40">
+        <div><h1 class="text-xl font-extrabold text-[#0B192C]">Subscription Plans</h1><p class="text-xs text-slate-400">Manage lawyer plan pricing &amp; features</p></div>
+        <button onclick="openModal()" class="bg-[#0B192C] hover:bg-slate-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2"><i class="fa-solid fa-plus"></i> New plan</button>
+      </header>
+
+      <main class="p-6 space-y-6">
+        <!-- KPI -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-5"><span class="text-xs font-bold uppercase tracking-wide text-slate-400">On trial</span><p class="text-2xl font-extrabold text-[#0B192C] mt-1">126</p></div>
+          <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-5"><span class="text-xs font-bold uppercase tracking-wide text-slate-400">Basic</span><p class="text-2xl font-extrabold text-[#0B192C] mt-1">410</p></div>
+          <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-5"><span class="text-xs font-bold uppercase tracking-wide text-slate-400">Premium</span><p class="text-2xl font-extrabold text-[#0B192C] mt-1">306</p></div>
+          <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-5"><span class="text-xs font-bold uppercase tracking-wide text-slate-400">MRR</span><p class="text-2xl font-extrabold text-[#0B192C] mt-1">₹6.6L</p></div>
+        </div>
+
+        <!-- plan cards -->
+        <div class="grid md:grid-cols-3 gap-6" id="plans"></div>
+
+        <!-- duration-tier pricing matrix -->
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6">
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="text-base font-bold text-[#0B192C]">Duration pricing</h2>
+            <span class="text-[11px] text-slate-400">Click a price to edit</span>
+          </div>
+          <p class="text-xs text-slate-400 mb-4">Per-term price for each plan. Longer terms are usually discounted to push annual commitment.</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-[11px] uppercase tracking-wide text-slate-400 border-b border-gray-100">
+                  <th class="py-2.5 pr-4 font-bold">Plan</th>
+                  <th class="py-2.5 px-4 font-bold">30 days</th>
+                  <th class="py-2.5 px-4 font-bold">3 months</th>
+                  <th class="py-2.5 px-4 font-bold">6 months</th>
+                  <th class="py-2.5 px-4 font-bold">1 year</th>
+                </tr>
+              </thead>
+              <tbody id="tierRows"></tbody>
+            </table>
+          </div>
+          <p class="text-[11px] text-slate-400 italic mt-4">Sample data — maps to <code>SubscriptionPlanTier</code> via <code>PATCH /api/subscriptions/admin/plans/:plan/tiers/:durationDays</code>. Edits affect new purchases only; existing subscriptions keep their billed term.</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- modal -->
+  <div id="modal" class="modal fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+      <div class="flex items-center justify-between mb-5"><h3 id="mTitle" class="text-lg font-bold text-[#0B192C]">Edit plan</h3><button onclick="closeModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+      <form onsubmit="event.preventDefault();closeModal();alert('Sample — PATCH /api/admin/plans');" class="space-y-4">
+        <div><label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Plan name</label><input id="mName" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]" /></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Price (₹)</label><input id="mPrice" type="number" min="0" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]" /></div>
+          <div><label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Billing (days)</label><input type="number" value="30" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]" /></div>
+        </div>
+        <div><label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Monthly lead cap</label><input id="mCap" type="number" min="0" placeholder="Leave blank for unlimited" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]" /><p class="text-[11px] text-slate-400 mt-1">Max new leads a lawyer on this plan receives per month.</p></div>
+        <label class="flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" class="rounded border-gray-300 text-[#C9A24B]" /> Active (available for purchase)</label>
+        <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal()" class="border border-gray-200 text-slate-600 font-semibold text-sm px-4 py-2.5 rounded-xl">Cancel</button><button type="submit" class="bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] font-bold text-sm px-5 py-2.5 rounded-xl">Save</button></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const plans = [
+      { name:'Free Trial', price:0, unit:'30 days', cap:null, active:true, badge:'Default', feats:['Verified profile','Receives leads','Dashboard & ratings'] },
+      { name:'Basic', price:499, unit:'month', cap:25, active:true, badge:'', feats:['Verified profile','Up to 25 leads/month','Standard lead routing','Dashboard & ratings'] },
+      { name:'Premium', price:1499, unit:'month', cap:null, active:true, badge:'Popular', feats:['Everything in Basic','Unlimited leads','Priority lead routing','Top search ranking','Premium badge & homepage'] },
+    ];
+    const capText = c => c===null ? 'Unlimited leads/mo' : c + ' leads/mo';
+    function render(){
+      document.getElementById('plans').innerHTML = plans.map(p => `
+        <div class="bg-white rounded-2xl border ${p.badge==='Popular'?'border-2 border-[#C9A24B]':'border-gray-200/60'} shadow-sm p-6 relative">
+          ${p.badge?`<span class="absolute top-4 right-4 text-[10px] font-bold ${p.badge==='Popular'?'bg-[#C9A24B] text-[#0B192C]':'bg-slate-100 text-slate-500'} px-2 py-0.5 rounded-full">${p.badge}</span>`:''}
+          <h3 class="text-lg font-bold text-[#0B192C]">${p.name}</h3>
+          <div class="mt-3 mb-1"><span class="text-3xl font-extrabold text-[#0B192C]">${p.price?'₹'+p.price.toLocaleString('en-IN'):'₹0'}</span><span class="text-sm text-slate-400">/${p.unit}</span></div>
+          <div class="mb-4"><span class="inline-flex items-center gap-1 text-[11px] font-bold ${p.cap===null?'text-[#C9A24B]':'text-slate-500'} bg-slate-50 border border-gray-100 px-2 py-0.5 rounded-full"><i class="fa-solid ${p.cap===null?'fa-infinity':'fa-inbox'}"></i> ${capText(p.cap)}</span></div>
+          <ul class="space-y-2 text-sm text-slate-600 mb-5">${p.feats.map(f=>`<li class="flex gap-2"><i class="fa-solid fa-check text-[#C9A24B] mt-0.5"></i> ${f}</li>`).join('')}</ul>
+          <div class="flex items-center justify-between border-t border-gray-100 pt-4">
+            <span class="text-xs font-bold ${p.active?'text-green-600':'text-slate-400'}">${p.active?'● Active':'○ Inactive'}</span>
+            <button onclick="edit('${p.name}', ${p.price}, ${p.cap===null?'null':p.cap})" class="text-sm font-semibold text-[#0B192C] border border-gray-200 hover:border-[#C9A24B] px-3 py-1.5 rounded-lg"><i class="fa-solid fa-pen text-xs mr-1"></i> Edit</button>
+          </div>
+        </div>`).join('');
+    }
+    function edit(name, price, cap){ document.getElementById('mTitle').textContent='Edit '+name; document.getElementById('mName').value=name; document.getElementById('mPrice').value=price; document.getElementById('mCap').value = (cap===null||cap===undefined) ? '' : cap; openModal(); }
+    function openModal(){ document.getElementById('modal').classList.add('open'); }
+    function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+
+    // ---- Duration tiers (maps to SubscriptionPlanTier) ----
+    const DURS = [30, 90, 180, 365];
+    const TIERS = {
+      BASIC:   { 30:499,  90:1349, 180:2549, 365:4790 },
+      PREMIUM: { 30:1499, 90:4049, 180:7649, 365:14390 }
+    };
+    const inr = n => '₹' + n.toLocaleString('en-IN');
+    function renderTiers(){
+      document.getElementById('tierRows').innerHTML = Object.keys(TIERS).map(plan => `
+        <tr class="border-b border-gray-50">
+          <td class="py-3 pr-4 font-bold text-[#0B192C]">${plan.charAt(0)+plan.slice(1).toLowerCase()}</td>
+          ${DURS.map(d => `<td class="py-2 px-4">
+            <button onclick="editTier('${plan}',${d},${TIERS[plan][d]})" class="font-semibold text-slate-700 hover:text-[#C9A24B] hover:underline">${inr(TIERS[plan][d])}</button>
+          </td>`).join('')}
+        </tr>`).join('');
+    }
+    function editTier(plan, dur, amt){
+      const label = {30:'30 days',90:'3 months',180:'6 months',365:'1 year'}[dur];
+      document.getElementById('mTitle').textContent = plan.charAt(0)+plan.slice(1).toLowerCase()+' · '+label;
+      document.getElementById('mName').value = plan;
+      document.getElementById('mPrice').value = amt;
+      const daysInput = document.querySelector('#modal input[type="number"][value]') || document.querySelectorAll('#modal input[type="number"]')[1];
+      if(daysInput) daysInput.value = dur;
+      openModal();
+    }
+
+    render();
+    renderTiers();
+  </script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CLIENT
+  LAWYER
+  ADMIN
+}
+
+enum VerificationStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+enum PaymentStatus {
+  CREATED
+  PAID
+  FAILED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  mobile       String   @unique
+  passwordHash String
+  role         Role     @default(CLIENT)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  emailVerified              Boolean   @default(false)
+  emailVerificationToken     String?   @unique
+  emailVerificationExpiresAt DateTime?
+
+  mobileVerified     Boolean   @default(false)
+  mobileOtpCode      String?
+  mobileOtpExpiresAt DateTime?
+
+  lawyer        Lawyer?
+  leads         Lead[]         @relation("ClientLeads")
+  refreshTokens RefreshToken[]
+  ratings       Rating[]
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  tokenHash String
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Lawyer {
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id])
+  fullName             String
+  barCouncilNumber     String   @unique
+  barCouncilState      String
+  practiceAreas        String[]
+  experienceYears      Int
+  city                 String
+  profileImageUrl      String?
+  certificateImageUrl  String
+  identityCardImageUrl String?
+
+  verificationStatus VerificationStatus @default(PENDING)
+  approvedBy         String?
+  approvedAt         DateTime?
+
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  trialStartDate     DateTime           @default(now())
+  trialEndDate       DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  verifications Verification[]
+  subscriptions Subscription[]
+  leads         Lead[]         @relation("LawyerLeads")
+  ratings       Rating[]
+  payments      Payment[]
+
+  @@index([city, verificationStatus])
+}
+
+model Verification {
+  id           String             @id @default(uuid())
+  lawyerId     String
+  lawyer       Lawyer             @relation(fields: [lawyerId], references: [id])
+  documentType String
+  documentUrl  String
+  status       VerificationStatus @default(PENDING)
+  reviewedBy   String?
+  reviewedAt   DateTime?
+  comments     String?
+  createdAt    DateTime           @default(now())
+}
+
+model Subscription {
+  id        String             @id @default(uuid())
+  lawyerId  String
+  lawyer    Lawyer             @relation(fields: [lawyerId], references: [id])
+  planName  String
+  amount    Decimal            @db.Decimal(10, 2)
+  startDate DateTime
+  endDate   DateTime
+  status    SubscriptionStatus
+
+  @@index([lawyerId, status])
+}
+
+model SubscriptionPlanPrice {
+  planName  String   @id
+  amount    Decimal  @db.Decimal(10, 2)
+  updatedAt DateTime @updatedAt
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  lawyerId          String
+  lawyer            Lawyer        @relation(fields: [lawyerId], references: [id])
+  planName          String
+  amount            Decimal       @db.Decimal(10, 2)
+  durationDays      Int
+  provider          String        @default("razorpay")
+  providerOrderId   String        @unique
+  providerPaymentId String?
+  status            PaymentStatus @default(CREATED)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([lawyerId, status])
+}
+
+model Lead {
+  id           String     @id @default(uuid())
+  clientId     String
+  client       User       @relation("ClientLeads", fields: [clientId], references: [id])
+  lawyerId     String
+  lawyer       Lawyer     @relation("LawyerLeads", fields: [lawyerId], references: [id])
+  practiceArea String
+  description  String
+  status       LeadStatus @default(NEW)
+  createdAt    DateTime   @default(now())
+
+  rating Rating?
+
+  @@index([lawyerId, status])
+}
+
+model Rating {
+  id        String   @id @default(uuid())
+  leadId    String   @unique
+  lead      Lead     @relation(fields: [leadId], references: [id])
+  lawyerId  String
+  lawyer    Lawyer   @relation(fields: [lawyerId], references: [id])
+  clientId  String
+  client    User     @relation(fields: [clientId], references: [id])
+  score     Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@index([lawyerId])
+}

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adv. A. Sharma — Family Lawyer, Bengaluru | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+
+  <!-- ===== NAV ===== -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm backdrop-blur-md bg-white/95">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3">
+        <img src="assets/logo.svg" alt="LawMitran" style="height:36px;display:block" />
+      </a>
+      <div class="hidden md:flex items-center space-x-8 font-medium">
+        <a href="lawyer-search.html" class="text-slate-600 hover:text-[#0B192C] transition-colors">Find Lawyers</a>
+        <a href="index.html#documents" class="text-slate-600 hover:text-[#0B192C] transition-colors">Legal Documents</a>
+        <a href="index.html#how" class="text-slate-600 hover:text-[#0B192C] transition-colors">How it Works</a>
+        <a href="lawyer-signup.html" class="text-slate-600 hover:text-[#0B192C] transition-colors">For Lawyers</a>
+        <a href="login.html" class="text-slate-600 hover:text-[#0B192C] transition-colors">Login</a>
+        <a href="signup.html" class="bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] px-6 py-2.5 rounded-xl font-bold shadow-md shadow-[#C9A24B]/10 transition-all transform hover:-translate-y-0.5">Sign Up</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- breadcrumb -->
+  <div class="max-w-7xl mx-auto px-6 pt-6">
+    <nav class="text-xs text-slate-400"><a href="index.html" class="hover:text-[#C9A24B]">Home</a> <span class="mx-1">/</span> <a href="lawyer-search.html" class="hover:text-[#C9A24B]">Lawyers in Bengaluru</a> <span class="mx-1">/</span> <span class="text-slate-700 font-medium">Adv. A. Sharma</span></nav>
+  </div>
+
+  <!-- ===== BODY ===== -->
+  <section class="max-w-7xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+
+      <!-- LEFT -->
+      <div class="lg:col-span-2 space-y-6">
+
+        <!-- header card -->
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6 md:p-8">
+          <div class="flex flex-col sm:flex-row gap-6">
+            <div class="relative shrink-0 mx-auto sm:mx-0">
+              <div class="w-28 h-28 rounded-2xl hero-gradient flex items-center justify-center text-[#C9A24B] font-extrabold text-4xl">AS</div>
+              <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white"></div>
+            </div>
+            <div class="flex-1 text-center sm:text-left">
+              <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div>
+                  <h1 class="text-2xl font-extrabold text-[#0B192C]">Adv. A. Sharma</h1>
+                  <div class="flex items-center justify-center sm:justify-start gap-2 mt-2">
+                    <span class="text-xs bg-green-50 text-green-600 font-bold px-2.5 py-1 rounded-full"><i class="fa-solid fa-circle-check"></i> Verified</span>
+                    <span class="text-xs bg-amber-50 text-amber-600 font-bold px-2.5 py-1 rounded-full"><i class="fa-solid fa-crown"></i> Premium</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-amber-500 font-bold text-sm"><i class="fa-solid fa-star"></i> 4.8 <span class="text-slate-400 font-normal">(120+ reviews)</span></div>
+                  <button onclick="openReport()" class="text-[11px] text-slate-400 hover:text-rose-500 font-medium mt-2 transition-colors"><i class="fa-regular fa-flag mr-1"></i> Report this lawyer</button>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-5 border-t border-gray-100 text-left">
+                <div><span class="block text-[10px] uppercase font-bold tracking-wider text-slate-400">Location</span><span class="text-sm font-semibold text-slate-800"><i class="fa-solid fa-location-dot text-[#C9A24B] mr-1"></i> Bengaluru</span></div>
+                <div><span class="block text-[10px] uppercase font-bold tracking-wider text-slate-400">Experience</span><span class="text-sm font-semibold text-slate-800"><i class="fa-solid fa-briefcase text-[#C9A24B] mr-1"></i> 18 years</span></div>
+                <div><span class="block text-[10px] uppercase font-bold tracking-wider text-slate-400">Languages</span><span class="text-sm font-semibold text-slate-800"><i class="fa-solid fa-language text-[#C9A24B] mr-1"></i> EN, HI, KN</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- about -->
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6 md:p-8">
+          <h2 class="text-lg font-bold text-[#0B192C] mb-4">About</h2>
+          <p class="text-sm text-slate-600 leading-relaxed mb-3">Adv. A. Sharma is an independent advocate with a result-oriented, ethical approach to family and matrimonial law. Over 18 years of practice she has advised and represented clients across divorce, child custody, maintenance, and domestic-violence matters.</p>
+          <p class="text-sm text-slate-500 leading-relaxed">She regularly appears before the family courts and the Karnataka High Court, and is enrolled with the Bar Council of Karnataka.</p>
+        </div>
+
+        <!-- practice areas -->
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6 md:p-8">
+          <h2 class="text-lg font-bold text-[#0B192C] mb-6">Practice Areas &amp; Skills</h2>
+
+          <div class="mb-5">
+            <div class="flex justify-between items-center mb-1.5"><span class="text-sm font-semibold text-slate-800">Family Law</span><span class="text-xs font-bold text-[#C9A24B]">90%</span></div>
+            <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-[#C9A24B] rounded-full" style="width:90%"></div></div>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Divorce</span>
+              <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Child Custody</span>
+              <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Maintenance</span>
+              <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Domestic Violence</span>
+            </div>
+          </div>
+
+          <div class="mb-5">
+            <div class="flex justify-between items-center mb-1.5"><span class="text-sm font-semibold text-slate-800">Matrimonial Disputes</span><span class="text-xs font-bold text-[#C9A24B]">80%</span></div>
+            <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-[#C9A24B] rounded-full" style="width:80%"></div></div>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Mutual Divorce</span>
+              <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Mediation</span>
+              <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Alimony</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-1.5"><span class="text-sm font-semibold text-slate-800">Civil &amp; Succession</span><span class="text-xs font-bold text-[#C9A24B]">65%</span></div>
+            <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-[#C9A24B] rounded-full" style="width:65%"></div></div>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Succession Certificate</span>
+              <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Property Partition</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- reviews -->
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6 md:p-8">
+          <h2 class="text-lg font-bold text-[#0B192C] mb-5">Client Reviews</h2>
+          <div class="space-y-4">
+            <div class="pb-4 border-b border-gray-100">
+              <div class="flex justify-between items-center mb-1"><span class="font-semibold text-slate-800 text-sm">R. Kumar</span><span class="text-amber-500 text-xs"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span></div>
+              <p class="text-sm text-slate-500">Handled my divorce with patience and clarity. Kept me informed at every step.</p>
+            </div>
+            <div class="pb-4 border-b border-gray-100">
+              <div class="flex justify-between items-center mb-1"><span class="font-semibold text-slate-800 text-sm">P. Devi</span><span class="text-amber-500 text-xs"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></span></div>
+              <p class="text-sm text-slate-500">Very professional and approachable. Got a fair maintenance settlement.</p>
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-1"><span class="font-semibold text-slate-800 text-sm">S. Anand</span><span class="text-amber-500 text-xs"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i></span></div>
+              <p class="text-sm text-slate-500">Good advice on custody. Responsive over calls and explained options well.</p>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-400 italic mt-5">Sample reviews for design preview.</p>
+        </div>
+      </div>
+
+      <!-- RIGHT: booking card -->
+      <aside class="lg:col-span-1">
+        <div class="hero-gradient text-white rounded-2xl shadow-xl p-6 lg:sticky lg:top-24">
+          <div class="flex items-baseline justify-between mb-1">
+            <span class="text-xs uppercase tracking-wider text-slate-300 font-bold">Typical fee</span>
+            <span class="text-2xl font-extrabold">₹2,500</span>
+          </div>
+          <p class="text-xs text-slate-300 mb-5">Indicative — the lawyer confirms fees when they reach out.</p>
+
+          <div class="bg-white/5 border border-dashed border-[#C9A24B]/50 rounded-xl py-3 text-center text-[#C9A24B] tracking-wide mb-4 text-sm"><i class="fa-solid fa-lock mr-1"></i> Contact shared after you submit</div>
+
+          <button class="w-full bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 mb-3"><i class="fa-solid fa-phone-volume"></i> Contact Lawyer</button>
+          <button class="w-full border border-white/25 hover:border-[#C9A24B] text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 mb-4"><i class="fa-regular fa-bookmark"></i> Save to Bookmarks</button>
+          <p class="text-[11px] text-slate-400 text-center">Submit your requirement and the lawyer contacts you directly (login required). No in-app scheduling.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="bg-[#0B192C] text-slate-400 text-sm pt-16 pb-8">
+    <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-slate-800">
+      <div class="md:col-span-4 space-y-4">
+        <div class="flex items-center space-x-2">
+          <img src="assets/logo-light.svg" alt="LawMitran" style="height:36px;display:block" />
+        </div>
+        <p class="text-xs text-slate-400 leading-relaxed">Connecting you to verified legal solutions — lawyers, advice, and documents, all in one place.</p>
+      </div>
+      <div class="md:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div><h4 class="text-xs font-bold uppercase tracking-wider text-white mb-4">Discover</h4><ul class="space-y-2.5 text-xs"><li><a href="lawyer-search.html" class="hover:text-[#C9A24B]">Find Lawyers</a></li><li><a href="index.html#documents" class="hover:text-[#C9A24B]">Legal Documents</a></li><li><a href="#" class="hover:text-[#C9A24B]">Cities</a></li><li><a href="index.html#practice" class="hover:text-[#C9A24B]">Practice Areas</a></li></ul></div>
+        <div><h4 class="text-xs font-bold uppercase tracking-wider text-white mb-4">Company</h4><ul class="space-y-2.5 text-xs"><li><a href="#" class="hover:text-[#C9A24B]">About</a></li><li><a href="#" class="hover:text-[#C9A24B]">Contact</a></li><li><a href="#" class="hover:text-[#C9A24B]">Blog</a></li><li><a href="#" class="hover:text-[#C9A24B]">Careers</a></li></ul></div>
+        <div><h4 class="text-xs font-bold uppercase tracking-wider text-white mb-4">Legal</h4><ul class="space-y-2.5 text-xs"><li><a href="privacy-policy.html" class="hover:text-[#C9A24B]">Privacy Policy</a></li><li><a href="terms.html" class="hover:text-[#C9A24B]">Terms</a></li><li><a href="refund-policy.html" class="hover:text-[#C9A24B]">Refund Policy</a></li><li><a href="disclaimer.html" class="hover:text-[#C9A24B]">Disclaimer</a></li></ul></div>
+        <div><h4 class="text-xs font-bold uppercase tracking-wider text-white mb-4">For Lawyers</h4><ul class="space-y-2.5 text-xs"><li><a href="lawyer-signup.html" class="hover:text-[#C9A24B]">For Lawyers</a></li><li><a href="login.html" class="hover:text-[#C9A24B]">Lawyer Login</a></li></ul></div>
+      </div>
+    </div>
+    <div class="max-w-6xl mx-auto px-6 pt-7 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <span class="text-slate-500">© 2026 LawMitran · <span class="text-[#C9A24B] font-semibold">Justice Made Accessible.</span></span>
+      <div class="flex flex-wrap justify-center gap-x-5 gap-y-1 text-slate-400">
+        <a href="#" class="hover:text-[#C9A24B]">www.lawmitran.com</a>
+        <a href="tel:+917760545789" class="hover:text-[#C9A24B]">+91 77605 45789</a>
+        <a href="mailto:support@lawmitran.com" class="hover:text-[#C9A24B]">support@lawmitran.com</a>
+      </div>
+    </div>
+    <p class="max-w-6xl mx-auto px-6 mt-6 pt-5 border-t border-slate-800/70 text-[11px] leading-relaxed text-slate-500 text-center">LawMitran is an information platform for discovering Bar Council–verified advocates and legal documents. It is not a law firm and does not provide legal advice; listings and rankings are informational and not an endorsement or solicitation. Fees shown are indicative.</p>
+  </footer>
+
+  <!-- ===== REPORT MODAL ===== -->
+  <div id="reportModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50" onclick="closeReport()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+      <div class="flex items-start justify-between mb-1">
+        <h3 class="text-lg font-bold text-[#0B192C]"><i class="fa-regular fa-flag text-rose-500 mr-1"></i> Report this lawyer</h3>
+        <button onclick="closeReport()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-slate-500 mb-5">Help us keep LawMitran trustworthy. Reports are reviewed by our team and kept confidential.</p>
+
+      <div id="reportForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Reason</label>
+          <select id="reportReason" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]">
+            <option value="">Select a reason…</option>
+            <option>Fake or impersonated profile</option>
+            <option>Not actually a verified advocate</option>
+            <option>Incorrect or misleading information</option>
+            <option>Professional misconduct</option>
+            <option>Spam or harassment</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Details <span class="text-slate-400 normal-case font-medium">(optional)</span></label>
+          <textarea id="reportDetails" rows="3" placeholder="Tell us what happened…" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B] resize-none"></textarea>
+        </div>
+        <button onclick="submitReport()" class="w-full bg-[#0B192C] hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-colors">Submit report</button>
+        <p class="text-[11px] text-slate-400 text-center">Submitting creates a moderation case for our admin team to review.</p>
+      </div>
+
+      <div id="reportDone" class="hidden text-center py-6">
+        <div class="w-14 h-14 rounded-full bg-green-50 text-green-500 flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fa-solid fa-circle-check"></i></div>
+        <h4 class="font-bold text-[#0B192C]">Thank you — report received</h4>
+        <p class="text-sm text-slate-500 mt-1">Our team will review it shortly. You may be contacted for more detail.</p>
+        <button onclick="closeReport()" class="mt-5 text-sm font-semibold text-[#C9A24B] hover:underline">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openReport(){ document.getElementById('reportModal').classList.remove('hidden'); }
+    function closeReport(){
+      document.getElementById('reportModal').classList.add('hidden');
+      document.getElementById('reportForm').classList.remove('hidden');
+      document.getElementById('reportDone').classList.add('hidden');
+    }
+    function submitReport(){
+      const r = document.getElementById('reportReason');
+      if(!r.value){ r.classList.add('border-rose-400'); return; }
+      r.classList.remove('border-rose-400');
+      // demo only → POST /api/lawyers/:id/report { reason, details }
+      document.getElementById('reportForm').classList.add('hidden');
+      document.getElementById('reportDone').classList.remove('hidden');
+    }
+  </script>
+
+</body>
+</html>

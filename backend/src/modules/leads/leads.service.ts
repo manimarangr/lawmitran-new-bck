@@ -43,6 +43,20 @@ export class LeadsService {
       );
     }
 
+    // Enforce the plan's monthly lead cap (Basic = capped, Premium/Trial = unlimited).
+    const cap = await this.getMonthlyLeadCap(
+      lawyer.id,
+      lawyer.subscriptionStatus,
+    );
+    if (cap !== null) {
+      const used = await this.countLeadsThisMonth(lawyer.id);
+      if (used >= cap) {
+        throw new BadRequestException(
+          'This lawyer has reached their monthly lead capacity. Please choose another available lawyer.',
+        );
+      }
+    }
+
     const lead = await this.prisma.lead.create({
       data: {
         clientId,
@@ -107,5 +121,41 @@ export class LeadsService {
       throw new NotFoundException('Lawyer profile not found');
     }
     return lawyer;
+  }
+
+  /**
+   * Resolve the lawyer's monthly lead cap.
+   * - TRIAL → unlimited (full access during the trial).
+   * - ACTIVE → the cap configured on their plan (`SubscriptionPlanPrice.monthlyLeadCap`).
+   * Returns null for "unlimited".
+   */
+  private async getMonthlyLeadCap(
+    lawyerId: string,
+    subscriptionStatus: SubscriptionStatus,
+  ): Promise<number | null> {
+    if (subscriptionStatus !== SubscriptionStatus.ACTIVE) {
+      return null;
+    }
+    const activeSub = await this.prisma.subscription.findFirst({
+      where: { lawyerId, status: SubscriptionStatus.ACTIVE },
+      orderBy: { startDate: 'desc' },
+      select: { planName: true },
+    });
+    if (!activeSub) {
+      return null;
+    }
+    const plan = await this.prisma.subscriptionPlanPrice.findUnique({
+      where: { planName: activeSub.planName },
+      select: { monthlyLeadCap: true },
+    });
+    return plan?.monthlyLeadCap ?? null;
+  }
+
+  private countLeadsThisMonth(lawyerId: string): Promise<number> {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    return this.prisma.lead.count({
+      where: { lawyerId, createdAt: { gte: monthStart } },
+    });
   }
 }

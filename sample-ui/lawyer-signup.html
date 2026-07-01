@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lawyer Signup | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+
+  <!-- ===== NAV ===== -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3">
+        <img src="assets/logo.svg" alt="LawMitran" style="height:36px;display:block" />
+      </a>
+      <div class="hidden md:flex items-center space-x-8 font-medium">
+        <a href="lawyer-search.html" class="text-slate-600 hover:text-[#0B192C] transition-colors">Find Lawyers</a>
+        <a href="index.html#documents" class="text-slate-600 hover:text-[#0B192C] transition-colors">Legal Documents</a>
+        <a href="index.html#how" class="text-slate-600 hover:text-[#0B192C] transition-colors">How it Works</a>
+        <a href="lawyer-signup.html" class="text-slate-600 hover:text-[#0B192C] transition-colors">For Lawyers</a>
+        <a href="login.html" class="text-slate-600 hover:text-[#0B192C] transition-colors">Login</a>
+        <a href="signup.html" class="bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] px-6 py-2.5 rounded-xl font-bold shadow-md shadow-[#C9A24B]/10 transition-all transform hover:-translate-y-0.5">Sign Up</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HERO + FORM ===== -->
+  <section class="hero-gradient relative overflow-hidden text-white">
+    <i class="fa-solid fa-scale-balanced absolute -left-10 top-1/2 -translate-y-1/2 text-white/5 text-[26rem] pointer-events-none"></i>
+    <div class="absolute -right-20 -bottom-24 w-[28rem] h-[28rem] bg-[#C9A24B]/10 rounded-full blur-3xl"></div>
+
+    <div class="max-w-7xl mx-auto px-6 py-16 lg:py-20 grid lg:grid-cols-2 gap-10 items-center relative z-10">
+      <!-- left copy -->
+      <div>
+        <span class="text-xs font-bold uppercase tracking-widest text-[#C9A24B] bg-[#C9A24B]/10 px-4 py-1.5 rounded-full border border-[#C9A24B]/20">For Advocates</span>
+        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight mt-5">
+          10,000+ advocates<br>grow their practice<br>on <span class="text-[#C9A24B]">LawMitran</span>
+        </h1>
+        <p class="text-slate-300 text-lg mt-5 max-w-md">Join India's leading verified-lawyer network and get a steady stream of intent-matched client leads.</p>
+        <div class="flex flex-wrap gap-5 mt-7 text-sm text-slate-200">
+          <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-[#C9A24B]"></i> 30-day free trial</span>
+          <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-[#C9A24B]"></i> No setup fee</span>
+          <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-[#C9A24B]"></i> Verified profile</span>
+        </div>
+      </div>
+
+      <!-- right form card -->
+      <div class="bg-white rounded-2xl shadow-2xl shadow-black/30 p-8 text-slate-800 max-w-md w-full lg:ml-auto">
+        <h2 class="text-2xl font-extrabold text-[#0B192C]">Sign up for free</h2>
+        <p class="text-sm text-slate-500 mt-1 mb-6">Create your advocate profile in minutes.</p>
+        <form onsubmit="event.preventDefault();window.location='lawyer-signup-otp.html';" class="space-y-4">
+          <div class="relative">
+            <i class="fa-solid fa-id-card absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="text" required placeholder="Enter your full name" class="w-full border border-gray-200 rounded-xl pl-10 pr-3 py-3.5 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+          </div>
+          <div class="relative">
+            <i class="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="email" required placeholder="Enter your email" class="w-full border border-gray-200 rounded-xl pl-10 pr-3 py-3.5 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+          </div>
+          <div class="flex">
+            <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-slate-50 text-sm text-slate-500 font-semibold">+91</span>
+            <input type="tel" required placeholder="Mobile number" class="w-full border border-gray-200 rounded-r-xl px-3 py-3.5 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+          </div>
+          <div class="relative">
+            <i class="fa-solid fa-location-dot absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <select required class="w-full border border-gray-200 rounded-xl pl-10 pr-8 py-3.5 text-sm appearance-none cursor-pointer focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20 text-slate-600">
+              <option value="" selected disabled>Select your city</option>
+              <option>Bengaluru</option><option>Chennai</option><option>Mumbai</option><option>Delhi</option><option>Hyderabad</option><option>Kolkata</option><option>Pune</option>
+            </select>
+            <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none"></i>
+          </div>
+          <button type="submit" class="w-full bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] font-bold py-3.5 rounded-xl transition-colors shadow-md">Submit</button>
+          <p class="text-[11px] text-slate-400 text-center"><i class="fa-solid fa-shield-halved text-[#C9A24B] mr-1"></i> We'll send a 4-digit OTP to verify your mobile.</p>
+        </form>
+        <p class="text-center text-sm text-slate-500 mt-5">Already registered? <a href="login.html" class="text-[#C9A24B] font-bold hover:underline">Sign in</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VALUE PROPS ===== -->
+  <section class="max-w-7xl mx-auto px-6 py-16">
+    <div class="grid md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+      <div class="md:px-6">
+        <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center mb-4"><i class="fa-solid fa-briefcase text-[#C9A24B] text-lg"></i></div>
+        <h3 class="text-lg font-bold text-[#0B192C] mb-1.5">Build your online brand</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">Showcase your expertise, practice areas, and achievements on a verified public profile.</p>
+      </div>
+      <div class="md:px-6 pt-8 md:pt-0">
+        <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center mb-4"><i class="fa-solid fa-people-arrows text-[#C9A24B] text-lg"></i></div>
+        <h3 class="text-lg font-bold text-[#0B192C] mb-1.5">Reach more clients</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">Get matched with clients actively looking for help in your practice areas and city.</p>
+      </div>
+      <div class="md:px-6 pt-8 md:pt-0">
+        <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center mb-4"><i class="fa-solid fa-comments text-[#C9A24B] text-lg"></i></div>
+        <h3 class="text-lg font-bold text-[#0B192C] mb-1.5">Grow your reputation</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">Collect genuine client ratings and stand out among the best advocates in your area.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TRUST / INFO ===== -->
+  <section class="bg-slate-50 border-y border-gray-100 py-16">
+    <div class="max-w-7xl mx-auto px-6">
+      <p class="text-lg md:text-xl font-semibold text-[#0B192C] max-w-4xl">We follow a multi-level verification process — Bar Council checks, document review, and reference checks — as part of onboarding.</p>
+      <p class="text-sm text-slate-500 mt-2 max-w-3xl">You may receive a verification call or email shortly after submitting your details. Only approved advocates appear in public search.</p>
+      <div class="grid md:grid-cols-2 gap-6 mt-10">
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-7">
+          <h3 class="text-lg font-bold text-[#0B192C] mb-2">India's preferred lawyer platform</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">Thousands of clients seek legal help every day on LawMitran. Join a fast-growing network built for trust and intent-matched leads.</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-7">
+          <h3 class="text-lg font-bold text-[#0B192C] mb-2">Be where the best are</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">We onboard verified, practising advocates only. A verified profile gives you instant credibility with new clients.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="bg-[#0B192C] text-slate-400 text-sm pt-16 pb-8">
+    <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-slate-800">
+      <div class="md:col-span-4 space-y-4">
+        <div class="flex items-center space-x-2">
+          <img src="assets/logo-light.svg" alt="LawMitran" style="height:36px;display:block" />
+        </div>
+        <p class="text-xs text-slate-400 leading-relaxed">Connecting you to verified legal solutions — lawyers, advice, and documents, all in one place.</p>
+      </div>
+      <div class="md:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div><h4 class="text-xs font-bold uppercase tracking-wider text-white mb-4">Discover</h4><ul class="space-y-2.5 text-xs"><li><a href="lawyer-search.html" class="hover:text-[#C9A24B]">Find Lawyers</a></li><li><a href="index.html#documents" class="hover:text-[#C9A24B]">Legal Documents</a></li><li><a href="#" class="hover:text-[#C9A24B]">Cities</a></li><li><a href="index.html#practice" class="hover:text-[#C9A24B]">Practice Areas</a></li></ul></div>
+        <div><h4 class="text-xs font-bold uppercase tracking-wider text-white mb-4">Company</h4><ul class="space-y-2.5 text-xs"><li><a href="#" class="hover:text-[#C9A24B]">About</a></li><li><a href="#" class="hover:text-[#C9A24B]">Contact</a></li><li><a href="#" class="hover:text-[#C9A24B]">Blog</a></li><li><a href="#" class="hover:text-[#C9A24B]">Careers</a></li></ul></div>
+        <div><h4 class="text-xs font-bold uppercase tracking-wider text-white mb-4">Legal</h4><ul class="space-y-2.5 text-xs"><li><a href="privacy-policy.html" class="hover:text-[#C9A24B]">Privacy Policy</a></li><li><a href="terms.html" class="hover:text-[#C9A24B]">Terms</a></li><li><a href="refund-policy.html" class="hover:text-[#C9A24B]">Refund Policy</a></li><li><a href="disclaimer.html" class="hover:text-[#C9A24B]">Disclaimer</a></li></ul></div>
+        <div><h4 class="text-xs font-bold uppercase tracking-wider text-white mb-4">For Lawyers</h4><ul class="space-y-2.5 text-xs"><li><a href="lawyer-signup.html" class="hover:text-[#C9A24B]">For Lawyers</a></li><li><a href="login.html" class="hover:text-[#C9A24B]">Lawyer Login</a></li></ul></div>
+      </div>
+    </div>
+    <div class="max-w-6xl mx-auto px-6 pt-7 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <span class="text-slate-500">© 2026 LawMitran · <span class="text-[#C9A24B] font-semibold">Justice Made Accessible.</span></span>
+      <div class="flex flex-wrap justify-center gap-x-5 gap-y-1 text-slate-400">
+        <a href="#" class="hover:text-[#C9A24B]">www.lawmitran.com</a>
+        <a href="mailto:support@lawmitran.com" class="hover:text-[#C9A24B]">support@lawmitran.com</a>
+      </div>
+    </div>
+    <p class="max-w-6xl mx-auto px-6 mt-6 pt-5 border-t border-slate-800/70 text-[11px] leading-relaxed text-slate-500 text-center">LawMitran is an information platform for discovering Bar Council–verified advocates and legal documents. It is not a law firm and does not provide legal advice; listings and rankings are informational and not an endorsement or solicitation. Fees shown are indicative.</p>
+  </footer>
+
+</body>
+</html>

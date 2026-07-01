@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Users | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .nav-item.active { background:#16306b; color:#fff; } .nav-item.active i { color:#C9A24B; }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+  <div class="flex min-h-screen">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 bg-[#0B192C] text-slate-300 flex-shrink-0 hidden lg:flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 px-6 h-20 border-b border-slate-800">
+        <img src="assets/logo-light.svg" alt="LawMitran" style="height:36px;display:block" />
+      </a>
+      <nav class="flex-1 p-4 space-y-1 text-sm font-medium">
+        <a href="admin-dashboard.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-gauge-high w-4"></i> Dashboard</a>
+        <a href="admin-lawyers.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-user-check w-4"></i> Lawyer Approvals <span class="ml-auto text-[10px] bg-[#C9A24B] text-[#0B192C] font-bold px-2 py-0.5 rounded-full">7</span></a>
+        <a href="admin-users.html" class="nav-item active flex items-center gap-3 px-4 py-2.5 rounded-xl"><i class="fa-solid fa-users w-4"></i> Users</a>
+        <a href="admin-documents.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-folder-open w-4"></i> Documents</a>
+        <a href="#" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-tags w-4"></i> Plans</a>
+        <a href="#" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-chart-line w-4"></i> Reports</a>
+      </nav>
+      <div class="p-4 border-t border-slate-800"><a href="login.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm hover:bg-slate-800/60"><i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Sign out</a></div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-40">
+        <div><h1 class="text-xl font-extrabold text-[#0B192C]">Users</h1><p class="text-xs text-slate-400">Manage clients, lawyers & staff</p></div>
+        <button class="bg-[#0B192C] hover:bg-slate-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2"><i class="fa-solid fa-plus"></i> Add user</button>
+      </header>
+
+      <main class="p-6 space-y-5">
+        <!-- filters -->
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4 flex flex-wrap items-center gap-3">
+          <div class="relative flex-1 min-w-[220px]">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="text" placeholder="Search name, email, mobile…" class="w-full border border-gray-200 rounded-xl pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]" />
+          </div>
+          <select class="border border-gray-200 rounded-xl px-3 py-2.5 text-sm"><option>All roles</option><option>Client</option><option>Lawyer</option><option>Admin</option></select>
+          <select class="border border-gray-200 rounded-xl px-3 py-2.5 text-sm"><option>All status</option><option>Active</option><option>Suspended</option><option>Deleted</option></select>
+        </div>
+
+        <!-- table -->
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wide">
+                <tr>
+                  <th class="text-left font-bold px-5 py-3">User</th>
+                  <th class="text-left font-bold px-5 py-3">Role</th>
+                  <th class="text-left font-bold px-5 py-3">Contact</th>
+                  <th class="text-left font-bold px-5 py-3">Status</th>
+                  <th class="text-left font-bold px-5 py-3">Joined</th>
+                  <th class="text-right font-bold px-5 py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="rows" class="divide-y divide-gray-100"></tbody>
+            </table>
+          </div>
+          <div class="flex items-center justify-between px-5 py-4 text-sm text-slate-500">
+            <span>Showing 1–6 of 12,310</span>
+            <div class="flex gap-1">
+              <a href="#" class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200"><i class="fa-solid fa-chevron-left text-xs"></i></a>
+              <a href="#" class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0B192C] text-white">1</a>
+              <a href="#" class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200">2</a>
+              <a href="#" class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200"><i class="fa-solid fa-chevron-right text-xs"></i></a>
+            </div>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 italic">Sample data — "Delete" performs a soft delete (status → DELETED), never a hard delete.</p>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const users = [
+      { n:'Anita Sharma', i:'AS', role:'Lawyer', email:'anita@example.com', mob:'+91 98XXXX01', status:'Active', joined:'12 Jan 2026' },
+      { n:'Rahul Kumar', i:'RK', role:'Client', email:'rahul@example.com', mob:'+91 98XXXX02', status:'Active', joined:'03 Feb 2026' },
+      { n:'Priya Verma', i:'PV', role:'Lawyer', email:'priya@example.com', mob:'+91 98XXXX03', status:'Suspended', joined:'21 Feb 2026' },
+      { n:'Sunil Nair', i:'SN', role:'Client', email:'sunil@example.com', mob:'+91 98XXXX04', status:'Active', joined:'09 Mar 2026' },
+      { n:'Meera Reddy', i:'MR', role:'Lawyer', email:'meera@example.com', mob:'+91 98XXXX05', status:'Deleted', joined:'15 Mar 2026' },
+      { n:'Ops Admin', i:'OA', role:'Admin', email:'ops@lawmitran.com', mob:'+91 98XXXX06', status:'Active', joined:'01 Jan 2026' },
+    ];
+    const roleBadge = r => ({Lawyer:'bg-amber-50 text-amber-700',Client:'bg-blue-50 text-blue-700',Admin:'bg-slate-200 text-slate-700'}[r]);
+    const stBadge = s => ({Active:'bg-green-50 text-green-700',Suspended:'bg-orange-50 text-orange-700',Deleted:'bg-red-50 text-red-700'}[s]);
+    document.getElementById('rows').innerHTML = users.map(u => `
+      <tr class="hover:bg-slate-50">
+        <td class="px-5 py-3"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-[#0B192C] text-[#C9A24B] flex items-center justify-center font-bold text-xs">${u.i}</div><span class="font-semibold text-slate-800">${u.n}</span></div></td>
+        <td class="px-5 py-3"><span class="text-xs font-bold px-2.5 py-1 rounded-full ${roleBadge(u.role)}">${u.role}</span></td>
+        <td class="px-5 py-3 text-slate-500"><div>${u.email}</div><div class="text-[11px] text-slate-400">${u.mob}</div></td>
+        <td class="px-5 py-3"><span class="text-xs font-bold px-2.5 py-1 rounded-full ${stBadge(u.status)}">${u.status}</span></td>
+        <td class="px-5 py-3 text-slate-500">${u.joined}</td>
+        <td class="px-5 py-3">
+          <div class="flex items-center justify-end gap-1 text-slate-400">
+            <button title="View" class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-[#0B192C]" onclick="act('view','${u.n}')"><i class="fa-solid fa-eye"></i></button>
+            <button title="Edit" class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-[#0B192C]" onclick="act('edit','${u.n}')"><i class="fa-solid fa-pen"></i></button>
+            <button title="Reset password" class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-[#0B192C]" onclick="act('reset','${u.n}')"><i class="fa-solid fa-key"></i></button>
+            <button title="Suspend" class="w-8 h-8 rounded-lg hover:bg-orange-50 hover:text-orange-600" onclick="act('suspend','${u.n}')"><i class="fa-solid fa-ban"></i></button>
+            <button title="Soft-delete" class="w-8 h-8 rounded-lg hover:bg-red-50 hover:text-red-600" onclick="act('delete','${u.n}')"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </td>
+      </tr>`).join('');
+    function act(a, n){
+      const msg = {
+        view:'GET /api/admin/users/:id', edit:'PATCH /api/admin/users/:id',
+        reset:'POST /api/admin/users/:id/reset-password (email link — never shows the password)',
+        suspend:'PATCH /api/admin/users/:id { status: SUSPENDED } + revoke refresh tokens',
+        delete:'PATCH /api/admin/users/:id { status: DELETED } — soft delete, record retained'
+      }[a];
+      alert(`${n}\\nSample — ${msg}`);
+    }
+  </script>
+</body>
+</html>

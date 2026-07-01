@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Win-back — Expired Subscription UI | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .toast { transition: opacity .3s, transform .3s; }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+
+  <!-- ===== NAV ===== -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2.5">
+        <span class="w-8 h-8 rounded-lg bg-[#0B192C] flex items-center justify-center"><i class="fa-solid fa-scale-balanced text-[#C9A24B] text-sm"></i></span>
+        <span class="text-lg font-bold tracking-tight text-[#0B192C]">Law<span class="text-[#C9A24B]">mitran</span></span>
+      </a>
+      <span class="text-xs font-bold uppercase tracking-wide text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full"><i class="fa-solid fa-rotate-right mr-1"></i> Win-back UI demo</span>
+    </div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto px-6 py-10 space-y-12">
+
+    <header>
+      <h1 class="text-2xl font-extrabold text-[#0B192C]">Expired-subscription win-back</h1>
+      <p class="text-sm text-slate-500 mt-1 max-w-2xl">Two views of the flow in <a href="../docs/20-winback-expired-contact.md" class="text-[#C9A24B] font-semibold">docs/20</a>: the <b>client</b> sees an expired lawyer as "unavailable" (with a callback + alternatives), and the <b>lawyer</b> sees "N clients waiting — renew to unlock."</p>
+    </header>
+
+    <!-- =================== CLIENT VIEW =================== -->
+    <section>
+      <h2 class="text-xs font-bold uppercase tracking-widest text-amber-600 mb-1">Client view · lawyer list</h2>
+      <p class="text-sm text-slate-500 mb-5">Available lawyers rank first; the expired lawyer stays listed but contact is gated.</p>
+
+      <div class="space-y-4" id="clientList">
+        <!-- available -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm flex flex-col sm:flex-row gap-5 items-start">
+          <div class="relative shrink-0"><div class="w-16 h-16 rounded-xl bg-gradient-to-br from-[#0B192C] to-[#1E3E62] flex items-center justify-center text-[#C9A24B] font-extrabold text-xl">AS</div><span class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></span></div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2"><h3 class="text-lg font-bold text-slate-900">Adv. A. Sharma</h3><span class="text-[10px] bg-green-50 text-green-600 font-bold px-2 py-0.5 rounded-full">✓ Verified</span></div>
+            <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-location-dot text-[#C9A24B] mr-1"></i> Bengaluru · 18 yrs · ★ 4.8</p>
+            <p class="text-sm text-slate-500 mt-2">Family &amp; matrimonial specialist.</p>
+          </div>
+          <a href="lawyer-details.html" class="bg-[#0B192C] hover:bg-slate-800 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shrink-0">Contact now</a>
+        </div>
+
+        <!-- EXPIRED lawyer (gated) -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm">
+          <div class="flex flex-col sm:flex-row gap-5 items-start opacity-90">
+            <div class="relative shrink-0"><div class="w-16 h-16 rounded-xl bg-slate-200 flex items-center justify-center text-slate-500 font-extrabold text-xl">RK</div><span class="absolute -bottom-1 -right-1 w-4 h-4 bg-slate-400 rounded-full border-2 border-white"></span></div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 flex-wrap"><h3 class="text-lg font-bold text-slate-900">Adv. R. Khanna</h3><span class="text-[10px] bg-green-50 text-green-600 font-bold px-2 py-0.5 rounded-full">✓ Verified</span><span class="text-[10px] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded-full"><i class="fa-regular fa-clock"></i> Currently unavailable</span></div>
+              <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-location-dot text-slate-400 mr-1"></i> Bengaluru · 11 yrs · ★ 4.6</p>
+              <p class="text-sm text-slate-500 mt-2">Criminal &amp; consumer law.</p>
+            </div>
+            <button id="cbBtn" onclick="requestCallback()" class="border border-[#C9A24B] text-[#0B192C] hover:bg-[#fffdf7] text-sm font-semibold px-5 py-2.5 rounded-xl shrink-0 flex items-center gap-2"><i class="fa-solid fa-phone-volume text-[#C9A24B]"></i> Request callback</button>
+          </div>
+
+          <!-- alternatives strip (revealed after callback) -->
+          <div id="alts" class="hidden mt-5 pt-5 border-t border-gray-100">
+            <p class="text-xs font-bold text-slate-500 mb-3"><i class="fa-solid fa-bolt text-[#C9A24B] mr-1"></i> Similar lawyers available now</p>
+            <div class="grid sm:grid-cols-3 gap-3">
+              <div class="border border-gray-100 rounded-xl p-3 flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[#0B192C] to-[#1E3E62] flex items-center justify-center text-[#C9A24B] font-bold text-xs">SB</div><div class="min-w-0"><p class="text-sm font-bold text-slate-800 truncate">Adv. S. Bakshi</p><p class="text-[11px] text-amber-500">★ 4.9 · Criminal</p></div></div>
+              <div class="border border-gray-100 rounded-xl p-3 flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[#0B192C] to-[#1E3E62] flex items-center justify-center text-[#C9A24B] font-bold text-xs">MR</div><div class="min-w-0"><p class="text-sm font-bold text-slate-800 truncate">Adv. M. Reddy</p><p class="text-[11px] text-amber-500">★ 4.6 · Consumer</p></div></div>
+              <div class="border border-gray-100 rounded-xl p-3 flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[#0B192C] to-[#1E3E62] flex items-center justify-center text-[#C9A24B] font-bold text-xs">DG</div><div class="min-w-0"><p class="text-sm font-bold text-slate-800 truncate">Adv. D. Gupta</p><p class="text-[11px] text-amber-500">★ 4.7 · Criminal</p></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="text-[11px] text-slate-400 italic mt-3">Click <b>Request callback</b> → <code>POST /api/leads</code> creates a <b>HELD</b> lead (no PII to the lawyer) and shows alternatives so you still convert.</p>
+    </section>
+
+    <!-- =================== LAWYER VIEW =================== -->
+    <section>
+      <h2 class="text-xs font-bold uppercase tracking-widest text-amber-600 mb-1">Lawyer view · dashboard</h2>
+      <p class="text-sm text-slate-500 mb-5">What the expired lawyer sees. The waiting count is the carrot; details unlock on renewal.</p>
+
+      <!-- PENDING (expired) state -->
+      <div id="lawPending" class="space-y-4">
+        <div class="rounded-2xl bg-gradient-to-br from-[#0B192C] to-[#1E3E62] text-white p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex items-start gap-4">
+            <span class="w-12 h-12 rounded-xl bg-[#C9A24B]/20 flex items-center justify-center text-[#C9A24B] text-xl shrink-0"><i class="fa-solid fa-users"></i></span>
+            <div>
+              <h3 class="text-xl font-bold"><span class="text-[#C9A24B]">3 clients</span> are waiting for you</h3>
+              <p class="text-sm text-slate-300 mt-1">They tried to reach you this week in <b>Criminal Law, Bengaluru</b>. Your subscription expired — renew to unlock their details and start the conversation.</p>
+            </div>
+          </div>
+          <button onclick="renew()" class="bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] font-bold px-6 py-3 rounded-xl shrink-0 whitespace-nowrap">Renew &amp; unlock</button>
+        </div>
+        <!-- locked held leads -->
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm divide-y divide-gray-100">
+          <div class="flex items-center justify-between p-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400"><i class="fa-solid fa-lock"></i></div><div><p class="text-sm font-semibold text-slate-500">Client · Criminal matter</p><p class="text-[11px] text-slate-400">Locked · 2 days ago</p></div></div><span class="text-xs text-slate-400">Renew to view</span></div>
+          <div class="flex items-center justify-between p-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400"><i class="fa-solid fa-lock"></i></div><div><p class="text-sm font-semibold text-slate-500">Client · Consumer complaint</p><p class="text-[11px] text-slate-400">Locked · 4 days ago</p></div></div><span class="text-xs text-slate-400">Renew to view</span></div>
+          <div class="flex items-center justify-between p-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400"><i class="fa-solid fa-lock"></i></div><div><p class="text-sm font-semibold text-slate-500">Client · Bail enquiry</p><p class="text-[11px] text-slate-400">Locked · 5 days ago</p></div></div><span class="text-xs text-slate-400">Renew to view</span></div>
+        </div>
+      </div>
+
+      <!-- RENEWED (released) state -->
+      <div id="lawRenewed" class="hidden space-y-4">
+        <div class="rounded-2xl bg-green-50 border border-green-200 text-green-800 p-6 flex items-center gap-4">
+          <span class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-green-600 text-xl shrink-0"><i class="fa-solid fa-circle-check"></i></span>
+          <div><h3 class="text-xl font-bold text-green-800">Welcome back — 3 leads released!</h3><p class="text-sm text-green-700 mt-1">Your held clients are now unlocked. Reach out before they pick someone else.</p></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm divide-y divide-gray-100">
+          <div class="flex items-center justify-between p-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-[#0B192C] text-[#C9A24B] flex items-center justify-center font-bold text-xs">RK</div><div><p class="text-sm font-semibold text-slate-800">Rohit K. · Criminal matter</p><p class="text-[11px] text-slate-400">+91 98XXXX01 · 2 days ago</p></div></div><a href="#" class="text-xs font-bold bg-[#0B192C] text-white px-3 py-1.5 rounded-lg">Contact</a></div>
+          <div class="flex items-center justify-between p-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-[#0B192C] text-[#C9A24B] flex items-center justify-center font-bold text-xs">PV</div><div><p class="text-sm font-semibold text-slate-800">Priya V. · Consumer complaint</p><p class="text-[11px] text-slate-400">+91 98XXXX02 · 4 days ago</p></div></div><a href="#" class="text-xs font-bold bg-[#0B192C] text-white px-3 py-1.5 rounded-lg">Contact</a></div>
+          <div class="flex items-center justify-between p-4"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-[#0B192C] text-[#C9A24B] flex items-center justify-center font-bold text-xs">SA</div><div><p class="text-sm font-semibold text-slate-800">Sunil A. · Bail enquiry</p><p class="text-[11px] text-slate-400">+91 98XXXX04 · 5 days ago</p></div></div><a href="#" class="text-xs font-bold bg-[#0B192C] text-white px-3 py-1.5 rounded-lg">Contact</a></div>
+        </div>
+        <button onclick="resetLawyer()" class="text-xs text-slate-400 hover:text-slate-600"><i class="fa-solid fa-rotate-left mr-1"></i> Reset demo</button>
+      </div>
+      <p class="text-[11px] text-slate-400 italic mt-3">Click <b>Renew &amp; unlock</b> → <code>release-held-leads</code> job flips HELD → NEW and reveals client details.</p>
+    </section>
+
+    <!-- digest email preview -->
+    <section>
+      <h2 class="text-xs font-bold uppercase tracking-widest text-amber-600 mb-3">The win-back digest (email / WhatsApp)</h2>
+      <div class="max-w-md bg-white rounded-2xl border border-gray-200/60 shadow-sm overflow-hidden">
+        <div class="bg-[#0B192C] text-white px-5 py-3 text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-[#C9A24B]"></i> LawMitran</div>
+        <div class="p-5 text-sm text-slate-700 space-y-3">
+          <p><b>3 clients tried to reach you this week</b> in Family Law, Bengaluru.</p>
+          <p class="text-slate-500">Renew your subscription to receive their details and start the conversation. We never share client contact info until you're active.</p>
+          <a href="lawyer-plan.html" class="inline-block bg-[#C9A24B] text-[#0B192C] font-bold px-4 py-2 rounded-lg text-sm">Renew subscription</a>
+          <p class="text-[11px] text-slate-400 pt-2 border-t border-gray-100">Aggregated weekly · no client PII · 1 message/day max.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- toast -->
+  <div id="toast" class="toast fixed bottom-6 left-1/2 -translate-x-1/2 opacity-0 translate-y-3 pointer-events-none bg-[#0B192C] text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 z-[60]">
+    <i class="fa-solid fa-circle-check text-[#C9A24B]"></i> <span id="toastMsg">Done</span>
+  </div>
+
+  <script>
+    function showToast(msg){
+      const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg;
+      t.style.opacity='1'; t.style.transform='translate(-50%,0)';
+      setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translate(-50%,12px)'; }, 2600);
+    }
+    function requestCallback(){
+      const b=document.getElementById('cbBtn');
+      b.innerHTML='<i class="fa-solid fa-check text-green-600"></i> Callback requested';
+      b.classList.add('opacity-70'); b.disabled=true;
+      document.getElementById('alts').classList.remove('hidden');
+      showToast("We've let the lawyer know you're interested");
+    }
+    function renew(){
+      document.getElementById('lawPending').classList.add('hidden');
+      document.getElementById('lawRenewed').classList.remove('hidden');
+      showToast('Renewed — 3 held leads released');
+    }
+    function resetLawyer(){
+      document.getElementById('lawRenewed').classList.add('hidden');
+      document.getElementById('lawPending').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

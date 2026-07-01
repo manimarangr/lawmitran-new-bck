@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Documents | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .nav-item.active { background:#16306b; color:#fff; } .nav-item.active i { color:#C9A24B; }
+    .cat.sel { background:#0B192C; color:#fff; border-color:#0B192C; } .cat.sel .ct { color:#C9A24B; }
+    .modal { display:none; } .modal.open { display:flex; }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+  <div class="flex min-h-screen">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 bg-[#0B192C] text-slate-300 flex-shrink-0 hidden lg:flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 px-6 h-20 border-b border-slate-800">
+        <img src="assets/logo-light.svg" alt="LawMitran" style="height:36px;display:block" />
+      </a>
+      <nav class="flex-1 p-4 space-y-1 text-sm font-medium">
+        <a href="admin-dashboard.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-gauge-high w-4"></i> Dashboard</a>
+        <a href="admin-lawyers.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-user-check w-4"></i> Lawyer Approvals <span class="ml-auto text-[10px] bg-[#C9A24B] text-[#0B192C] font-bold px-2 py-0.5 rounded-full">7</span></a>
+        <a href="admin-users.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-users w-4"></i> Users</a>
+        <a href="admin-documents.html" class="nav-item active flex items-center gap-3 px-4 py-2.5 rounded-xl"><i class="fa-solid fa-folder-open w-4"></i> Documents</a>
+        <a href="#" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-tags w-4"></i> Plans</a>
+        <a href="#" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-chart-line w-4"></i> Reports</a>
+      </nav>
+      <div class="p-4 border-t border-slate-800"><a href="login.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm hover:bg-slate-800/60"><i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Sign out</a></div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-40">
+        <div><h1 class="text-xl font-extrabold text-[#0B192C]">Document Templates</h1><p class="text-xs text-slate-400">Manage the category-wise legal document catalog</p></div>
+        <button onclick="openModal()" class="bg-[#0B192C] hover:bg-slate-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2"><i class="fa-solid fa-plus"></i> New template</button>
+      </header>
+
+      <main class="p-6 grid lg:grid-cols-4 gap-6 items-start">
+        <!-- categories -->
+        <div class="lg:col-span-1 bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4">
+          <div class="flex items-center justify-between mb-3 px-1"><h2 class="text-xs font-bold uppercase tracking-wide text-slate-400">Categories</h2><button onclick="alert('Sample — POST /api/admin/categories')" class="text-[#C9A24B] text-xs font-bold">+ Add</button></div>
+          <div id="cats" class="space-y-1.5"></div>
+        </div>
+
+        <!-- templates -->
+        <div class="lg:col-span-3 bg-white rounded-2xl border border-gray-200/60 shadow-sm overflow-hidden">
+          <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <h2 id="catTitle" class="text-base font-bold text-[#0B192C]">Rent &amp; Lease</h2>
+            <div class="relative"><i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i><input placeholder="Search templates…" class="border border-gray-200 rounded-lg pl-8 pr-3 py-2 text-sm focus:outline-none focus:border-[#C9A24B]" /></div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wide">
+                <tr><th class="text-left font-bold px-5 py-3">Template</th><th class="text-left font-bold px-5 py-3">Price</th><th class="text-left font-bold px-5 py-3">Stamp</th><th class="text-left font-bold px-5 py-3">Status</th><th class="text-left font-bold px-5 py-3">Ver.</th><th class="text-right font-bold px-5 py-3">Actions</th></tr>
+              </thead>
+              <tbody id="tpls" class="divide-y divide-gray-100"></tbody>
+            </table>
+          </div>
+        </div>
+        <p class="lg:col-span-4 text-[11px] text-slate-400 italic">Sample data — templates are archived (not deleted) and editing a published one creates a new version.</p>
+      </main>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: new/edit template ===== -->
+  <div id="modal" class="modal fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+      <div class="flex items-center justify-between mb-5"><h3 class="text-lg font-bold text-[#0B192C]">New template</h3><button onclick="closeModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+      <form onsubmit="event.preventDefault();closeModal();alert('Sample — POST /api/admin/templates (status DRAFT)');" class="space-y-4">
+        <div><label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Title</label><input required placeholder="e.g. Rental Agreement (11 months)" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]" /></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Category</label><select class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm"><option>Rent &amp; Lease</option><option>Affidavits</option><option>Property</option><option>Employment</option><option>Business</option></select></div>
+          <div><label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Price (₹)</label><input type="number" min="0" placeholder="299" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]" /></div>
+        </div>
+        <label class="flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" class="rounded border-gray-300 text-[#C9A24B]" /> Requires e-stamp paper</label>
+        <div><label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Template file</label>
+          <label class="block border-2 border-dashed border-gray-200 rounded-xl p-5 text-center text-sm text-slate-500 cursor-pointer hover:border-[#C9A24B]"><i class="fa-solid fa-file-arrow-up text-[#C9A24B] text-lg block mb-1"></i> Upload .docx/.pdf body template<input type="file" class="hidden" /></label>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="border border-gray-200 text-slate-600 font-semibold text-sm px-4 py-2.5 rounded-xl">Cancel</button>
+          <button type="submit" class="bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] font-bold text-sm px-5 py-2.5 rounded-xl">Save as draft</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const cats = [
+      { name:'Rent & Lease', icon:'fa-house-chimney', n:6 },
+      { name:'Affidavits', icon:'fa-file-lines', n:9 },
+      { name:'Property', icon:'fa-building', n:5 },
+      { name:'Employment', icon:'fa-user-tie', n:7 },
+      { name:'Business', icon:'fa-briefcase', n:8 },
+      { name:'Legal Notices', icon:'fa-scroll', n:4 },
+    ];
+    const tplsByCat = {
+      'Rent & Lease': [
+        { t:'Rental Agreement (11 months)', price:299, stamp:true, status:'Published', ver:2 },
+        { t:'Leave & License Agreement', price:349, stamp:true, status:'Published', ver:1 },
+        { t:'Commercial Lease Deed', price:499, stamp:true, status:'Draft', ver:1 },
+        { t:'Rent Receipt', price:0, stamp:false, status:'Archived', ver:3 },
+      ],
+    };
+    let curCat = 'Rent & Lease';
+    const stBadge = s => ({Published:'bg-green-50 text-green-700',Draft:'bg-slate-100 text-slate-600',Archived:'bg-red-50 text-red-600'}[s]);
+
+    function renderCats(){
+      document.getElementById('cats').innerHTML = cats.map(c => `
+        <button onclick="selectCat('${c.name}')" class="cat ${c.name===curCat?'sel':'border-transparent'} w-full flex items-center gap-3 border rounded-xl px-3 py-2.5 text-sm hover:bg-slate-50 transition">
+          <i class="ct fa-solid ${c.icon} ${c.name===curCat?'':'text-[#C9A24B]'} w-4"></i>
+          <span class="font-semibold ${c.name===curCat?'':'text-slate-700'}">${c.name}</span>
+          <span class="ml-auto text-[11px] ${c.name===curCat?'text-slate-300':'text-slate-400'}">${c.n}</span>
+        </button>`).join('');
+    }
+    function renderTpls(){
+      document.getElementById('catTitle').textContent = curCat;
+      const list = tplsByCat[curCat] || [{ t:'(sample templates only for Rent & Lease)', price:0, stamp:false, status:'Draft', ver:1 }];
+      document.getElementById('tpls').innerHTML = list.map((x,i) => `
+        <tr class="hover:bg-slate-50">
+          <td class="px-5 py-3 font-semibold text-slate-800">${x.t}</td>
+          <td class="px-5 py-3 text-slate-600">${x.price ? '₹'+x.price : 'Free'}</td>
+          <td class="px-5 py-3">${x.stamp ? '<span class="text-[#C9A24B]"><i class="fa-solid fa-stamp"></i></span>' : '<span class="text-slate-300">—</span>'}</td>
+          <td class="px-5 py-3"><span class="text-xs font-bold px-2.5 py-1 rounded-full ${stBadge(x.status)}">${x.status}</span></td>
+          <td class="px-5 py-3 text-slate-500">v${x.ver}</td>
+          <td class="px-5 py-3">
+            <div class="flex items-center justify-end gap-1 text-slate-400">
+              <button title="Edit (new version)" onclick="alert('Sample — PATCH /api/admin/templates/:id → new version')" class="w-8 h-8 rounded-lg hover:bg-slate-100 hover:text-[#0B192C]"><i class="fa-solid fa-pen"></i></button>
+              <button title="${x.status==='Published'?'Unpublish':'Publish'}" onclick="alert('Sample — PATCH status ${x.status==='Published'?'DRAFT':'PUBLISHED'}')" class="w-8 h-8 rounded-lg hover:bg-green-50 hover:text-green-600"><i class="fa-solid fa-toggle-${x.status==='Published'?'on':'off'}"></i></button>
+              <button title="Archive" onclick="alert('Sample — PATCH status ARCHIVED (not hard delete)')" class="w-8 h-8 rounded-lg hover:bg-red-50 hover:text-red-600"><i class="fa-solid fa-box-archive"></i></button>
+            </div>
+          </td>
+        </tr>`).join('');
+    }
+    function selectCat(c){ curCat = c; renderCats(); renderTpls(); }
+    function openModal(){ document.getElementById('modal').classList.add('open'); }
+    function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+    renderCats(); renderTpls();
+  </script>
+</body>
+</html>

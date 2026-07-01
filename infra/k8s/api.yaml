@@ -1,0 +1,103 @@
+# LawMitran API — Kubernetes deployment with autoscaling (HPA).
+# Implements the stateless-horizontal-scale tier from docs/19-scalability.md.
+#
+# Apply:  kubectl apply -f infra/k8s/api.yaml
+# Watch:  kubectl get hpa lawmitran-api -w
+#
+# Assumes: an Ingress/CDN in front, a managed Postgres reachable via PgBouncer,
+# and Redis — all referenced through the `lawmitran-api` Secret/ConfigMap.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lawmitran-api
+  labels: { app: lawmitran-api }
+spec:
+  replicas: 4                       # baseline; HPA scales this
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels: { app: lawmitran-api }
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 25%, maxUnavailable: 0 }   # zero-downtime deploys
+  template:
+    metadata:
+      labels: { app: lawmitran-api }
+    spec:
+      terminationGracePeriodSeconds: 30   # drain in-flight requests
+      containers:
+        - name: api
+          image: ghcr.io/lawmitran/api:latest   # set by CI
+          ports:
+            - containerPort: 3001
+          envFrom:
+            - secretRef: { name: lawmitran-api }   # DATABASE_URL (→ pgbouncer), REDIS_URL, JWT_*, S3_*
+          resources:
+            requests: { cpu: "500m", memory: "512Mi" }
+            limits:   { cpu: "2",    memory: "1Gi" }
+          readinessProbe:
+            httpGet: { path: /health, port: 3001 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: 3001 }
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          lifecycle:
+            preStop:
+              exec: { command: ["sh", "-c", "sleep 5"] }   # let LB deregister before exit
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lawmitran-api
+  labels: { app: lawmitran-api }
+spec:
+  selector: { app: lawmitran-api }
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3001
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: lawmitran-api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lawmitran-api
+  minReplicas: 4
+  maxReplicas: 16
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: { type: Utilization, averageUtilization: 65 }
+    - type: Resource
+      resource:
+        name: memory
+        target: { type: Utilization, averageUtilization: 75 }
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Percent
+          value: 100          # can double pods in a burst
+          periodSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 300   # scale down slowly to avoid flapping
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lawmitran-api
+spec:
+  minAvailable: 3            # keep capacity during node drains / rollouts
+  selector:
+    matchLabels: { app: lawmitran-api }

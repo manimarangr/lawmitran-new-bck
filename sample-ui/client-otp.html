@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify your mobile | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
+    .otp-box { width:54px; height:62px; text-align:center; font-size:24px; font-weight:700; color:#0B192C; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- ===== NAV ===== -->
+  <nav class="bg-white border-b border-gray-100 h-20 flex items-center">
+    <div class="max-w-7xl mx-auto w-full px-6 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3">
+        <img src="assets/logo.svg" alt="LawMitran" style="height:36px;display:block" />
+      </a>
+      <a href="signup.html" class="text-sm text-slate-500 hover:text-[#0B192C] font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Back</a>
+    </div>
+  </nav>
+
+  <!-- ===== OTP CARD ===== -->
+  <main class="flex-1 flex items-center justify-center px-6 py-12">
+    <div class="w-full max-w-md text-center">
+      <div class="w-16 h-16 rounded-2xl hero-gradient flex items-center justify-center text-[#C9A24B] text-2xl mx-auto mb-5"><i class="fa-solid fa-mobile-screen-button"></i></div>
+      <h1 class="text-2xl font-extrabold text-[#0B192C]">Verify your mobile</h1>
+      <p class="text-sm text-slate-500 mt-2">Enter the 4-digit code we sent to <span class="font-semibold text-slate-700">+91 98XXXX&nbsp;XX01</span>. <a href="signup.html" class="text-[#C9A24B] font-semibold hover:underline">Change</a></p>
+
+      <form onsubmit="event.preventDefault();alert('Sample — POST /api/auth/mobile/verify-otp');" class="mt-8">
+        <div class="flex justify-center gap-3 mb-2" id="otp">
+          <input class="otp-box border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" maxlength="1" inputmode="numeric" aria-label="digit 1" />
+          <input class="otp-box border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" maxlength="1" inputmode="numeric" aria-label="digit 2" />
+          <input class="otp-box border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" maxlength="1" inputmode="numeric" aria-label="digit 3" />
+          <input class="otp-box border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" maxlength="1" inputmode="numeric" aria-label="digit 4" />
+        </div>
+
+        <button type="submit" class="w-full bg-[#0B192C] hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors shadow-md mt-6">Verify &amp; continue</button>
+
+        <p id="timer" class="text-sm text-slate-400 mt-5">Didn't get it? Resend in <span id="t" class="font-semibold text-slate-600">30</span>s</p>
+        <button type="button" id="resend" class="hidden text-sm font-bold text-[#C9A24B] hover:underline mt-5">Resend code</button>
+        <p class="text-[11px] text-slate-400 mt-4"><i class="fa-solid fa-shield-halved text-[#C9A24B] mr-1"></i> Verifying your mobile keeps the platform spam-free and your account secure.</p>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const boxes = [...document.querySelectorAll('#otp .otp-box')];
+    boxes.forEach((b,i) => {
+      b.addEventListener('input', () => { b.value = b.value.replace(/\D/g,''); if(b.value && i<boxes.length-1) boxes[i+1].focus(); });
+      b.addEventListener('keydown', e => { if(e.key==='Backspace' && !b.value && i>0) boxes[i-1].focus(); });
+    });
+    boxes[0].focus();
+    let t = 30; const tEl = document.getElementById('t'), timer = document.getElementById('timer'), resend = document.getElementById('resend');
+    const iv = setInterval(() => { t--; tEl.textContent = t; if(t<=0){ clearInterval(iv); timer.classList.add('hidden'); resend.classList.remove('hidden'); } }, 1000);
+    resend.addEventListener('click', () => alert('Sample — POST /api/auth/mobile/send-otp'));
+  </script>
+</body>
+</html>

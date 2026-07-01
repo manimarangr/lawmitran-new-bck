@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="60 60 880 880" role="img" aria-label="LawMitran — Legal Help, Simplified.">
+  <!-- Wrapper for dark backgrounds: displays logo-light.png unchanged. Place a light/white version at assets/logo-light.png
+       viewBox trims ~6% whitespace margin so the artwork reads larger. Widen toward "0 0 1000 1000" if it clips. -->
+  <image href="logo-light.png" xlink:href="logo-light.png" x="0" y="0" width="1000" height="1000" preserveAspectRatio="xMidYMid meet"/>
+</svg>

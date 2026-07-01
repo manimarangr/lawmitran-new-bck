@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find a Lawyer | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+
+  <!-- ===== NAV ===== -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm backdrop-blur-md bg-white/95">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3">
+        <img src="assets/logo.svg" alt="LawMitran" style="height:36px;display:block" />
+      </a>
+      <div class="hidden md:flex items-center space-x-8 font-medium">
+        <a href="lawyer-search.html" class="text-slate-600 hover:text-[#0B192C] transition-colors">Find Lawyers</a>
+        <a href="index.html#documents" class="text-slate-600 hover:text-[#0B192C] transition-colors">Legal Documents</a>
+        <a href="index.html#how" class="text-slate-600 hover:text-[#0B192C] transition-colors">How it Works</a>
+        <a href="lawyer-signup.html" class="text-slate-600 hover:text-[#0B192C] transition-colors">For Lawyers</a>
+        <a href="login.html" class="text-slate-600 hover:text-[#0B192C] transition-colors">Login</a>
+        <a href="signup.html" class="bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] px-6 py-2.5 rounded-xl font-bold shadow-md shadow-[#C9A24B]/10 transition-all transform hover:-translate-y-0.5">Sign Up</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== SEARCH BAND ===== -->
+  <section class="hero-gradient text-white pt-10 pb-16 relative overflow-hidden">
+    <div class="absolute -right-16 bottom-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
+    <div class="max-w-7xl mx-auto px-6 relative z-10">
+      <nav class="text-xs text-slate-300 mb-3"><a href="index.html" class="hover:text-amber-400">Home</a> <span class="mx-1">/</span> Find Lawyers</nav>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Find a Verified Lawyer</h1>
+      <p class="text-slate-300 text-sm mt-2 max-w-2xl">Search Bar Council–verified advocates by practice area, city, and language. Submit a requirement and the lawyer reaches out to you.</p>
+
+      <div class="bg-white p-3 rounded-2xl shadow-2xl shadow-black/40 text-slate-700 max-w-5xl mt-6 border border-gray-100">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
+          <div class="flex items-center px-4 py-2 border-b md:border-b-0 md:border-r border-gray-100">
+            <i class="fa-solid fa-gavel text-[#C9A24B] mr-3"></i>
+            <div class="text-left w-full">
+              <label class="block text-[10px] font-bold tracking-wider uppercase text-slate-400">Practice Area</label>
+              <select class="w-full bg-transparent font-medium text-slate-800 focus:outline-none appearance-none cursor-pointer">
+                <option>Family Law</option><option>Criminal Law</option><option>Property Law</option><option>Corporate Law</option><option>Consumer Law</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex items-center px-4 py-2 border-b md:border-b-0 md:border-r border-gray-100">
+            <i class="fa-solid fa-location-dot text-[#C9A24B] mr-3"></i>
+            <div class="text-left w-full">
+              <label class="block text-[10px] font-bold tracking-wider uppercase text-slate-400">City</label>
+              <input type="text" value="Bengaluru" class="w-full bg-transparent font-medium text-slate-800 placeholder-slate-400 focus:outline-none" />
+            </div>
+          </div>
+          <div class="p-1">
+            <button class="w-full hero-gradient text-white font-semibold py-4 px-6 rounded-xl hover:opacity-90 transition-all flex items-center justify-center space-x-2 shadow-lg">
+              <i class="fa-solid fa-magnifying-glass"></i><span>Search</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RESULTS ===== -->
+  <section class="max-w-7xl mx-auto px-6 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+
+      <!-- Filter sidebar -->
+      <aside class="lg:col-span-1 bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6 lg:sticky lg:top-24">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-[#0B192C]">Filters</h3>
+          <a href="#" class="text-xs text-[#C9A24B] font-semibold hover:underline">Reset</a>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-1.5">Practice Area</label>
+            <select class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]"><option>Family</option><option>Criminal</option><option>Property</option><option>Civil</option><option>Corporate</option></select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-1.5">Court</label>
+            <select class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]"><option>Any court</option><option>Supreme Court</option><option>High Court</option><option>District Court</option><option>Tribunal</option></select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-1.5">Experience</label>
+            <select class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]"><option>Any</option><option>0–5 years</option><option>5–10 years</option><option>10–20 years</option><option>20+ years</option></select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-2">Languages <span class="text-slate-300 normal-case font-medium">(select any)</span></label>
+            <div class="flex flex-wrap gap-2" id="langChips">
+              <button type="button" onclick="toggleChip(this)" class="lang-chip text-xs px-3 py-1.5 rounded-full border border-gray-200 text-slate-600 hover:border-[#C9A24B] transition-colors">English</button>
+              <button type="button" onclick="toggleChip(this)" class="lang-chip text-xs px-3 py-1.5 rounded-full border border-gray-200 text-slate-600 hover:border-[#C9A24B] transition-colors">Hindi</button>
+              <button type="button" onclick="toggleChip(this)" class="lang-chip text-xs px-3 py-1.5 rounded-full border border-gray-200 text-slate-600 hover:border-[#C9A24B] transition-colors">Kannada</button>
+              <button type="button" onclick="toggleChip(this)" class="lang-chip text-xs px-3 py-1.5 rounded-full border border-gray-200 text-slate-600 hover:border-[#C9A24B] transition-colors">Tamil</button>
+              <button type="button" onclick="toggleChip(this)" class="lang-chip text-xs px-3 py-1.5 rounded-full border border-gray-200 text-slate-600 hover:border-[#C9A24B] transition-colors">Telugu</button>
+              <button type="button" onclick="toggleChip(this)" class="lang-chip text-xs px-3 py-1.5 rounded-full border border-gray-200 text-slate-600 hover:border-[#C9A24B] transition-colors">Marathi</button>
+              <button type="button" onclick="toggleChip(this)" class="lang-chip text-xs px-3 py-1.5 rounded-full border border-gray-200 text-slate-600 hover:border-[#C9A24B] transition-colors">Urdu</button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-1.5">Gender</label>
+            <select class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]"><option>Any</option><option>Male</option><option>Female</option><option>Other</option></select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wide text-slate-400 mb-1.5">Minimum Rating</label>
+            <select class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]"><option>Any</option><option>4.5+ ★</option><option>4.0+ ★</option><option>3.5+ ★</option></select>
+          </div>
+          <button class="w-full bg-[#0B192C] hover:bg-slate-800 text-white font-semibold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
+            <i class="fa-solid fa-sliders text-xs"></i> Apply Filters
+          </button>
+        </div>
+      </aside>
+
+      <!-- Result list -->
+      <div class="lg:col-span-3">
+        <div class="flex items-center justify-between mb-6 gap-3 flex-wrap">
+          <p class="text-sm text-slate-500">Showing <span class="font-semibold text-slate-800">1–5</span> of 120 verified lawyers</p>
+          <div class="flex items-center gap-3 text-sm text-slate-600">
+            <a href="lawyer-search-map.html" class="flex items-center gap-2 border border-gray-200 hover:border-[#C9A24B] text-[#0B192C] font-semibold px-3 py-2 rounded-lg transition-colors"><i class="fa-solid fa-map-location-dot text-[#C9A24B]"></i> Map view</a>
+            <span>Sort by</span>
+            <select class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#C9A24B]"><option>Activity</option><option>Rating</option><option>Experience</option><option>Relevance</option></select>
+          </div>
+        </div>
+
+        <div class="space-y-5">
+
+          <!-- card -->
+          <div class="bg-white rounded-2xl p-6 border border-gray-200/60 shadow-sm hover:shadow-md transition-all">
+            <div class="flex flex-col sm:flex-row gap-5">
+              <div class="relative shrink-0">
+                <div class="w-20 h-20 rounded-xl hero-gradient flex items-center justify-center text-[#C9A24B] font-extrabold text-2xl">AS</div>
+                <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 class="text-lg font-bold text-slate-900">Adv. A. Sharma
+                      <span class="ml-2 align-middle text-[10px] bg-green-50 text-green-600 font-bold px-2 py-0.5 rounded-full"><i class="fa-solid fa-circle-check"></i> Verified</span>
+                    </h3>
+                    <p class="text-xs text-slate-400 font-medium mt-1"><i class="fa-solid fa-location-dot text-[#C9A24B] mr-1"></i> SC Road, Bengaluru &nbsp;·&nbsp; <i class="fa-solid fa-briefcase mr-1"></i> 18 yrs</p>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <div class="text-xs font-semibold text-amber-500"><i class="fa-solid fa-star"></i> 4.8</div>
+                    <div class="text-[11px] text-slate-400">120+ reviews</div>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-2 my-3">
+                  <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Family Law</span>
+                  <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Divorce</span>
+                  <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">+3 more</span>
+                </div>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Family &amp; matrimonial specialist with a result-oriented, ethical approach. Appears before the family courts and Karnataka High Court.</p>
+                <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div><span class="block text-[10px] uppercase font-bold tracking-wider text-slate-400">Typical fee</span><span class="text-lg font-bold text-slate-900">₹2,500</span></div>
+                  <div class="flex gap-2">
+                    <a href="lawyer-details.html" class="border border-gray-200 hover:border-[#C9A24B] text-[#0B192C] px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors">View Profile</a>
+                    <a href="lawyer-details.html" class="bg-[#0B192C] hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors flex items-center gap-2"><i class="fa-solid fa-phone-volume text-xs"></i> Contact Lawyer</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- card -->
+          <div class="bg-white rounded-2xl p-6 border border-gray-200/60 shadow-sm hover:shadow-md transition-all">
+            <div class="flex flex-col sm:flex-row gap-5">
+              <div class="relative shrink-0">
+                <div class="w-20 h-20 rounded-xl hero-gradient flex items-center justify-center text-[#C9A24B] font-extrabold text-2xl">SB</div>
+                <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 class="text-lg font-bold text-slate-900">Adv. S. Bakshi
+                      <span class="ml-2 align-middle text-[10px] bg-green-50 text-green-600 font-bold px-2 py-0.5 rounded-full"><i class="fa-solid fa-circle-check"></i> Verified</span>
+                    </h3>
+                    <p class="text-xs text-slate-400 font-medium mt-1"><i class="fa-solid fa-location-dot text-[#C9A24B] mr-1"></i> Indiranagar, Bengaluru &nbsp;·&nbsp; <i class="fa-solid fa-briefcase mr-1"></i> 24 yrs</p>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <div class="text-xs font-semibold text-amber-500"><i class="fa-solid fa-star"></i> 4.9</div>
+                    <div class="text-[11px] text-slate-400">100+ reviews</div>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-2 my-3">
+                  <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Family Law</span>
+                  <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Matrimonial</span>
+                </div>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Senior matrimonial counsel known for mediation-first strategy and strong settlement outcomes.</p>
+                <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div><span class="block text-[10px] uppercase font-bold tracking-wider text-slate-400">Typical fee</span><span class="text-lg font-bold text-slate-900">₹3,000</span></div>
+                  <div class="flex gap-2">
+                    <a href="lawyer-details.html" class="border border-gray-200 hover:border-[#C9A24B] text-[#0B192C] px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors">View Profile</a>
+                    <a href="lawyer-details.html" class="bg-[#0B192C] hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors flex items-center gap-2"><i class="fa-solid fa-phone-volume text-xs"></i> Contact Lawyer</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- card — EXPIRED subscription (win-back state) -->
+          <div class="bg-white rounded-2xl p-6 border border-gray-200/60 shadow-sm transition-all">
+            <div class="flex flex-col sm:flex-row gap-5">
+              <div class="relative shrink-0">
+                <div class="w-20 h-20 rounded-xl bg-slate-200 flex items-center justify-center text-slate-500 font-extrabold text-2xl">MR</div>
+                <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-slate-400 rounded-full border-2 border-white"></div>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 class="text-lg font-bold text-slate-900">Adv. M. Reddy
+                      <span class="ml-2 align-middle text-[10px] bg-green-50 text-green-600 font-bold px-2 py-0.5 rounded-full"><i class="fa-solid fa-circle-check"></i> Verified</span>
+                      <span class="ml-1 align-middle text-[10px] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded-full"><i class="fa-regular fa-clock"></i> Currently unavailable</span>
+                    </h3>
+                    <p class="text-xs text-slate-400 font-medium mt-1"><i class="fa-solid fa-location-dot text-slate-400 mr-1"></i> Jayanagar, Bengaluru &nbsp;·&nbsp; <i class="fa-solid fa-briefcase mr-1"></i> 12 yrs</p>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <div class="text-xs font-semibold text-amber-500"><i class="fa-solid fa-star"></i> 4.6</div>
+                    <div class="text-[11px] text-slate-400">64 reviews</div>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-2 my-3">
+                  <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Family Law</span>
+                  <span class="text-xs bg-slate-100 px-3 py-1 rounded-full font-medium text-slate-600">Civil</span>
+                </div>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Handles domestic-violence and civil family disputes with a practical, client-first approach.</p>
+                <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div><span class="block text-[10px] uppercase font-bold tracking-wider text-slate-400">Typical fee</span><span class="text-lg font-bold text-slate-900">₹1,800</span></div>
+                  <div class="flex gap-2">
+                    <a href="lawyer-details.html" class="border border-gray-200 hover:border-[#C9A24B] text-[#0B192C] px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors">View Profile</a>
+                    <button id="cbBtn" onclick="requestCallback()" class="border border-[#C9A24B] text-[#0B192C] hover:bg-[#fffdf7] px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors flex items-center gap-2"><i class="fa-solid fa-phone-volume text-[#C9A24B] text-xs"></i> Request callback</button>
+                  </div>
+                </div>
+
+                <!-- alternatives strip (revealed after callback) -->
+                <div id="alts" class="hidden mt-5 pt-4 border-t border-gray-100">
+                  <p class="text-xs font-bold text-slate-500 mb-3"><i class="fa-solid fa-bolt text-[#C9A24B] mr-1"></i> Similar lawyers available now</p>
+                  <div class="grid sm:grid-cols-3 gap-3">
+                    <a href="lawyer-details.html" class="border border-gray-100 rounded-xl p-3 flex items-center gap-3 hover:border-[#C9A24B] transition-colors"><div class="w-10 h-10 rounded-lg hero-gradient flex items-center justify-center text-[#C9A24B] font-bold text-xs">SB</div><div class="min-w-0"><p class="text-sm font-bold text-slate-800 truncate">Adv. S. Bakshi</p><p class="text-[11px] text-amber-500">★ 4.9 · Family</p></div></a>
+                    <a href="lawyer-details.html" class="border border-gray-100 rounded-xl p-3 flex items-center gap-3 hover:border-[#C9A24B] transition-colors"><div class="w-10 h-10 rounded-lg hero-gradient flex items-center justify-center text-[#C9A24B] font-bold text-xs">AS</div><div class="min-w-0"><p class="text-sm font-bold text-slate-800 truncate">Adv. A. Sharma</p><p class="text-[11px] text-amber-500">★ 4.8 · Family</p></div></a>
+                    <a href="lawyer-details.html" class="border border-gray-100 rounded-xl p-3 flex items-center gap-3 hover:border-[#C9A24B] transition-colors"><div class="w-10 h-10 rounded-lg hero-gradient flex items-center justify-center text-[#C9A24B] font-bold text-xs">DG</div><div class="min-w-0"><p class="text-sm font-bold text-slate-800 truncate">Adv. D. Gupta</p><p class="text-[11px] text-amber-500">★ 4.7 · Civil</p></div></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- pagination -->
+        <div class="flex justify-center items-center gap-2 mt-10">
+          <a href="#" class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-slate-500 hover:border-[#C9A24B]"><i class="fa-solid fa-chevron-left text-xs"></i></a>
+          <a href="#" class="w-10 h-10 flex items-center justify-center rounded-lg bg-[#0B192C] text-white font-semibold">1</a>
+          <a href="#" class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-slate-600 hover:border-[#C9A24B]">2</a>
+          <a href="#" class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-slate-600 hover:border-[#C9A24B]">3</a>
+          <span class="px-1 text-slate-400">…</span>
+          <a href="#" class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-slate-600 hover:border-[#C9A24B]">24</a>
+          <a href="#" class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-slate-500 hover:border-[#C9A24B]"><i class="fa-solid fa-chevron-right text-xs"></i></a>
+        </div>
+        <p class="text-center text-[11px] text-slate-400 italic mt-6">Sample results for design preview — not real lawyers.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="bg-[#0B192C] text-slate-400 text-sm pt-16 pb-8">
+    <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-slate-800">
+      <div class="md:col-span-4 space-y-4">
+        <div class="flex items-center space-x-2">
+          <img src="assets/logo-light.svg" alt="LawMitran" style="height:36px;display:block" />
+        </div>
+        <p class="text-xs text-slate-400 leading-relaxed">Connecting you to verified legal solutions — lawyers, advice, and documents, all in one place.</p>
+      </div>
+      <div class="md:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div><h4 class="text-xs font-bold uppercase tracking-wider text-white mb-4">Discover</h4><ul class="space-y-2.5 text-xs"><li><a href="lawyer-search.html" class="hover:text-[#C9A24B]">Find Lawyers</a></li><li><a href="index.html#documents" class="hover:text-[#C9A24B]">Legal Documents</a></li><li><a href="#" class="hover:text-[#C9A24B]">Cities</a></li><li><a href="index.html#practice" class="hover:text-[#C9A24B]">Practice Areas</a></li></ul></div>
+        <div><h4 class="text-xs font-bold uppercase tracking-wider text-white mb-4">Company</h4><ul class="space-y-2.5 text-xs"><li><a href="#" class="hover:text-[#C9A24B]">About</a></li><li><a href="#" class="hover:text-[#C9A24B]">Contact</a></li><li><a href="#" class="hover:text-[#C9A24B]">Blog</a></li><li><a href="#" class="hover:text-[#C9A24B]">Careers</a></li></ul></div>
+        <div><h4 class="text-xs font-bold uppercase tracking-wider text-white mb-4">Legal</h4><ul class="space-y-2.5 text-xs"><li><a href="privacy-policy.html" class="hover:text-[#C9A24B]">Privacy Policy</a></li><li><a href="terms.html" class="hover:text-[#C9A24B]">Terms</a></li><li><a href="refund-policy.html" class="hover:text-[#C9A24B]">Refund Policy</a></li><li><a href="disclaimer.html" class="hover:text-[#C9A24B]">Disclaimer</a></li></ul></div>
+        <div><h4 class="text-xs font-bold uppercase tracking-wider text-white mb-4">For Lawyers</h4><ul class="space-y-2.5 text-xs"><li><a href="lawyer-signup.html" class="hover:text-[#C9A24B]">For Lawyers</a></li><li><a href="login.html" class="hover:text-[#C9A24B]">Lawyer Login</a></li></ul></div>
+      </div>
+    </div>
+    <div class="max-w-6xl mx-auto px-6 pt-7 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <span class="text-slate-500">© 2026 LawMitran · <span class="text-[#C9A24B] font-semibold">Justice Made Accessible.</span></span>
+      <div class="flex flex-wrap justify-center gap-x-5 gap-y-1 text-slate-400">
+        <a href="#" class="hover:text-[#C9A24B]">www.lawmitran.com</a>
+        <a href="tel:+917760545789" class="hover:text-[#C9A24B]">+91 77605 45789</a>
+        <a href="mailto:support@lawmitran.com" class="hover:text-[#C9A24B]">support@lawmitran.com</a>
+      </div>
+    </div>
+    <p class="max-w-6xl mx-auto px-6 mt-6 pt-5 border-t border-slate-800/70 text-[11px] leading-relaxed text-slate-500 text-center">LawMitran is an information platform for discovering Bar Council–verified advocates and legal documents. It is not a law firm and does not provide legal advice; listings and rankings are informational and not an endorsement or solicitation. Fees shown are indicative.</p>
+  </footer>
+
+  <!-- toast -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 opacity-0 translate-y-3 pointer-events-none bg-[#0B192C] text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 z-[60] transition-all">
+    <i class="fa-solid fa-circle-check text-[#C9A24B]"></i> <span>We've let the lawyer know you're interested</span>
+  </div>
+
+  <script>
+    function toggleChip(el){
+      const on = el.classList.toggle('chip-on');
+      if (on){ el.classList.add('bg-[#0B192C]','text-white','border-[#0B192C]'); el.classList.remove('text-slate-600','border-gray-200'); }
+      else { el.classList.remove('bg-[#0B192C]','text-white','border-[#0B192C]'); el.classList.add('text-slate-600','border-gray-200'); }
+    }
+    function requestCallback(){
+      const b = document.getElementById('cbBtn');
+      b.innerHTML = '<i class="fa-solid fa-check text-green-600 text-xs"></i> Callback requested';
+      b.classList.add('opacity-70'); b.disabled = true;
+      document.getElementById('alts').classList.remove('hidden');
+      const t = document.getElementById('toast');
+      t.style.opacity = '1'; t.style.transform = 'translate(-50%,0)';
+      setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translate(-50%,12px)'; }, 2600);
+    }
+  </script>
+
+</body>
+</html>

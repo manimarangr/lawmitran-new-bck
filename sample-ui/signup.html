@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
+    .role-btn.active { border-color:#C9A24B; background:#fffdf7; box-shadow:0 0 0 3px rgba(201,162,75,.12); }
+    .role-btn.active .role-ic { background:#C9A24B; color:#0B192C; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex">
+
+  <!-- ===== LEFT BRAND PANEL ===== -->
+  <aside class="hidden lg:flex lg:w-1/2 hero-gradient text-white relative overflow-hidden p-12 flex-col justify-between">
+    <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-[#C9A24B]/10 rounded-full blur-3xl"></div>
+    <i class="fa-solid fa-scale-balanced absolute right-10 top-1/3 text-[#C9A24B]/10 text-[18rem]"></i>
+
+    <a href="index.html" class="flex items-center space-x-3 relative z-10">
+      <img src="assets/logo-light.svg" alt="LawMitran" style="height:36px;display:block" />
+    </a>
+
+    <div class="relative z-10">
+      <h1 class="text-4xl font-extrabold leading-tight">Join LawMitran<br><span class="text-[#C9A24B]">in under a minute.</span></h1>
+      <p class="text-slate-300 mt-4 max-w-md">Create your free account to find verified lawyers, submit requirements, and generate legal documents.</p>
+      <ul class="mt-8 space-y-3 text-sm text-slate-200">
+        <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-[#C9A24B]"></i> Free for clients — no charges to ask</li>
+        <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-[#C9A24B]"></i> Lawyers get a 30-day free trial</li>
+        <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-[#C9A24B]"></i> Email &amp; mobile verified for trust</li>
+      </ul>
+    </div>
+
+    <div class="relative z-10">
+      <p class="text-xs text-slate-400">© 2026 LawMitran · Justice Made Accessible.</p>
+      <p class="text-[11px] text-slate-500 mt-1.5 max-w-sm">An information platform, not a law firm. We don't provide legal advice.</p>
+    </div>
+  </aside>
+
+  <!-- ===== RIGHT FORM ===== -->
+  <main class="flex-1 flex flex-col">
+    <div class="p-6">
+      <a href="index.html" class="text-sm text-slate-500 hover:text-[#0B192C] font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Back to home</a>
+    </div>
+
+    <div class="flex-1 flex items-center justify-center px-6 pb-12">
+      <div class="w-full max-w-md">
+        <a href="index.html" class="lg:hidden flex items-center space-x-3 mb-8 justify-center">
+          <img src="assets/logo.svg" alt="LawMitran" style="height:36px;display:block" />
+        </a>
+
+        <h2 class="text-2xl font-extrabold text-[#0B192C]">Create your account</h2>
+        <p class="text-sm text-slate-500 mt-1 mb-6">Choose how you want to use LawMitran.</p>
+
+        <!-- role toggle -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <button type="button" id="role-client" onclick="setRole('CLIENT')" class="role-btn active text-left border border-gray-200 rounded-xl p-3.5 transition-all">
+            <span class="role-ic w-9 h-9 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center mb-2 transition-colors"><i class="fa-solid fa-user"></i></span>
+            <span class="block text-sm font-bold text-[#0B192C]">I need a lawyer</span>
+            <span class="block text-[11px] text-slate-500">Client account</span>
+          </button>
+          <button type="button" id="role-lawyer" onclick="setRole('LAWYER')" class="role-btn text-left border border-gray-200 rounded-xl p-3.5 transition-all">
+            <span class="role-ic w-9 h-9 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center mb-2 transition-colors"><i class="fa-solid fa-scale-balanced"></i></span>
+            <span class="block text-sm font-bold text-[#0B192C]">I am a lawyer</span>
+            <span class="block text-[11px] text-slate-500">Advocate account</span>
+          </button>
+        </div>
+
+        <form onsubmit="event.preventDefault();window.location = (role==='LAWYER' ? 'lawyer-signup-otp.html' : 'client-otp.html');" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Full name</label>
+            <div class="relative">
+              <i class="fa-solid fa-id-card absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="text" required placeholder="Your full name" class="w-full border border-gray-200 rounded-xl pl-10 pr-3 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Email</label>
+            <div class="relative">
+              <i class="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="email" required placeholder="you@example.com" class="w-full border border-gray-200 rounded-xl pl-10 pr-3 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Mobile</label>
+            <div class="flex">
+              <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-slate-50 text-sm text-slate-500 font-semibold">+91</span>
+              <input type="tel" required placeholder="98XXXXXX01" class="w-full border border-gray-200 rounded-r-xl px-3 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1.5"><i class="fa-solid fa-shield-halved text-[#C9A24B] mr-1"></i> We'll send an OTP to verify your mobile.</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Password</label>
+            <div class="relative">
+              <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input id="pw" type="password" required placeholder="At least 8 characters" class="w-full border border-gray-200 rounded-xl pl-10 pr-10 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+              <button type="button" onclick="togglePw()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><i id="pwicon" class="fa-solid fa-eye text-sm"></i></button>
+            </div>
+          </div>
+
+          <p id="lawyer-note" class="hidden text-[12px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3"><i class="fa-solid fa-circle-info mr-1"></i> After signup you'll upload your Bar Council certificate for verification before going live.</p>
+
+          <!-- DPDP-style granular consent: required agreements separate from optional marketing -->
+          <div class="space-y-2.5 pt-1">
+            <label class="flex items-start gap-2 text-xs text-slate-600 select-none">
+              <input type="checkbox" required class="mt-0.5 rounded border-gray-300 text-[#C9A24B] focus:ring-[#C9A24B]" />
+              <span>I agree to the <a href="terms.html" class="text-[#C9A24B] font-semibold hover:underline">Terms of Use</a> &amp; <a href="privacy-policy.html" class="text-[#C9A24B] font-semibold hover:underline">Privacy Policy</a>. <span class="text-rose-500">*</span></span>
+            </label>
+            <label class="flex items-start gap-2 text-xs text-slate-600 select-none">
+              <input type="checkbox" required class="mt-0.5 rounded border-gray-300 text-[#C9A24B] focus:ring-[#C9A24B]" />
+              <span>I consent to LawMitran processing my personal data to verify my identity and connect me with advocates, as described in the Privacy Policy. <span class="text-rose-500">*</span></span>
+            </label>
+            <label class="flex items-start gap-2 text-xs text-slate-500 select-none">
+              <input type="checkbox" class="mt-0.5 rounded border-gray-300 text-[#C9A24B] focus:ring-[#C9A24B]" />
+              <span>Send me updates, tips, and offers by email/SMS/WhatsApp. <span class="text-slate-400">(optional)</span></span>
+            </label>
+          </div>
+          <p class="text-[11px] text-slate-400"><i class="fa-solid fa-shield-halved text-[#C9A24B] mr-1"></i> You can withdraw consent or delete your account anytime from Settings. <span class="text-rose-500">*</span> required.</p>
+
+          <button type="submit" class="w-full bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] font-bold py-3.5 rounded-xl transition-colors shadow-md">Create account</button>
+        </form>
+
+        <p class="text-center text-sm text-slate-500 mt-6">Already have an account? <a href="login.html" class="text-[#C9A24B] font-bold hover:underline">Sign in</a></p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let role = 'CLIENT';
+    function setRole(r){
+      role = r;
+      document.getElementById('role-client').classList.toggle('active', r==='CLIENT');
+      document.getElementById('role-lawyer').classList.toggle('active', r==='LAWYER');
+      document.getElementById('lawyer-note').classList.toggle('hidden', r!=='LAWYER');
+    }
+    function togglePw(){ const p=document.getElementById('pw'), i=document.getElementById('pwicon');
+      const show = p.type==='password'; p.type = show?'text':'password';
+      i.className = 'fa-solid '+(show?'fa-eye-slash':'fa-eye')+' text-sm'; }
+  </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex">
+
+  <!-- ===== LEFT BRAND PANEL ===== -->
+  <aside class="hidden lg:flex lg:w-1/2 hero-gradient text-white relative overflow-hidden p-12 flex-col justify-between">
+    <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-[#C9A24B]/10 rounded-full blur-3xl"></div>
+    <i class="fa-solid fa-scale-balanced absolute right-10 top-1/3 text-[#C9A24B]/10 text-[18rem]"></i>
+
+    <a href="index.html" class="flex items-center space-x-3 relative z-10">
+      <img src="assets/logo-light.svg" alt="LawMitran" style="height:36px;display:block" />
+    </a>
+
+    <div class="relative z-10">
+      <h1 class="text-4xl font-extrabold leading-tight">Welcome back to<br><span class="text-[#C9A24B]">Legal Help, Simplified.</span></h1>
+      <p class="text-slate-300 mt-4 max-w-md">Sign in to manage your requirements, saved lawyers, and legal documents — all in one place.</p>
+      <ul class="mt-8 space-y-3 text-sm text-slate-200">
+        <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-[#C9A24B]"></i> Bar Council–verified lawyers</li>
+        <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-[#C9A24B]"></i> 1000+ ready legal documents</li>
+        <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-[#C9A24B]"></i> Secure &amp; confidential</li>
+      </ul>
+    </div>
+
+    <div class="relative z-10">
+      <p class="text-xs text-slate-400">© 2026 LawMitran · Justice Made Accessible.</p>
+      <p class="text-[11px] text-slate-500 mt-1.5 max-w-sm">An information platform, not a law firm. We don't provide legal advice.</p>
+    </div>
+  </aside>
+
+  <!-- ===== RIGHT FORM ===== -->
+  <main class="flex-1 flex flex-col">
+    <div class="p-6">
+      <a href="index.html" class="text-sm text-slate-500 hover:text-[#0B192C] font-medium"><i class="fa-solid fa-arrow-left mr-1"></i> Back to home</a>
+    </div>
+
+    <div class="flex-1 flex items-center justify-center px-6 pb-12">
+      <div class="w-full max-w-md">
+        <!-- mobile logo -->
+        <a href="index.html" class="lg:hidden flex items-center space-x-3 mb-8 justify-center">
+          <img src="assets/logo.svg" alt="LawMitran" style="height:36px;display:block" />
+        </a>
+
+        <h2 class="text-2xl font-extrabold text-[#0B192C]">Sign in</h2>
+        <p class="text-sm text-slate-500 mt-1 mb-8">Enter your details to access your account.</p>
+
+        <form onsubmit="event.preventDefault();alert('Sample — POST /api/auth/login');" class="space-y-5">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Email or Mobile</label>
+            <div class="relative">
+              <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="text" required placeholder="you@example.com" class="w-full border border-gray-200 rounded-xl pl-10 pr-3 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Password</label>
+              <a href="#" class="text-xs font-semibold text-[#C9A24B] hover:underline">Forgot password?</a>
+            </div>
+            <div class="relative">
+              <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input id="pw" type="password" required placeholder="••••••••" class="w-full border border-gray-200 rounded-xl pl-10 pr-10 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+              <button type="button" onclick="togglePw()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><i id="pwicon" class="fa-solid fa-eye text-sm"></i></button>
+            </div>
+          </div>
+
+          <label class="flex items-center gap-2 text-sm text-slate-600 select-none">
+            <input type="checkbox" class="rounded border-gray-300 text-[#C9A24B] focus:ring-[#C9A24B]" /> Remember me
+          </label>
+
+          <button type="submit" class="w-full bg-[#0B192C] hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors shadow-md">Sign in</button>
+        </form>
+
+        <p class="text-center text-sm text-slate-500 mt-8">New to LawMitran? <a href="signup.html" class="text-[#C9A24B] font-bold hover:underline">Create an account</a></p>
+        <div class="mt-6 pt-5 border-t border-gray-100 text-center">
+          <a href="admin-dashboard.html" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-[#0B192C]"><i class="fa-solid fa-shield-halved"></i> Admin portal</a>
+          <p class="text-[11px] text-slate-300 mt-1">Staff only · role-gated (ADMIN)</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function togglePw(){ const p=document.getElementById('pw'), i=document.getElementById('pwicon');
+      const show = p.type==='password'; p.type = show?'text':'password';
+      i.className = 'fa-solid '+(show?'fa-eye-slash':'fa-eye')+' text-sm'; }
+  </script>
+</body>
+</html>

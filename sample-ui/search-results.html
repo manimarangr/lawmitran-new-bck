@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Family Lawyers in Bengaluru — LawMitran</title>
+<link rel="stylesheet" href="styles.css" />
+<style>
+  .layout{display:grid;grid-template-columns:300px 1fr;gap:30px;padding:10px 0 50px;align-items:start}
+
+  /* sidebar */
+  .filters{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);
+    padding:22px;position:sticky;top:90px}
+  .filters h3{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);margin-bottom:18px}
+  .fgroup{margin-bottom:14px}
+  .fgroup label{display:block;font-size:12px;font-weight:700;color:var(--navy);margin-bottom:6px}
+  .fgroup select,.fgroup input{width:100%;appearance:none;border:1.5px solid var(--line);border-radius:9px;
+    padding:11px 12px;font-size:14px;font-family:var(--font);background:#fff;color:var(--ink)}
+  .fgroup select:focus,.fgroup input:focus{outline:none;border-color:var(--gold)}
+  .filters .actions{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+  .filters .btn{width:100%;justify-content:center}
+  .lang-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .lchip{font-size:12px;padding:6px 11px;border-radius:999px;border:1.5px solid var(--line);background:#fff;
+    color:var(--ink);font-family:var(--font);cursor:pointer;transition:all .15s}
+  .lchip:hover{border-color:var(--gold)}
+  .lchip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+
+  /* main */
+  .results-head h1{font-size:30px;color:var(--navy);letter-spacing:-.5px;margin-bottom:10px}
+  .results-head p{color:var(--muted);max-width:680px;margin-bottom:16px}
+  .online{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:var(--navy);font-weight:600;margin-bottom:16px}
+  .online i{width:8px;height:8px;border-radius:50%;background:#2f8f57;display:inline-block;box-shadow:0 0 0 3px rgba(47,143,87,.18)}
+  .chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+  .chip{border:1.5px solid var(--line);background:#fff;border-radius:30px;padding:8px 16px;font-size:13.5px;
+    font-weight:600;color:var(--navy);cursor:pointer;transition:.15s}
+  .chip:hover,.chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+  .toolbar .count{color:var(--muted);font-size:14px}
+  .toolbar .sort{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--navy)}
+  .toolbar select{border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;font-family:var(--font);font-size:13.5px}
+
+  /* result card */
+  .rcard{display:grid;grid-template-columns:84px 1fr auto;gap:18px;align-items:center;
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px;
+    box-shadow:var(--shadow-sm);transition:.16s}
+  .rcard:hover{border-color:#dfe3ec;box-shadow:var(--shadow);transform:translateY(-2px)}
+  .rcard .av{width:84px;height:84px}
+  .rcard .name{font-size:18px;color:var(--navy);font-weight:700}
+  .rcard .name a:hover{color:var(--gold)}
+  .rcard .sub{font-size:13px;color:var(--gold);font-weight:700;margin:2px 0 8px}
+  .rcard .meta{display:flex;gap:18px;color:var(--muted);font-size:13px;flex-wrap:wrap;margin-top:6px}
+  .rcard .meta span{display:flex;align-items:center;gap:6px}
+  .rcard .right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+  .rcard .right .stars{white-space:nowrap}
+  .skills-line{font-size:13px;color:var(--ink);margin-top:8px}
+  .skills-line b{color:var(--navy)}
+
+  /* pagination */
+  .pager{display:flex;gap:8px;justify-content:center;margin-top:26px}
+  .pager a{min-width:38px;height:38px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--line);
+    border-radius:9px;font-weight:600;color:var(--navy);font-size:14px}
+  .pager a.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .pager a:hover:not(.active){border-color:var(--gold)}
+  .sample-tag{font-size:11px;color:var(--muted);text-align:center;margin-top:18px;font-style:italic}
+
+  @media(max-width:900px){ .layout{grid-template-columns:1fr} .filters{position:static}
+    .rcard{grid-template-columns:64px 1fr;text-align:left} .rcard .av{width:64px;height:64px}
+    .rcard .right{flex-direction:row;align-items:center;grid-column:1/-1;justify-content:space-between} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.svg" alt="LawMitran" style="height:38px;display:block" />
+    </a>
+    <nav class="nav-links">
+      <a href="lawyer-search.html">Find Lawyers</a>
+      <a href="index.html#documents">Legal Documents</a>
+      <a href="index.html#how">How it Works</a>
+      <a href="lawyer-signup.html">For Lawyers</a>
+      <a href="login.html">Login</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-gold btn-sm" href="signup.html">Sign Up</a>
+      <button class="nav-toggle" aria-label="Menu" onclick="document.querySelector('.nav-links').style.display='flex'">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="#0E2148" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="crumb"><a href="index.html">Home</a> / <a href="#">Lawyers in Bengaluru</a> / <b>Family Lawyers</b></div>
+
+  <div class="layout">
+    <!-- ===== Filters ===== -->
+    <aside class="filters">
+      <h3>Filter Results</h3>
+      <form onsubmit="event.preventDefault();alert('Sample filter — GET /api/lawyers?...');">
+        <div class="fgroup"><label>City</label>
+          <select><option selected>Bengaluru</option><option>Chennai</option><option>Mumbai</option><option>Delhi</option><option>Kochi</option></select></div>
+        <div class="fgroup"><label>Practice Area</label>
+          <select><option selected>Family</option><option>Criminal</option><option>Property</option><option>Civil</option><option>Corporate</option></select></div>
+        <div class="fgroup"><label>Court</label>
+          <select><option selected>Any court</option><option>Supreme Court</option><option>High Court</option><option>District Court</option><option>Tribunal</option></select></div>
+        <div class="fgroup"><label>Experience</label>
+          <select><option selected>Any</option><option>0–5 years</option><option>5–10 years</option><option>10–20 years</option><option>20+ years</option></select></div>
+        <div class="fgroup"><label>Languages <span style="font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0">(select any)</span></label>
+          <div class="lang-chips">
+            <button type="button" class="lchip" onclick="this.classList.toggle('on')">English</button>
+            <button type="button" class="lchip" onclick="this.classList.toggle('on')">Hindi</button>
+            <button type="button" class="lchip" onclick="this.classList.toggle('on')">Kannada</button>
+            <button type="button" class="lchip" onclick="this.classList.toggle('on')">Tamil</button>
+            <button type="button" class="lchip" onclick="this.classList.toggle('on')">Telugu</button>
+            <button type="button" class="lchip" onclick="this.classList.toggle('on')">Marathi</button>
+            <button type="button" class="lchip" onclick="this.classList.toggle('on')">Urdu</button>
+          </div></div>
+        <div class="fgroup"><label>Gender</label>
+          <select><option selected>Any</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+        <div class="fgroup"><label>Minimum Rating</label>
+          <select><option selected>Any</option><option>4.5+ ★</option><option>4.0+ ★</option><option>3.5+ ★</option></select></div>
+        <div class="actions">
+          <button class="btn btn-navy" type="submit">Apply Filters</button>
+          <button class="btn btn-ghost" type="reset">Reset</button>
+        </div>
+      </form>
+    </aside>
+
+    <!-- ===== Results ===== -->
+    <main>
+      <div class="results-head">
+        <h1>Consult Best Family Lawyers in Bengaluru</h1>
+        <p>Whether it's divorce, child custody, maintenance, or a family dispute, connect with verified family-law advocates near you. Submit your requirement and matched lawyers will reach out directly.</p>
+        <div class="online"><i></i> 120+ verified lawyers available</div>
+        <div class="chips">
+          <span class="chip active">Family</span><span class="chip">Divorce</span><span class="chip">Child Custody</span>
+          <span class="chip">Maintenance</span><span class="chip">Domestic Violence</span>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <span class="count">Showing <b>1–5</b> of 120 lawyers</span>
+        <span class="sort">Sort by
+          <select><option>Activity</option><option>Rating</option><option>Experience</option><option>Relevance</option></select>
+        </span>
+      </div>
+
+      <!-- cards -->
+      <div class="rcard">
+        <span class="av avatar"><svg viewBox="0 0 84 84" width="84" height="84"><rect width="84" height="84" fill="#eef1f7"/><circle cx="42" cy="32" r="15" fill="#c2cbdc"/><path d="M14 74c3-15 15-22 28-22s25 7 28 22" fill="#c2cbdc"/></svg></span>
+        <div>
+          <div class="name"><a href="lawyer-profile.html">Adv. A. Sharma</a></div>
+          <div class="sub">Family &amp; Divorce</div>
+          <div class="verified">✓ Verified</div>
+          <div class="skills-line"><b>Practice areas:</b> Family, Divorce, Child Custody +3 more</div>
+          <div class="meta"><span>📍 SC Road, Bengaluru</span><span>💼 18 years</span><span>🗣 English, Hindi, Kannada</span></div>
+        </div>
+        <div class="right">
+          <div class="stars">★★★★★ <small>4.8 · 120+</small></div>
+          <a class="btn btn-navy btn-sm" href="lawyer-profile.html">Contact now</a>
+        </div>
+      </div>
+
+      <div class="rcard">
+        <span class="av avatar"><svg viewBox="0 0 84 84" width="84" height="84"><rect width="84" height="84" fill="#eef1f7"/><circle cx="42" cy="32" r="15" fill="#c2cbdc"/><path d="M14 74c3-15 15-22 28-22s25 7 28 22" fill="#c2cbdc"/></svg></span>
+        <div>
+          <div class="name"><a href="lawyer-profile.html">Adv. S. Bakshi</a></div>
+          <div class="sub">Family Law</div>
+          <div class="verified">✓ Verified</div>
+          <div class="skills-line"><b>Practice areas:</b> Family, Matrimonial, Maintenance +2 more</div>
+          <div class="meta"><span>📍 Indiranagar, Bengaluru</span><span>💼 24 years</span><span>🗣 English, Hindi</span></div>
+        </div>
+        <div class="right">
+          <div class="stars">★★★★★ <small>4.9 · 100+</small></div>
+          <a class="btn btn-navy btn-sm" href="lawyer-profile.html">Contact now</a>
+        </div>
+      </div>
+
+      <div class="rcard">
+        <span class="av avatar"><svg viewBox="0 0 84 84" width="84" height="84"><rect width="84" height="84" fill="#eef1f7"/><circle cx="42" cy="32" r="15" fill="#c2cbdc"/><path d="M14 74c3-15 15-22 28-22s25 7 28 22" fill="#c2cbdc"/></svg></span>
+        <div>
+          <div class="name"><a href="lawyer-profile.html">Adv. M. Reddy</a></div>
+          <div class="sub">Family &amp; Civil</div>
+          <div class="verified">✓ Verified</div>
+          <div class="skills-line"><b>Practice areas:</b> Family, Domestic Violence, Civil +1 more</div>
+          <div class="meta"><span>📍 Jayanagar, Bengaluru</span><span>💼 12 years</span><span>🗣 English, Kannada, Telugu</span></div>
+        </div>
+        <div class="right">
+          <div class="stars">★★★★☆ <small>4.6 · 64</small></div>
+          <a class="btn btn-navy btn-sm" href="lawyer-profile.html">Contact now</a>
+        </div>
+      </div>
+
+      <div class="rcard">
+        <span class="av avatar"><svg viewBox="0 0 84 84" width="84" height="84"><rect width="84" height="84" fill="#eef1f7"/><circle cx="42" cy="32" r="15" fill="#c2cbdc"/><path d="M14 74c3-15 15-22 28-22s25 7 28 22" fill="#c2cbdc"/></svg></span>
+        <div>
+          <div class="name"><a href="lawyer-profile.html">Adv. K. Menon</a></div>
+          <div class="sub">Matrimonial</div>
+          <div class="verified">✓ Verified</div>
+          <div class="skills-line"><b>Practice areas:</b> Family, Divorce, Mediation +2 more</div>
+          <div class="meta"><span>📍 Whitefield, Bengaluru</span><span>💼 9 years</span><span>🗣 English, Malayalam</span></div>
+        </div>
+        <div class="right">
+          <div class="stars">★★★★☆ <small>4.5 · 41</small></div>
+          <a class="btn btn-navy btn-sm" href="lawyer-profile.html">Contact now</a>
+        </div>
+      </div>
+
+      <div class="rcard">
+        <span class="av avatar"><svg viewBox="0 0 84 84" width="84" height="84"><rect width="84" height="84" fill="#eef1f7"/><circle cx="42" cy="32" r="15" fill="#c2cbdc"/><path d="M14 74c3-15 15-22 28-22s25 7 28 22" fill="#c2cbdc"/></svg></span>
+        <div>
+          <div class="name"><a href="lawyer-profile.html">Adv. D. Gupta</a></div>
+          <div class="sub">Family &amp; Property</div>
+          <div class="verified">✓ Verified</div>
+          <div class="skills-line"><b>Practice areas:</b> Family, Succession, Property +3 more</div>
+          <div class="meta"><span>📍 Koramangala, Bengaluru</span><span>💼 16 years</span><span>🗣 English, Hindi</span></div>
+        </div>
+        <div class="right">
+          <div class="stars">★★★★★ <small>4.7 · 88</small></div>
+          <a class="btn btn-navy btn-sm" href="lawyer-profile.html">Contact now</a>
+        </div>
+      </div>
+
+      <div class="pager">
+        <a href="#">‹</a><a href="#" class="active">1</a><a href="#">2</a><a href="#">3</a><a href="#">…</a><a href="#">24</a><a href="#">›</a>
+      </div>
+      <p class="sample-tag">Sample results for design preview — not real lawyers.</p>
+    </main>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <img src="assets/logo-light.svg" alt="LawMitran" />
+        <p>Connecting you to verified legal solutions — lawyers, advice, and documents, all in one place.</p>
+      </div>
+      <div><h4>Discover</h4><ul><li><a href="lawyer-search.html">Find Lawyers</a></li><li><a href="index.html#documents">Legal Documents</a></li><li><a href="#">Cities</a></li><li><a href="index.html#practice">Practice Areas</a></li></ul></div>
+      <div><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Contact</a></li><li><a href="#">Blog</a></li><li><a href="#">Careers</a></li></ul></div>
+      <div><h4>Legal</h4><ul><li><a href="privacy-policy.html">Privacy Policy</a></li><li><a href="terms.html">Terms</a></li><li><a href="refund-policy.html">Refund Policy</a></li><li><a href="disclaimer.html">Disclaimer</a></li></ul></div>
+      <div><h4>For Lawyers</h4><ul><li><a href="lawyer-signup.html">For Lawyers</a></li><li><a href="login.html">Lawyer Login</a></li></ul></div>
+    </div>
+    <div class="foot-contact">
+      <span>🌐 www.lawmitran.com</span><span>📞 +91 77605 45789</span><span>✉ support@lawmitran.com</span><span>📍 Bengaluru, India</span>
+    </div>
+    <div class="foot-bottom"><span>© 2026 LawMitran. All rights reserved.</span><span class="tagline">Justice Made Accessible.</span></div>
+    <p style="font-size:11px;line-height:1.6;color:rgba(255,255,255,.4);text-align:center;margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.08);max-width:820px;margin-left:auto;margin-right:auto">LawMitran is an information platform for discovering Bar Council–verified advocates and legal documents. It is not a law firm and does not provide legal advice; listings and rankings are informational and not an endorsement or solicitation. Fees shown are indicative.</p>
+  </div>
+</footer>
+
+</body>
+</html>

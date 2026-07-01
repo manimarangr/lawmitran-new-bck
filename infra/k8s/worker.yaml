@@ -1,0 +1,68 @@
+# LawMitran async workers (BullMQ) — notifications, lead routing, OTP send, PDF generation.
+# Kept separate from the API so request latency is unaffected by background load.
+#
+# Apply:  kubectl apply -f infra/k8s/worker.yaml
+#
+# Autoscaling note: workers scale best on QUEUE DEPTH, not CPU. The HPA below uses CPU as a
+# portable default. For queue-aware scaling, install KEDA and use a Redis/BullMQ ScaledObject
+# (commented at the bottom) instead of this HPA.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lawmitran-worker
+  labels: { app: lawmitran-worker }
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels: { app: lawmitran-worker }
+  template:
+    metadata:
+      labels: { app: lawmitran-worker }
+    spec:
+      terminationGracePeriodSeconds: 60   # let in-flight jobs finish
+      containers:
+        - name: worker
+          image: ghcr.io/lawmitran/api:latest
+          command: ["node", "dist/worker.js"]   # adjust to your worker entrypoint
+          envFrom:
+            - secretRef: { name: lawmitran-api }
+          resources:
+            requests: { cpu: "250m", memory: "384Mi" }
+            limits:   { cpu: "1",    memory: "768Mi" }
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: lawmitran-worker
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lawmitran-worker
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: { type: Utilization, averageUtilization: 70 }
+
+# ---- Queue-aware autoscaling with KEDA (preferred for workers) ----
+# Install KEDA, then replace the HPA above with:
+#
+# apiVersion: keda.sh/v1alpha1
+# kind: ScaledObject
+# metadata:
+#   name: lawmitran-worker
+# spec:
+#   scaleTargetRef: { name: lawmitran-worker }
+#   minReplicaCount: 2
+#   maxReplicaCount: 12
+#   triggers:
+#     - type: redis
+#       metadata:
+#         address: redis:6379
+#         listName: "bull:notifications:wait"   # per-queue Redis list
+#         listLength: "100"                      # +1 replica per 100 queued jobs

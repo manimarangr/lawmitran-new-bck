@@ -19,4 +19,9 @@ export class MailService {
     this.logger.log(`[placeholder email] to ${email}: you have a new ${practiceArea} lead waiting`);
     return Promise.resolve();
   }
+
+  async sendPasswordResetEmail(email: string, resetUrl: string): Promise<void> {
+    this.logger.log(`[placeholder email] to ${email}: reset password link: ${resetUrl}`);
+    return Promise.resolve();
+  }
 }

@@ -1,0 +1,76 @@
+name: k6 Load Test (release gate)
+
+# Runs the LawMitran load test from loadtest/k6-lawmitran.js against staging.
+# - Manual: Actions → "k6 Load Test" → Run workflow (choose target/base URL).
+# - Scheduled: nightly smoke against staging.
+# - As a gate: call this workflow from your deploy pipeline before promoting to prod.
+# k6 exits non-zero if thresholds (p95<300ms, p99<800ms, errors<1%) are breached,
+# which fails the job and blocks the release.
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Target base URL (load balancer / CDN origin)"
+        required: true
+        default: "https://staging.lawmitran.com"
+      target:
+        description: "Peak concurrent VUs (~= concurrent users)"
+        required: true
+        default: "2000"
+      ramp:
+        description: "Ramp-up duration"
+        required: false
+        default: "2m"
+      hold:
+        description: "Hold duration at peak"
+        required: false
+        default: "5m"
+  schedule:
+    - cron: "0 2 * * *"   # nightly 02:00 UTC smoke test
+  workflow_call:
+    inputs:
+      base_url: { required: true, type: string }
+      target:   { required: false, type: string, default: "2000" }
+      ramp:     { required: false, type: string, default: "2m" }
+      hold:     { required: false, type: string, default: "5m" }
+
+jobs:
+  k6:
+    name: Run k6
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve inputs
+        id: cfg
+        run: |
+          echo "base_url=${{ inputs.base_url || github.event.inputs.base_url || 'https://staging.lawmitran.com' }}" >> "$GITHUB_OUTPUT"
+          echo "target=${{ inputs.target || github.event.inputs.target || '2000' }}" >> "$GITHUB_OUTPUT"
+          echo "ramp=${{ inputs.ramp || github.event.inputs.ramp || '2m' }}" >> "$GITHUB_OUTPUT"
+          echo "hold=${{ inputs.hold || github.event.inputs.hold || '5m' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Run k6 load test
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: loadtest/k6-lawmitran.js
+          flags: --summary-export=k6-summary.json
+        env:
+          BASE_URL: ${{ steps.cfg.outputs.base_url }}
+          TARGET: ${{ steps.cfg.outputs.target }}
+          DURATION_RAMP: ${{ steps.cfg.outputs.ramp }}
+          DURATION_HOLD: ${{ steps.cfg.outputs.hold }}
+
+      - name: Upload k6 summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-summary
+          path: k6-summary.json
+          if-no-files-found: ignore
+
+      - name: Threshold result
+        if: always()
+        run: |
+          echo "k6 finished. Job fails automatically if any threshold (p95<300ms, p99<800ms, errors<1%) was breached."

@@ -9,8 +9,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { MailService } from '../../common/mail/mail.service';
+import { OtpService } from '../../common/otp/otp.service';
 import { RecaptchaService } from '../../common/recaptcha/recaptcha.service';
-import { SmsService } from '../../common/sms/sms.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuthService } from './auth.service';
 
@@ -32,7 +32,12 @@ describe('AuthService', () => {
   };
   let recaptcha: { verify: jest.Mock };
   let mail: { sendEmailVerification: jest.Mock };
-  let sms: { sendOtp: jest.Mock };
+  let otp: {
+    generateCode: jest.Mock;
+    hash: jest.Mock;
+    deliver: jest.Mock;
+    ttlMs: number;
+  };
 
   beforeEach(async () => {
     prisma = {
@@ -51,7 +56,12 @@ describe('AuthService', () => {
     };
     recaptcha = { verify: jest.fn().mockResolvedValue(true) };
     mail = { sendEmailVerification: jest.fn().mockResolvedValue(undefined) };
-    sms = { sendOtp: jest.fn().mockResolvedValue(undefined) };
+    otp = {
+      generateCode: jest.fn().mockReturnValue('123456'),
+      hash: jest.fn((code: string) => `hash:${code}`),
+      deliver: jest.fn().mockResolvedValue('whatsapp'),
+      ttlMs: 5 * 60 * 1000,
+    };
 
     const module = await Test.createTestingModule({
       providers: [
@@ -67,7 +77,7 @@ describe('AuthService', () => {
         { provide: ConfigService, useValue: { get: jest.fn() } },
         { provide: RecaptchaService, useValue: recaptcha },
         { provide: MailService, useValue: mail },
-        { provide: SmsService, useValue: sms },
+        { provide: OtpService, useValue: otp },
       ],
     }).compile();
 
@@ -92,12 +102,19 @@ describe('AuthService', () => {
       expect(prisma.user.findFirst).not.toHaveBeenCalled();
     });
 
-    it('creates a CLIENT without sending an OTP, and sends an email verification link', async () => {
+    it('sends one mobile OTP and an email link for a CLIENT', async () => {
       prisma.user.findFirst.mockResolvedValue(null);
       prisma.user.create.mockResolvedValue({
         id: 'user-1',
         email: 'a@b.com',
+        mobile: '9999999999',
         role: Role.CLIENT,
+      });
+      // sendMobileOtp() re-reads the user
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        mobile: '9999999999',
+        mobileVerified: false,
       });
 
       const result = await service.register({
@@ -110,17 +127,17 @@ describe('AuthService', () => {
 
       expect(result).toEqual({
         userId: 'user-1',
-        emailVerificationRequired: true,
-        mobileVerificationRequired: false,
+        mobileVerificationRequired: true,
+        emailVerificationRequired: false,
       });
       expect(mail.sendEmailVerification).toHaveBeenCalledWith(
         'a@b.com',
         expect.any(String),
       );
-      expect(sms.sendOtp).not.toHaveBeenCalled();
+      expect(otp.deliver).toHaveBeenCalledWith('9999999999', '123456');
     });
 
-    it('creates a LAWYER and also sends a mobile OTP', async () => {
+    it('sends a mobile OTP for a LAWYER too', async () => {
       prisma.user.findFirst.mockResolvedValue(null);
       prisma.user.create.mockResolvedValue({
         id: 'user-2',
@@ -130,7 +147,7 @@ describe('AuthService', () => {
       });
       prisma.user.findUnique.mockResolvedValue({
         id: 'user-2',
-        role: Role.LAWYER,
+        mobile: '9999999998',
         mobileVerified: false,
       });
 
@@ -143,20 +160,17 @@ describe('AuthService', () => {
       });
 
       expect(result.mobileVerificationRequired).toBe(true);
-      expect(sms.sendOtp).toHaveBeenCalledWith(
-        '9999999998',
-        expect.any(String),
-      );
+      expect(otp.deliver).toHaveBeenCalledWith('9999999998', '123456');
     });
   });
 
   describe('login', () => {
-    it('rejects unverified email', async () => {
+    it('rejects an unverified mobile for any role', async () => {
       const passwordHash = await bcrypt.hash('password123', 12);
       prisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
         passwordHash,
-        emailVerified: false,
+        mobileVerified: false,
         role: Role.CLIENT,
       });
 
@@ -165,34 +179,19 @@ describe('AuthService', () => {
       ).rejects.toThrow(ForbiddenException);
     });
 
-    it('rejects an unverified lawyer mobile even with a verified email', async () => {
+    it('logs in with a verified mobile even if email is unverified', async () => {
       const passwordHash = await bcrypt.hash('password123', 12);
       prisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
         passwordHash,
-        emailVerified: true,
-        mobileVerified: false,
-        role: Role.LAWYER,
-      });
-
-      await expect(
-        service.login({ email: 'lawyer@b.com', password: 'password123' }),
-      ).rejects.toThrow(ForbiddenException);
-    });
-
-    it('issues tokens once email (and mobile for lawyers) is verified', async () => {
-      const passwordHash = await bcrypt.hash('password123', 12);
-      prisma.user.findUnique.mockResolvedValue({
-        id: 'user-1',
-        passwordHash,
-        emailVerified: true,
+        emailVerified: false,
         mobileVerified: true,
-        role: Role.LAWYER,
+        role: Role.CLIENT,
       });
       prisma.refreshToken.create.mockResolvedValue({});
 
       const result = await service.login({
-        email: 'lawyer@b.com',
+        email: 'a@b.com',
         password: 'password123',
       });
 
@@ -230,22 +229,23 @@ describe('AuthService', () => {
   });
 
   describe('sendMobileOtp / verifyMobileOtp', () => {
-    it('rejects sending an OTP for a non-lawyer account', async () => {
+    it('sends an OTP for a client account (WhatsApp-first)', async () => {
       prisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
-        role: Role.CLIENT,
+        mobile: '9999999999',
         mobileVerified: false,
+        mobileOtpLastSentAt: null,
       });
 
-      await expect(service.sendMobileOtp('9999999999')).rejects.toThrow(
-        BadRequestException,
-      );
+      const result = await service.sendMobileOtp('9999999999');
+
+      expect(result).toEqual({ success: true, channel: 'whatsapp' });
+      expect(otp.deliver).toHaveBeenCalledWith('9999999999', '123456');
     });
 
     it('rejects sending an OTP when already verified', async () => {
       prisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
-        role: Role.LAWYER,
         mobileVerified: true,
       });
 
@@ -254,23 +254,47 @@ describe('AuthService', () => {
       );
     });
 
-    it('rejects an incorrect or expired OTP code', async () => {
+    it('throttles a too-soon resend', async () => {
       prisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
-        mobileOtpCode: '123456',
+        mobileVerified: false,
+        mobileOtpLastSentAt: new Date(), // just now
+      });
+
+      await expect(service.sendMobileOtp('9999999999')).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(otp.deliver).not.toHaveBeenCalled();
+    });
+
+    it('rejects an incorrect OTP code and counts the attempt', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        mobileVerified: false,
+        mobileOtpHash: 'hash:123456',
         mobileOtpExpiresAt: new Date(Date.now() + 60_000),
+        mobileOtpAttempts: 0,
+        mobileOtpLockedUntil: null,
       });
 
       await expect(
         service.verifyMobileOtp('9999999999', '000000'),
       ).rejects.toThrow(BadRequestException);
+      expect(prisma.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ mobileOtpAttempts: 1 }),
+        }),
+      );
     });
 
     it('marks the mobile verified on a correct code', async () => {
       prisma.user.findUnique.mockResolvedValue({
         id: 'user-1',
-        mobileOtpCode: '123456',
+        mobileVerified: false,
+        mobileOtpHash: 'hash:123456',
         mobileOtpExpiresAt: new Date(Date.now() + 60_000),
+        mobileOtpAttempts: 0,
+        mobileOtpLockedUntil: null,
       });
 
       await service.verifyMobileOtp('9999999999', '123456');
@@ -279,8 +303,10 @@ describe('AuthService', () => {
         where: { id: 'user-1' },
         data: {
           mobileVerified: true,
-          mobileOtpCode: null,
+          mobileOtpHash: null,
           mobileOtpExpiresAt: null,
+          mobileOtpAttempts: 0,
+          mobileOtpLockedUntil: null,
         },
       });
     });
