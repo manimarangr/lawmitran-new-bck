@@ -7,6 +7,17 @@ The Super Admin console for trust, operations, and platform management. All rout
 - `ADMIN` accounts are provisioned internally — **self-registration as ADMIN is rejected**.
 - Admins authenticate like any user but pass `RolesGuard` for admin routes.
 
+## Verification responsibility (who admin approves)
+
+- **Admin approves lawyers only.** Only `Lawyer.verificationStatus` moves through the review queue —
+  because a lawyer's bar credentials must be genuine before they're publicly listed.
+- **Clients are auto-active after mobile OTP.** There is **no client-approval queue**; a client can act
+  as soon as `mobileVerified = true`. Fake/abusive clients are handled by automated controls (OTP,
+  reCAPTCHA, lead rate-limits/dedupe) and **reactive suspension** (`UserStatus = SUSPENDED`), not up-front
+  approval.
+- In the console: **Lawyer Approvals** is a lawyer-only queue; **User Management** *manages/suspends*
+  every role but has **no "approve client" action**.
+
 ## Dashboard
 
 Operational snapshot:
@@ -19,7 +30,7 @@ Operational snapshot:
 ## Lawyer Approvals (Verification)
 
 - `GET /api/admin/lawyers?status=UNDER_REVIEW` — verification queue.
-- Open a lawyer: view profile + uploaded Bar Council certificate / ID (signed URLs).
+- Open a lawyer: view profile + **enrollment number** and the uploaded **profile photo + Bar Council certificate** (signed URLs); cross-check the enrollment number against the certificate.
 - `PATCH /api/admin/lawyers/:id/verification` — set `APPROVED` / `REJECTED` (with comments) / `SUSPENDED`.
 - Every action appends to the `Verification` trail and the `AuditLog`.
 - Approving makes the lawyer publicly visible; suspending removes them immediately.
@@ -31,6 +42,17 @@ flowchart LR
     V -->|invalid| RJ[REJECTED + comment]
     AP -->|complaint| SU[SUSPENDED]
 ```
+
+## Moderation (two-sided reports)
+
+Both sides can report the other about a contacted lead — a client reports a lawyer, a lawyer reports a
+client (`Report`, reasons: fake profile, misconduct, spam, no-show, abusive, wrong info, other).
+
+- `GET /api/admin/reports?status=OPEN` — the moderation queue (`admin-moderation` UI).
+- `PATCH /api/admin/reports/:id` — set `ACTIONED` / `DISMISSED` with an admin note; optionally
+  **suspend the reported user** (`UserStatus = SUSPENDED` + revoke sessions) in the same action.
+- Every decision writes an `AuditLog` row; the reporter gets a `REPORT_UPDATE` notification.
+- Reports never expose the reporter to the reported party.
 
 ## User Management (CRUD rules)
 
@@ -59,8 +81,8 @@ A lawyer is `APPROVED` only after a **human review** — automated "all fields f
 
 - **Automated pre-checks (gate submission):** required fields present, **bar number format + uniqueness**,
   valid file types/sizes, and **duplicate detection** (same bar number / mobile / email).
-- **Human verification (required for `APPROVED`):** the admin opens the **Bar Council certificate** (and
-  ID, if provided) via signed URL and confirms the lawyer is genuine before approving.
+- **Human verification (required for `APPROVED`):** the admin opens the **Bar Council certificate** via
+  signed URL and confirms the **enrollment number** matches it and the lawyer is genuine before approving.
 - **Decisions:** Approve → `APPROVED`; Reject → `REJECTED` **with a reason** the lawyer sees so they can
   resubmit; Suspend → `SUSPENDED`. Each appends a `Verification` row and an `AuditLog` entry.
 - Approving sets `approvedBy`/`approvedAt` and makes the lawyer publicly visible.

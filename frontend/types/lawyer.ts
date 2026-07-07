@@ -8,6 +8,7 @@ export interface LawyerCity {
 
 export interface LawyerListItem {
   id: string;
+  slug: string | null;
   fullName: string;
   barCouncilState: string;
   experienceYears: number;

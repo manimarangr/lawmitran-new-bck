@@ -22,20 +22,25 @@ flowchart LR
 - Email verification + mobile OTP required before profile submission counts as complete.
 - A 30-day trial starts on lawyer creation (`subscriptionStatus = TRIAL`, `trialStartDate`/`trialEndDate`).
 
-## Onboarding Wizard (post-OTP)
+## Signup (two pages) + verification upload
 
-After mobile OTP, the lawyer completes a **resumable 3-step wizard** (`lawyer-onboarding` UI). The account
-already exists at `verificationStatus = PENDING` with the trial running, so progress can be saved and resumed.
+Lawyer signup is **two pages**, then a short document-upload step. The account exists after OTP at
+`verificationStatus = PENDING` with the trial running, so the upload can be saved and resumed.
 
-| Step | Fields | Required to submit? |
+| Stage | Fields | Required? |
 |---|---|---|
-| 1 · Bar details | Full name (per Bar Council), **Bar Council enrollment number** (text), **bar council state**, **experience**, gender | name, enrollment number, state, experience required |
-| 2 · Photo & docs | **Profile photo**, **Bar Council certificate** | both required (no ID-card upload) |
-| 3 · Practice & review | **Primary practice area**, **city**, languages, bio | practice area + city required |
+| **Page 1 — details** (`signup` UI) | Full name, email, mobile, password; **Bar Council enrollment number** (text), **state**, **experience**, **primary city**, **areas of practice** — a **multi-select, up to 5** | all required (except optional marketing consent) |
+| **Page 2 — verify** (`*-signup-otp` UI) | Mobile **OTP** (6-digit, WhatsApp-first, SMS fallback) | required |
+| **Upload** (`lawyer-documents` UI) | **Profile photo**, **Bar Council certificate** | both required (no ID-card upload) |
 
-- Mandatory fields are enforced **at submission** (the review gate), not at account creation.
+- Areas of practice are captured at signup (multi-select) so lead matching works as soon as the lawyer
+  is approved; deeper detail (skills, proficiency, bio, languages) is added later from profile edit.
+- **Office location** is captured on the profile step (`lawyer-practice-review` UI) via a **map pin** —
+  "Use my location" (browser geolocation), address geocode, or click/drag the pin → stored as
+  `Lawyer.latitude`/`longitude` for map/"near me" search ([15](./15-search-and-matching.md#geolocation--map-search-near-me)).
+- Mandatory fields are enforced **at the review gate**, not at account creation.
 - Uploads go to S3/MinIO via the storage service; only S3 keys are stored.
-- Submitting moves the lawyer to `UNDER_REVIEW` and appends `Verification` rows for each document.
+- Submitting the upload moves the lawyer to `UNDER_REVIEW` and appends `Verification` rows.
 - `POST /api/lawyers/me/verification` is the submit endpoint.
 
 ## Verification
@@ -159,15 +164,22 @@ Rules:
 
 ## Lead Inbox
 
-- `GET /api/lawyers/me/leads` — leads routed to this lawyer, filterable by status.
+- `GET /api/leads/lawyer/me` — leads routed to this lawyer, filterable by status.
 - Lawyer advances status: `NEW → CONTACTED → CLOSED` (`PATCH /api/leads/:id/status`).
+- **Reveal contact is subscription-gated.** The client's name/phone stay hidden behind a "Reveal contact"
+  action that only works when `subscriptionStatus ∈ {TRIAL, ACTIVE}`; for `EXPIRED`/no-plan lawyers the
+  button becomes **"Subscribe to reveal contact."** See [13-subscription-module.md](./13-subscription-module.md#contact-reveal-is-subscription-gated).
 - Lawyer contacts the client directly (phone/WhatsApp/email) — no in-app messaging.
 - New-lead alerts via SMS/WhatsApp/email.
 
-## Dashboard
+## Dashboard (`lawyer-dashboard` UI — the post-login home)
 
 - KPIs: new vs contacted vs closed leads, conversion rate, average rating, subscription status & days remaining, profile completeness, verification status.
-- Calls to action: complete verification, renew subscription, respond to stale leads.
+- **State-aware home:**
+  - **PENDING/UNDER_REVIEW** → amber "verification in progress" banner, empty inbox ("leads appear once approved"), and a **pre-subscribe** prompt.
+  - **APPROVED + TRIAL/ACTIVE** → live inbox with working contact reveal.
+  - **APPROVED + EXPIRED/no-plan** → inbox visible but contacts locked, with a **benefits-rich subscription prompt** (unlock contacts, more/unlimited leads, visibility, priority routing, badge, GST invoice).
+- Calls to action: complete verification, subscribe/renew, respond to stale leads.
 
 ## Endpoints
 

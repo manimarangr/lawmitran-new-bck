@@ -98,14 +98,23 @@
 
     const stars = r => '★'.repeat(Math.round(r));
     const cardsEl = document.getElementById('cards');
-    cardsEl.innerHTML = lawyers.map((l,i) => `
+
+    // Haversine distance in km between two lat/lng points
+    function distanceKm(aLat, aLng, bLat, bLng){
+      const R = 6371, rad = d => d * Math.PI / 180;
+      const dLat = rad(bLat - aLat), dLng = rad(bLng - aLng);
+      const s = Math.sin(dLat/2)**2 + Math.cos(rad(aLat))*Math.cos(rad(bLat))*Math.sin(dLng/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1-s));
+    }
+
+    function cardHtml(l,i){ return `
       <div class="card bg-white rounded-xl p-4 border ${i===0?'border-[#C9A24B] sel':'border-gray-200/60'} shadow-sm hover:shadow-md transition-all cursor-pointer relative" data-id="${l.id}">
         ${l.online?`<span class="absolute top-3 right-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full px-2 py-0.5 font-bold text-[9px] flex items-center"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5"></span>Online</span>`:''}
         <div class="flex items-start space-x-3 mb-3">
           <div class="w-12 h-12 rounded-lg flex items-center justify-center text-[#C9A24B] font-extrabold text-sm shadow-sm" style="background:linear-gradient(135deg,#0B192C,#1E3E62)">${l.initials}</div>
           <div class="pr-16">
             <h3 class="text-sm font-bold text-slate-900">${l.name}</h3>
-            <p class="text-[11px] text-slate-500 font-medium mt-0.5"><i class="fa-solid fa-location-dot text-amber-500 mr-1.5"></i>${l.loc}</p>
+            <p class="text-[11px] text-slate-500 font-medium mt-0.5"><i class="fa-solid fa-location-dot text-amber-500 mr-1.5"></i>${l.loc}${l._dist!=null?` · <span class="text-[#C9A24B] font-bold">~${l._dist.toFixed(1)} km away</span>`:''}</p>
             <p class="text-[11px] text-slate-400 font-semibold mt-1"><i class="fa-solid fa-briefcase text-slate-400 mr-1.5"></i>${l.exp} years Experience</p>
           </div>
         </div>
@@ -117,9 +126,17 @@
           <p class="text-xs font-semibold text-slate-700">${l.skills}</p>
         </div>
         <div class="pt-3 border-t border-gray-100">
-          <a href="lawyer-details.html" class="block text-center w-full bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#C9A24B]/10 hover:-translate-y-0.5">Contact Now</a>
+          <a href="lawyer-details.html" class="block text-center w-full bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-[#C9A24B]/10 hover:-translate-y-0.5">Contact Lawyer</a>
         </div>
-      </div>`).join('');
+      </div>`; }
+
+    function bindCards(){
+      cardsEl.querySelectorAll('.card').forEach(c => c.addEventListener('click', e => {
+        if(e.target.closest('a')) return; select(c.dataset.id);
+      }));
+    }
+    function renderCards(list){ cardsEl.innerHTML = list.map(cardHtml).join(''); bindCards(); }
+    renderCards(lawyers);
 
     const map = L.map('map', { zoomControl:true }).setView([12.9716, 77.5946], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -151,10 +168,41 @@
       if(card) card.scrollIntoView({ behavior:'smooth', block:'nearest' });
     }
 
-    cardsEl.querySelectorAll('.card').forEach(c => c.addEventListener('click', e => {
-      if(e.target.closest('a')) return; select(c.dataset.id);
-    }));
-    document.getElementById('locate').addEventListener('click', () => map.flyTo([12.9716,77.5946], 12, { duration:.6 }));
+    // ---- "Use my location": capture the user's lat/lng via the browser Geolocation API ----
+    let youMarker = null;
+    const locateBtn = document.getElementById('locate');
+    locateBtn.title = 'Use my location';
+    locateBtn.addEventListener('click', () => {
+      if(!navigator.geolocation){ alert('Location is not supported on this device.'); return; }
+      locateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const { latitude, longitude } = pos.coords;   // → sent to GET /api/lawyers?lat=&lng=&radiusKm=
+          locateBtn.innerHTML = '<i class="fa-solid fa-crosshairs"></i>';
+
+          // drop / move a "you are here" marker
+          const youIcon = L.divIcon({ className:'', html:'<div style="width:18px;height:18px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 4px rgba(37,99,235,.25)"></div>', iconSize:[18,18], iconAnchor:[9,9] });
+          if(youMarker) youMarker.setLatLng([latitude, longitude]);
+          else youMarker = L.marker([latitude, longitude], { icon: youIcon, zIndexOffset: 1000 }).addTo(map).bindPopup('You are here');
+          map.flyTo([latitude, longitude], 13, { duration:.6 });
+
+          // compute distance to each lawyer and sort nearest-first
+          lawyers.forEach(l => { l._dist = distanceKm(latitude, longitude, l.lat, l.lng); });
+          const sorted = [...lawyers].sort((a,b) => a._dist - b._dist);
+          renderCards(sorted);
+          document.getElementById('count').textContent = sorted.length + ' matches';
+          const info = document.getElementById('count').parentElement;
+          if(info) info.innerHTML = 'Sorted by distance from <strong class="text-slate-700 font-semibold">your location</strong>';
+        },
+        err => {
+          locateBtn.innerHTML = '<i class="fa-solid fa-crosshairs"></i>';
+          alert(err.code === 1
+            ? 'Location permission denied. Showing results by city instead.'
+            : "Couldn't get your location. Showing results by city instead.");
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    });
   </script>
 </body>
 </html>

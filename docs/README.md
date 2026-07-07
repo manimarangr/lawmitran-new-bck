@@ -17,6 +17,9 @@ This `docs/` folder is the product + engineering reference.
 
 ## Index
 
+> **Shipping? Start with the [MVP Launch Checklist](./MVP-launch-checklist.md)** — the ship-oriented cut
+> (scope in/out, build steps, compliance gate, go-to-market).
+
 | # | Doc | What's inside |
 |---|---|---|
 | 01 | [Product Vision](./01-product-vision.md) | Vision, mission, users, competitors, MVP, roadmap |
@@ -40,6 +43,10 @@ This `docs/` folder is the product + engineering reference.
 | 19 | [Scalability](./19-scalability.md) | Handling 10k+ concurrent users: caching, CDN, pooling, autoscaling |
 | 20 | [Win-back (expired contact)](./20-winback-expired-contact.md) | Gate contact on expired subs, hold leads, "N clients waiting — renew" digest |
 | 21 | [Improvement Backlog](./21-improvement-backlog.md) | Prioritized gaps: India compliance (BCI/DPDP/GST), trust & lead integrity, cold-start, client depth, pricing, search/UX |
+| 22 | [Decisions Log](./22-decisions-log.md) | Consolidated record of finalized decisions (auth/OTP, subscriptions/tiers/GST/lead-cap, reveal-gating, renewals, verification responsibility, compliance) + config flags + schema changes |
+| 23 | [Client Membership](./23-client-membership.md) | Freemium client plan: AI legal chatbot + dynamic document generation; plans/quotas, schema, endpoints, legal framing, phasing |
+| 24 | [SEO & Landing Pages](./24-seo-and-landing-pages.md) | Slugged URLs, programmatic city×practice pages, JSON-LD, sitemaps/robots, canonical/pagination, content + internal linking |
+| 25 | [Multi-Professional Expansion](./25-multi-professional-expansion.md) | Future "Find Professionals" — CA/CS/GST; generalized Professional model, per-body verification, discovery vs productized services, phasing |
 
 ## Tech stack (target)
 

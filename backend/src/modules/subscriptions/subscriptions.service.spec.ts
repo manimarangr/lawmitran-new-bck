@@ -6,7 +6,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PaymentStatus, SubscriptionStatus } from '@prisma/client';
+import { MailService } from '../../common/mail/mail.service';
 import { RazorpayService } from '../../common/payments/razorpay.service';
+import { WhatsappService } from '../../common/whatsapp/whatsapp.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SubscriptionsService } from './subscriptions.service';
 
@@ -26,6 +28,7 @@ describe('SubscriptionsService', () => {
       findMany: jest.Mock;
       upsert: jest.Mock;
     };
+    subscriptionPlanTier: { findUnique: jest.Mock };
     payment: { create: jest.Mock; findUnique: jest.Mock; update: jest.Mock };
     $transaction: jest.Mock;
   };
@@ -34,6 +37,8 @@ describe('SubscriptionsService', () => {
     verifySignature: jest.Mock;
     keyId: string | undefined;
   };
+  let mail: { sendSubscriptionReminder: jest.Mock };
+  let whatsapp: { sendMessage: jest.Mock };
 
   beforeEach(async () => {
     prisma = {
@@ -54,6 +59,7 @@ describe('SubscriptionsService', () => {
         findMany: jest.fn(),
         upsert: jest.fn(),
       },
+      subscriptionPlanTier: { findUnique: jest.fn() },
       payment: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
       $transaction: jest.fn((ops: Promise<unknown>[]) => Promise.all(ops)),
     };
@@ -62,12 +68,16 @@ describe('SubscriptionsService', () => {
       verifySignature: jest.fn(),
       keyId: 'rzp_test_key',
     };
+    mail = { sendSubscriptionReminder: jest.fn().mockResolvedValue(undefined) };
+    whatsapp = { sendMessage: jest.fn().mockResolvedValue(undefined) };
 
     const module = await Test.createTestingModule({
       providers: [
         SubscriptionsService,
         { provide: PrismaService, useValue: prisma },
         { provide: RazorpayService, useValue: razorpay },
+        { provide: MailService, useValue: mail },
+        { provide: WhatsappService, useValue: whatsapp },
       ],
     }).compile();
 
@@ -113,12 +123,12 @@ describe('SubscriptionsService', () => {
       );
     });
 
-    it('throws if the requested plan has no configured price', async () => {
+    it('throws if the requested plan+duration has no active tier', async () => {
       prisma.lawyer.findUnique.mockResolvedValue({
         id: 'lawyer-1',
         subscriptionStatus: SubscriptionStatus.TRIAL,
       });
-      prisma.subscriptionPlanPrice.findUnique.mockResolvedValue(null);
+      prisma.subscriptionPlanTier.findUnique.mockResolvedValue(null);
 
       await expect(
         service.createCheckoutOrder('user-1', { planName: 'GOLD' }),
@@ -130,9 +140,11 @@ describe('SubscriptionsService', () => {
         id: 'lawyer-1',
         subscriptionStatus: SubscriptionStatus.TRIAL,
       });
-      prisma.subscriptionPlanPrice.findUnique.mockResolvedValue({
-        planName: 'STANDARD',
+      prisma.subscriptionPlanTier.findUnique.mockResolvedValue({
+        planName: 'BASIC',
+        durationDays: 30,
         amount: 1000,
+        active: true,
       });
       razorpay.createOrder.mockResolvedValue({
         id: 'order_abc',
@@ -150,7 +162,7 @@ describe('SubscriptionsService', () => {
       expect(prisma.payment.create).toHaveBeenCalledWith({
         data: {
           lawyerId: 'lawyer-1',
-          planName: 'STANDARD',
+          planName: 'BASIC',
           amount: 1000,
           durationDays: 30,
           providerOrderId: 'order_abc',

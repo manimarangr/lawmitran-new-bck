@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Settings | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
+    .otp-box { width:44px; height:52px; text-align:center; font-size:20px; font-weight:700; color:#0B192C; }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+
+  <!-- ===== NAV ===== -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3"><img src="assets/logo.svg" alt="LawMitran" style="height:32px;display:block" /></a>
+      <div class="flex items-center gap-5 text-sm font-medium">
+        <a href="lawyer-dashboard.html" class="text-slate-600 hover:text-[#0B192C]">Dashboard</a>
+        <a href="notifications.html" class="text-slate-600 hover:text-[#0B192C]"><i class="fa-regular fa-bell"></i></a>
+        <a href="settings.html" class="text-[#0B192C] font-bold">Settings</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-2xl mx-auto px-6 py-8 space-y-6">
+    <h1 class="text-2xl font-extrabold text-[#0B192C]">Account settings</h1>
+
+    <!-- profile picture -->
+    <section class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6">
+      <h2 class="text-base font-bold text-[#0B192C] mb-4">Profile picture</h2>
+      <div class="flex items-center gap-5">
+        <div id="avatar" class="w-20 h-20 rounded-2xl hero-gradient flex items-center justify-center text-[#C9A24B] text-2xl font-extrabold bg-cover bg-center">AS</div>
+        <div>
+          <label class="inline-block bg-[#0B192C] hover:bg-slate-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl cursor-pointer">
+            <i class="fa-solid fa-camera mr-1"></i> Upload photo
+            <input type="file" accept="image/*" class="hidden" onchange="previewAvatar(event)" />
+          </label>
+          <p class="text-[11px] text-slate-400 mt-2">JPG or PNG, up to 5MB. → <code>POST /api/users/me/avatar</code></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- change password -->
+    <section class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6">
+      <h2 class="text-base font-bold text-[#0B192C] mb-4">Change password</h2>
+      <form onsubmit="event.preventDefault();toast('Password updated');" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Current password</label>
+          <input type="password" required class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[#C9A24B]" />
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">New password</label>
+            <input type="password" required minlength="8" placeholder="At least 8 characters" class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[#C9A24B]" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Confirm new password</label>
+            <input type="password" required class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[#C9A24B]" />
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400">Changing your password signs you out of other devices. → <code>PATCH /api/users/me/password</code></p>
+        <button type="submit" class="bg-[#0B192C] hover:bg-slate-800 text-white font-semibold text-sm px-5 py-2.5 rounded-xl">Update password</button>
+      </form>
+    </section>
+
+    <!-- change mobile -->
+    <section class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-6">
+      <h2 class="text-base font-bold text-[#0B192C] mb-1">Change mobile number</h2>
+      <p class="text-xs text-slate-400 mb-4">Current: <span class="font-semibold text-slate-600">+91 98XXXX XX01</span></p>
+
+      <!-- step 1: new number -->
+      <div id="mobStep1" class="space-y-3">
+        <div class="flex gap-2">
+          <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-slate-50 text-sm text-slate-500 font-semibold">+91</span>
+          <input id="newMob" type="tel" inputmode="numeric" maxlength="10" placeholder="New 10-digit number" class="flex-1 border border-gray-200 rounded-r-xl px-3 py-3 text-sm focus:outline-none focus:border-[#C9A24B]" />
+        </div>
+        <p class="text-[11px] text-slate-400"><i class="fa-brands fa-whatsapp text-green-600 mr-1"></i> We'll send a 6-digit OTP to the new number. → <code>POST /api/users/me/mobile/change</code></p>
+        <button onclick="sendMobOtp()" class="bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] font-bold text-sm px-5 py-2.5 rounded-xl">Send OTP</button>
+      </div>
+
+      <!-- step 2: verify OTP -->
+      <div id="mobStep2" class="hidden space-y-3">
+        <p class="text-sm text-slate-600">Enter the 6-digit code sent to <span id="newMobLabel" class="font-semibold"></span>.</p>
+        <div class="flex gap-2" id="otp">
+          <input class="otp-box border border-gray-200 rounded-xl focus:outline-none focus:border-[#C9A24B]" maxlength="1" inputmode="numeric" />
+          <input class="otp-box border border-gray-200 rounded-xl focus:outline-none focus:border-[#C9A24B]" maxlength="1" inputmode="numeric" />
+          <input class="otp-box border border-gray-200 rounded-xl focus:outline-none focus:border-[#C9A24B]" maxlength="1" inputmode="numeric" />
+          <input class="otp-box border border-gray-200 rounded-xl focus:outline-none focus:border-[#C9A24B]" maxlength="1" inputmode="numeric" />
+          <input class="otp-box border border-gray-200 rounded-xl focus:outline-none focus:border-[#C9A24B]" maxlength="1" inputmode="numeric" />
+          <input class="otp-box border border-gray-200 rounded-xl focus:outline-none focus:border-[#C9A24B]" maxlength="1" inputmode="numeric" />
+        </div>
+        <div class="flex gap-2">
+          <button onclick="verifyMob()" class="bg-[#0B192C] hover:bg-slate-800 text-white font-semibold text-sm px-5 py-2.5 rounded-xl">Verify &amp; update</button>
+          <button onclick="cancelMob()" class="border border-gray-200 text-slate-600 font-semibold text-sm px-4 py-2.5 rounded-xl">Cancel</button>
+        </div>
+        <p class="text-[11px] text-slate-400">→ <code>POST /api/users/me/mobile/verify</code></p>
+      </div>
+    </section>
+
+    <!-- danger zone -->
+    <section class="bg-white rounded-2xl border border-rose-200 shadow-sm p-6">
+      <h2 class="text-base font-bold text-rose-600 mb-1">Delete account</h2>
+      <p class="text-sm text-slate-500 mb-4">This deactivates your account and signs you out everywhere. Your records are retained where required by law; you can't undo this yourself.</p>
+      <button onclick="openDelete()" class="border border-rose-300 text-rose-600 hover:bg-rose-50 font-semibold text-sm px-5 py-2.5 rounded-xl"><i class="fa-solid fa-trash mr-1"></i> Delete my account</button>
+    </section>
+  </main>
+
+  <!-- delete modal -->
+  <div id="delModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50" onclick="closeDelete()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+      <h3 class="text-lg font-bold text-rose-600"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Delete account?</h3>
+      <p class="text-sm text-slate-500 mt-2">Type <b>DELETE</b> to confirm. This can't be undone.</p>
+      <input id="delConfirm" type="text" placeholder="DELETE" class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm mt-4 focus:outline-none focus:border-rose-400" oninput="document.getElementById('delBtn').disabled = this.value !== 'DELETE'" />
+      <div class="flex justify-end gap-2 mt-5">
+        <button onclick="closeDelete()" class="border border-gray-200 text-slate-600 font-semibold text-sm px-4 py-2.5 rounded-xl">Cancel</button>
+        <button id="delBtn" disabled onclick="event.preventDefault();toast('Account deleted');closeDelete();" class="bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white font-bold text-sm px-5 py-2.5 rounded-xl">Delete forever</button>
+      </div>
+      <p class="text-[11px] text-slate-400 mt-3">→ <code>DELETE /api/users/me</code> (soft delete)</p>
+    </div>
+  </div>
+
+  <!-- toast -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 opacity-0 translate-y-3 pointer-events-none bg-[#0B192C] text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 z-[60] transition-all">
+    <i class="fa-solid fa-circle-check text-[#C9A24B]"></i> <span id="toastMsg">Done</span>
+  </div>
+
+  <script>
+    function toast(m){ const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=m; t.style.opacity='1'; t.style.transform='translate(-50%,0)'; setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translate(-50%,12px)'; },2400); }
+
+    function previewAvatar(e){
+      const f = e.target.files[0]; if(!f) return;
+      const r = new FileReader();
+      r.onload = ev => { const a=document.getElementById('avatar'); a.style.backgroundImage=`url(${ev.target.result})`; a.textContent=''; };
+      r.readAsDataURL(f);
+      toast('Photo updated');
+    }
+
+    // mobile change
+    const otpBoxes = [...document.querySelectorAll('#otp .otp-box')];
+    otpBoxes.forEach((b,i)=>{ b.addEventListener('input',()=>{ b.value=b.value.replace(/\D/g,''); if(b.value&&i<otpBoxes.length-1) otpBoxes[i+1].focus(); }); });
+    document.getElementById('newMob').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g,'').slice(0,10));
+    function sendMobOtp(){
+      const v = document.getElementById('newMob').value;
+      if(!/^[6-9]\d{9}$/.test(v)){ toast('Enter a valid 10-digit mobile'); return; }
+      document.getElementById('newMobLabel').textContent = '+91 '+v;
+      document.getElementById('mobStep1').classList.add('hidden');
+      document.getElementById('mobStep2').classList.remove('hidden');
+      otpBoxes[0].focus();
+    }
+    function verifyMob(){ document.getElementById('mobStep2').classList.add('hidden'); document.getElementById('mobStep1').classList.remove('hidden'); toast('Mobile number updated'); }
+    function cancelMob(){ document.getElementById('mobStep2').classList.add('hidden'); document.getElementById('mobStep1').classList.remove('hidden'); }
+
+    function openDelete(){ document.getElementById('delModal').classList.remove('hidden'); }
+    function closeDelete(){ document.getElementById('delModal').classList.add('hidden'); }
+  </script>
+</body>
+</html>

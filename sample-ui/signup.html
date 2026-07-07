@@ -12,6 +12,9 @@
     .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
     .role-btn.active { border-color:#C9A24B; background:#fffdf7; box-shadow:0 0 0 3px rgba(201,162,75,.12); }
     .role-btn.active .role-ic { background:#C9A24B; color:#0B192C; }
+    .area-chip { font-size:12px; padding:6px 12px; border-radius:999px; border:1.5px solid #e5e7eb; color:#475569; cursor:pointer; transition:all .15s; }
+    .area-chip:hover { border-color:#C9A24B; }
+    .area-chip.on { background:#0B192C; border-color:#0B192C; color:#fff; }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex">
@@ -70,7 +73,7 @@
           </button>
         </div>
 
-        <form onsubmit="event.preventDefault();window.location = (role==='LAWYER' ? 'lawyer-signup-otp.html' : 'client-otp.html');" class="space-y-4">
+        <form onsubmit="submitSignup(event)" class="space-y-4">
           <div>
             <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Full name</label>
             <div class="relative">
@@ -83,17 +86,20 @@
             <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Email</label>
             <div class="relative">
               <i class="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-              <input type="email" required placeholder="you@example.com" class="w-full border border-gray-200 rounded-xl pl-10 pr-3 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+              <input id="email" type="email" required placeholder="you@example.com" oninput="clearErr('emailErr')" onblur="checkEmail()" class="w-full border border-gray-200 rounded-xl pl-10 pr-9 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+              <i id="emailOk" class="fa-solid fa-circle-check text-green-500 text-sm absolute right-3 top-1/2 -translate-y-1/2 hidden"></i>
             </div>
+            <p id="emailErr" class="hidden text-[11px] text-rose-500 mt-1"></p>
           </div>
 
           <div>
             <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Mobile</label>
             <div class="flex">
               <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-slate-50 text-sm text-slate-500 font-semibold">+91</span>
-              <input type="tel" required placeholder="98XXXXXX01" class="w-full border border-gray-200 rounded-r-xl px-3 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+              <input id="mobile" type="tel" required inputmode="numeric" maxlength="10" placeholder="98XXXXXX01" oninput="onMobileInput()" onblur="checkMobile()" class="w-full border border-gray-200 rounded-r-xl px-3 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
             </div>
-            <p class="text-[11px] text-slate-400 mt-1.5"><i class="fa-solid fa-shield-halved text-[#C9A24B] mr-1"></i> We'll send an OTP to verify your mobile.</p>
+            <p id="mobileErr" class="hidden text-[11px] text-rose-500 mt-1"></p>
+            <p id="mobileHint" class="text-[11px] text-slate-400 mt-1.5"><i class="fa-brands fa-whatsapp text-green-600 mr-1"></i> We'll send a one-time code on WhatsApp (or SMS) to verify your mobile.</p>
           </div>
 
           <div>
@@ -105,7 +111,55 @@
             </div>
           </div>
 
-          <p id="lawyer-note" class="hidden text-[12px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3"><i class="fa-solid fa-circle-info mr-1"></i> After signup you'll upload your Bar Council certificate for verification before going live.</p>
+          <!-- lawyer-only professional details (revealed for advocates) -->
+          <div id="lawyer-fields" class="hidden space-y-4 border-t border-gray-100 pt-4">
+            <p class="text-xs font-bold uppercase tracking-wide text-[#0B192C]"><i class="fa-solid fa-scale-balanced text-[#C9A24B] mr-1"></i> Professional details</p>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Enrollment No.</label>
+                <input type="text" placeholder="KAR/1234/2010" class="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Bar Council State</label>
+                <select class="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm bg-white appearance-none cursor-pointer focus:outline-none focus:border-[#C9A24B]">
+                  <option value="" selected disabled>Select</option><option>Karnataka</option><option>Maharashtra</option><option>Tamil Nadu</option><option>Delhi</option><option>Telangana</option><option>Kerala</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Experience (yrs)</label>
+                <input type="number" min="0" placeholder="e.g. 12" class="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-amber-500/20" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Primary city</label>
+                <select class="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm bg-white appearance-none cursor-pointer focus:outline-none focus:border-[#C9A24B]">
+                  <option value="" selected disabled>Select</option><option>Bengaluru</option><option>Chennai</option><option>Mumbai</option><option>Delhi</option><option>Hyderabad</option><option>Kolkata</option><option>Pune</option><option>Kochi</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Areas of practice <span class="text-slate-400 normal-case font-medium">(pick up to 5)</span></label>
+              <div class="flex flex-wrap gap-2" id="areaChips">
+                <button type="button" class="area-chip" onclick="toggleArea(this)">Family</button>
+                <button type="button" class="area-chip" onclick="toggleArea(this)">Criminal</button>
+                <button type="button" class="area-chip" onclick="toggleArea(this)">Property</button>
+                <button type="button" class="area-chip" onclick="toggleArea(this)">Civil</button>
+                <button type="button" class="area-chip" onclick="toggleArea(this)">Corporate</button>
+                <button type="button" class="area-chip" onclick="toggleArea(this)">Consumer</button>
+                <button type="button" class="area-chip" onclick="toggleArea(this)">Employment</button>
+                <button type="button" class="area-chip" onclick="toggleArea(this)">Tax</button>
+                <button type="button" class="area-chip" onclick="toggleArea(this)">Intellectual Property</button>
+                <button type="button" class="area-chip" onclick="toggleArea(this)">Immigration</button>
+              </div>
+              <p id="areaHint" class="text-[11px] text-slate-400 mt-1.5">Used to match you with relevant client requirements.</p>
+            </div>
+          </div>
+
+          <p id="lawyer-note" class="hidden text-[12px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3"><i class="fa-solid fa-circle-info mr-1"></i> Next you'll verify your mobile, then upload your photo &amp; Bar Council certificate for review.</p>
 
           <!-- DPDP-style granular consent: required agreements separate from optional marketing -->
           <div class="space-y-2.5 pt-1">
@@ -134,11 +188,79 @@
 
   <script>
     let role = 'CLIENT';
+    const MAX_AREAS = 5;
+
+    // Demo "already registered" sets — in production these are checked server-side at /api/auth/register
+    // (and optionally a debounced GET /api/auth/check-availability).
+    const TAKEN_EMAILS = ['rahul@example.com', 'taken@lawmitran.com'];
+    const TAKEN_MOBILES = ['9812345678', '9800000001'];
+
+    function showErr(id, msg){ const e=document.getElementById(id); e.textContent=msg; e.classList.remove('hidden'); }
+    function clearErr(id){ document.getElementById(id).classList.add('hidden'); }
+
+    function checkEmail(){
+      const v = (document.getElementById('email').value||'').trim().toLowerCase();
+      const ok = document.getElementById('emailOk');
+      ok.classList.add('hidden');
+      if(!v){ clearErr('emailErr'); return false; }
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ showErr('emailErr','Enter a valid email address.'); return false; }
+      if(TAKEN_EMAILS.includes(v)){ const e=document.getElementById('emailErr'); e.innerHTML='This email is already registered. <a href="login.html" class="font-semibold underline">Sign in</a> instead.'; e.classList.remove('hidden'); return false; }
+      clearErr('emailErr'); ok.classList.remove('hidden'); return true;
+    }
+
+    function onMobileInput(){
+      const el = document.getElementById('mobile');
+      el.value = el.value.replace(/\D/g,'').slice(0,10);
+      clearErr('mobileErr');
+    }
+    function checkMobile(){
+      const v = document.getElementById('mobile').value;
+      if(!v){ clearErr('mobileErr'); return false; }
+      if(!/^[6-9]\d{9}$/.test(v)){ showErr('mobileErr','Enter a valid 10-digit Indian mobile (starts 6–9).'); return false; }
+      if(TAKEN_MOBILES.includes(v)){ const m=document.getElementById('mobileErr'); m.innerHTML='This mobile number is already registered. <a href="login.html" class="font-semibold underline">Sign in</a> instead.'; m.classList.remove('hidden'); return false; }
+      clearErr('mobileErr'); return true;
+    }
+
+    // Real integration: on a 409 from POST /api/auth/register the body is
+    // { message, fields: ['email'|'mobile'] } — map it straight to the field(s).
+    function showServerDuplicate(fields){
+      if(fields.includes('email')){ const e=document.getElementById('emailErr'); e.innerHTML='This email is already registered. <a href="login.html" class="font-semibold underline">Sign in</a> instead.'; e.classList.remove('hidden'); }
+      if(fields.includes('mobile')){ const m=document.getElementById('mobileErr'); m.innerHTML='This mobile number is already registered. <a href="login.html" class="font-semibold underline">Sign in</a> instead.'; m.classList.remove('hidden'); }
+    }
     function setRole(r){
       role = r;
+      const isLawyer = r==='LAWYER';
       document.getElementById('role-client').classList.toggle('active', r==='CLIENT');
-      document.getElementById('role-lawyer').classList.toggle('active', r==='LAWYER');
-      document.getElementById('lawyer-note').classList.toggle('hidden', r!=='LAWYER');
+      document.getElementById('role-lawyer').classList.toggle('active', isLawyer);
+      document.getElementById('lawyer-note').classList.toggle('hidden', !isLawyer);
+      document.getElementById('lawyer-fields').classList.toggle('hidden', !isLawyer);
+    }
+    function selectedAreas(){ return [...document.querySelectorAll('#areaChips .area-chip.on')].map(c=>c.textContent); }
+    function toggleArea(el){
+      if(!el.classList.contains('on') && selectedAreas().length >= MAX_AREAS){
+        const h = document.getElementById('areaHint');
+        h.textContent = 'You can pick up to '+MAX_AREAS+' areas.'; h.classList.add('text-rose-500');
+        setTimeout(()=>{ h.textContent='Used to match you with relevant client requirements.'; h.classList.remove('text-rose-500'); }, 1800);
+        return;
+      }
+      el.classList.toggle('on');
+    }
+    function submitSignup(e){
+      e.preventDefault();
+      const emailOk = checkEmail();
+      const mobileOk = checkMobile();
+      if(!emailOk || !mobileOk){
+        (emailOk ? document.getElementById('mobile') : document.getElementById('email')).focus();
+        return;
+      }
+      if(role==='LAWYER' && selectedAreas().length===0){
+        const h = document.getElementById('areaHint');
+        h.textContent = 'Please pick at least one area of practice.'; h.classList.add('text-rose-500');
+        return;
+      }
+      // demo only → POST /api/auth/register { role, ...fields, practiceAreas: selectedAreas() }
+      // Server re-checks email/mobile uniqueness authoritatively and returns 400 on a duplicate.
+      window.location = (role==='LAWYER' ? 'lawyer-signup-otp.html' : 'client-otp.html');
     }
     function togglePw(){ const p=document.getElementById('pw'), i=document.getElementById('pwicon');
       const show = p.type==='password'; p.type = show?'text':'password';

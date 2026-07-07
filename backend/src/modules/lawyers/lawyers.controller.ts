@@ -39,6 +39,13 @@ export class LawyersController {
     return this.lawyersService.findMarkers(query);
   }
 
+  // SEO-friendly public profile by slug (/lawyer/:slug)
+  @Public()
+  @Get('slug/:slug')
+  getPublicProfileBySlug(@Param('slug') slug: string) {
+    return this.lawyersService.getPublicProfileBySlug(slug);
+  }
+
   @Public()
   @Get(':id')
   getPublicProfile(@Param('id') id: string) {

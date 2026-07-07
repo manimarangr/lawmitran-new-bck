@@ -106,10 +106,16 @@ Candidates ranked by a weighted score:
 |---|---|---|---|
 | POST | `/api/leads` | CLIENT | Submit requirement (routes to eligible lawyers) |
 | GET | `/api/leads/me` | CLIENT | Client lead history |
-| GET | `/api/lawyers/me/leads` | LAWYER | Lawyer lead inbox |
-| GET | `/api/leads/:id` | Owner | Lead detail |
+| GET | `/api/leads/lawyer/me` | LAWYER | Lawyer lead inbox |
 | PATCH | `/api/leads/:id/status` | LAWYER | Advance status |
+| POST | `/api/leads/:id/confirm-contact` | CLIENT | Confirm the lawyer actually reached out (sets `clientConfirmedAt`, moves to `CONTACTED`) |
+| PATCH | `/api/leads/:id/withdraw` | CLIENT | Withdraw the requirement → `CLOSED` (`closedReason=WITHDRAWN`) |
 | POST | `/api/leads/:id/rating` | CLIENT | Rate closed lead |
+
+> **Client-confirmed contact.** `PATCH /status → CONTACTED` is set by the *lawyer*; to keep conversion
+> metrics honest, the client's `confirm-contact` records `clientConfirmedAt`. Only client-confirmed
+> contacts should count as real conversions. Every transition (status change, confirm, withdraw) writes
+> a `LeadHistory` row.
 
 ---
 **Related:** [02-business-rules.md](./02-business-rules.md) · [13-subscription-module.md](./13-subscription-module.md) · [15-search-and-matching.md](./15-search-and-matching.md)

@@ -24,4 +24,13 @@ export class MailService {
     this.logger.log(`[placeholder email] to ${email}: reset password link: ${resetUrl}`);
     return Promise.resolve();
   }
+
+  async sendSubscriptionReminder(
+    email: string,
+    subject: string,
+    body: string,
+  ): Promise<void> {
+    this.logger.log(`[placeholder email] to ${email}: ${subject} — ${body}`);
+    return Promise.resolve();
+  }
 }

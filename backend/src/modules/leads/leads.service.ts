@@ -115,6 +115,107 @@ export class LeadsService {
     });
   }
 
+  /** Client confirms the lawyer actually reached out (protects conversion metrics from lawyer-asserted contact). */
+  async confirmContact(clientId: string, leadId: string) {
+    const lead = await this.prisma.lead.findUnique({ where: { id: leadId } });
+    if (!lead || lead.clientId !== clientId) {
+      throw new ForbiddenException('This lead does not belong to you');
+    }
+    if (lead.status === LeadStatus.CLOSED) {
+      throw new BadRequestException('This lead is already closed');
+    }
+
+    const movesToContacted = lead.status !== LeadStatus.CONTACTED;
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.lead.update({
+        where: { id: leadId },
+        data: {
+          clientConfirmedAt: new Date(),
+          ...(movesToContacted ? { status: LeadStatus.CONTACTED } : {}),
+        },
+      }),
+      this.prisma.leadHistory.create({
+        data: {
+          leadId,
+          fromStatus: lead.status,
+          toStatus: movesToContacted ? LeadStatus.CONTACTED : lead.status,
+          changedBy: clientId,
+          note: 'Client confirmed the lawyer made contact',
+        },
+      }),
+    ]);
+    return updated;
+  }
+
+  /** Client withdraws their requirement — closes the lead. */
+  async withdraw(clientId: string, leadId: string, reason?: string) {
+    const lead = await this.prisma.lead.findUnique({ where: { id: leadId } });
+    if (!lead || lead.clientId !== clientId) {
+      throw new ForbiddenException('This lead does not belong to you');
+    }
+    if (lead.status === LeadStatus.CLOSED) {
+      throw new BadRequestException('This lead is already closed');
+    }
+
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.lead.update({
+        where: { id: leadId },
+        data: { status: LeadStatus.CLOSED, closedReason: reason ?? 'WITHDRAWN' },
+      }),
+      this.prisma.leadHistory.create({
+        data: {
+          leadId,
+          fromStatus: lead.status,
+          toStatus: LeadStatus.CLOSED,
+          changedBy: clientId,
+          note: reason ? `Withdrawn by client: ${reason}` : 'Withdrawn by client',
+        },
+      }),
+    ]);
+    return updated;
+  }
+
+  /**
+   * Lawyer reveals a lead's client contact — **subscription-gated on the server** (UI gating alone is
+   * not enough). Only TRIAL/ACTIVE lawyers may reveal; every reveal is logged for anti-abuse + analytics.
+   */
+  async revealContact(userId: string, leadId: string) {
+    const lawyer = await this.getLawyerByUserId(userId);
+
+    const canReveal =
+      lawyer.subscriptionStatus === SubscriptionStatus.TRIAL ||
+      lawyer.subscriptionStatus === SubscriptionStatus.ACTIVE;
+    if (!canReveal) {
+      throw new ForbiddenException(
+        'Subscribe to reveal client contact details',
+      );
+    }
+
+    const lead = await this.prisma.lead.findUnique({
+      where: { id: leadId },
+      include: { client: { select: { mobile: true, email: true } } },
+    });
+    if (!lead || lead.lawyerId !== lawyer.id) {
+      throw new ForbiddenException('This lead does not belong to you');
+    }
+
+    await this.prisma.auditLog.create({
+      data: {
+        actorId: userId,
+        action: 'LEAD_CONTACT_REVEALED',
+        entity: 'Lead',
+        entityId: leadId,
+        metaJson: { lawyerId: lawyer.id, clientId: lead.clientId },
+      },
+    });
+
+    return {
+      leadId,
+      mobile: lead.client.mobile,
+      email: lead.client.email,
+    };
+  }
+
   private async getLawyerByUserId(userId: string) {
     const lawyer = await this.prisma.lawyer.findUnique({ where: { userId } });
     if (!lawyer) {

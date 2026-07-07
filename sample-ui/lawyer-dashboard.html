@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lawyer Dashboard | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
+    .tab.active { color:#0B192C; border-color:#C9A24B; }
+    .seg.on { background:#0B192C; color:#fff; }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+
+  <!-- ===== NAV ===== -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3"><img src="assets/logo.svg" alt="LawMitran" style="height:32px;display:block" /></a>
+      <div class="hidden md:flex items-center space-x-7 font-medium text-sm">
+        <a href="lawyer-dashboard.html" class="text-[#0B192C] font-bold">Leads</a>
+        <a href="lawyer-practice-review.html" class="text-slate-600 hover:text-[#0B192C]">My Profile</a>
+        <a href="lawyer-plan.html" class="text-slate-600 hover:text-[#0B192C]">Subscription</a>
+        <a href="lawyer-details.html" class="text-slate-600 hover:text-[#0B192C]">Public view</a>
+        <a href="notifications.html" class="relative text-slate-500 hover:text-[#0B192C]" title="Notifications"><i class="fa-regular fa-bell text-lg"></i><span class="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">3</span></a>
+        <div class="relative">
+          <button onclick="toggleMenu(event)" class="w-9 h-9 rounded-full hero-gradient text-[#C9A24B] flex items-center justify-center font-bold text-sm">AS</button>
+          <div id="userMenu" class="hidden absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+            <div class="px-4 py-2 border-b border-gray-100"><p class="font-bold text-slate-800 text-sm">Adv. A. Sharma</p><p class="text-[11px] text-slate-400">anita@example.com</p></div>
+            <a href="lawyer-dashboard.html" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-inbox w-4 mr-2 text-slate-400"></i> Dashboard</a>
+            <a href="lawyer-practice-review.html" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-user w-4 mr-2 text-slate-400"></i> My Profile</a>
+            <a href="notifications.html" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"><i class="fa-regular fa-bell w-4 mr-2 text-slate-400"></i> Notifications</a>
+            <a href="settings.html" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-gear w-4 mr-2 text-slate-400"></i> Settings</a>
+            <a href="login.html" class="block px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 border-t border-gray-100 mt-1"><i class="fa-solid fa-arrow-right-from-bracket w-4 mr-2"></i> Log out</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- demo state switcher (preview only) -->
+  <div class="bg-slate-100 border-b border-gray-200 text-[11px]">
+    <div class="max-w-6xl mx-auto px-6 py-2 flex flex-wrap items-center gap-x-4 gap-y-2">
+      <span class="font-bold uppercase tracking-wide text-slate-400">Preview state:</span>
+      <span class="flex items-center gap-1"><span class="text-slate-400">Verification</span>
+        <button class="seg px-2 py-1 rounded-lg border border-gray-300" data-v="APPROVED" onclick="setVerif('APPROVED')">Approved</button>
+        <button class="seg px-2 py-1 rounded-lg border border-gray-300" data-v="PENDING" onclick="setVerif('PENDING')">Pending</button>
+      </span>
+      <span class="flex items-center gap-1"><span class="text-slate-400">Subscription</span>
+        <button class="seg px-2 py-1 rounded-lg border border-gray-300" data-s="TRIAL" onclick="setSub('TRIAL')">Trial</button>
+        <button class="seg px-2 py-1 rounded-lg border border-gray-300" data-s="ACTIVE" onclick="setSub('ACTIVE')">Active</button>
+        <button class="seg px-2 py-1 rounded-lg border border-gray-300" data-s="EXPIRED" onclick="setSub('EXPIRED')">Expired / free</button>
+      </span>
+    </div>
+  </div>
+
+  <main class="max-w-6xl mx-auto px-6 py-8">
+
+    <!-- header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+      <div>
+        <h1 class="text-2xl font-extrabold text-[#0B192C]">Welcome back, Adv. Sharma</h1>
+        <p class="text-sm text-slate-500 mt-1" id="subhead">Here are the clients waiting to hear from you.</p>
+      </div>
+      <span id="statusPill" class="inline-flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full self-start"></span>
+    </div>
+
+    <!-- verification banner (pending) -->
+    <div id="verifBanner" class="hidden rounded-2xl border border-amber-200 bg-amber-50 text-amber-800 p-5 mb-6">
+      <div class="flex items-start gap-3">
+        <i class="fa-solid fa-clock-rotate-left text-amber-500 text-xl mt-0.5"></i>
+        <div>
+          <h3 class="font-bold">Verification in progress</h3>
+          <p class="text-sm mt-1">Our team is reviewing your Bar Council certificate. You're <b>not visible in search yet</b> and won't receive leads until approved (usually within 1–2 business days).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- subscription benefits prompt (free / expired, or pre-subscribe while pending) -->
+    <div id="subPrompt" class="hidden rounded-2xl hero-gradient text-white p-6 mb-6">
+      <div class="md:flex items-center justify-between gap-6">
+        <div class="flex-1">
+          <h3 id="promptTitle" class="text-xl font-bold">Subscribe to unlock client contacts</h3>
+          <p id="promptSub" class="text-sm text-slate-300 mt-1">Your plan is inactive, so client contact details are locked. Pick a plan to start reaching clients.</p>
+          <ul class="grid sm:grid-cols-2 gap-x-6 gap-y-2 mt-4 text-sm text-slate-200">
+            <li class="flex gap-2"><i class="fa-solid fa-unlock text-[#C9A24B] mt-1"></i> See client contact details &amp; reach out directly</li>
+            <li class="flex gap-2"><i class="fa-solid fa-inbox text-[#C9A24B] mt-1"></i> Receive intent-matched leads (Basic 25/mo · Premium unlimited)</li>
+            <li class="flex gap-2"><i class="fa-solid fa-magnifying-glass text-[#C9A24B] mt-1"></i> Appear in search as a verified lawyer</li>
+            <li class="flex gap-2"><i class="fa-solid fa-arrow-trend-up text-[#C9A24B] mt-1"></i> Premium: priority routing + top search ranking</li>
+            <li class="flex gap-2"><i class="fa-solid fa-crown text-[#C9A24B] mt-1"></i> Premium: badge + homepage feature</li>
+            <li class="flex gap-2"><i class="fa-solid fa-file-invoice text-[#C9A24B] mt-1"></i> GST invoice · cancel anytime</li>
+          </ul>
+        </div>
+        <a href="lawyer-plan.html" class="mt-5 md:mt-0 inline-block bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] font-bold px-6 py-3 rounded-xl whitespace-nowrap shrink-0">View plans</a>
+      </div>
+    </div>
+
+    <!-- stat strip -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+      <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4"><p class="text-xs text-slate-400 font-semibold">New leads</p><p class="text-2xl font-extrabold text-[#0B192C] mt-1"><span id="kNew">0</span></p></div>
+      <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4"><p class="text-xs text-slate-400 font-semibold">Contacted</p><p class="text-2xl font-extrabold text-[#0B192C] mt-1"><span id="kContacted">0</span></p></div>
+      <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4"><p class="text-xs text-slate-400 font-semibold">Rating</p><p class="text-2xl font-extrabold text-[#0B192C] mt-1">4.8 <span class="text-amber-400 text-base"><i class="fa-solid fa-star"></i></span></p></div>
+      <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-4"><p class="text-xs text-slate-400 font-semibold">Profile views (30d)</p><p class="text-2xl font-extrabold text-[#0B192C] mt-1">214</p></div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6 items-start">
+
+      <!-- ===== LEAD INBOX ===== -->
+      <section class="lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-[#0B192C]">Lead inbox</h2>
+          <div class="flex gap-1 text-sm font-semibold" id="tabs">
+            <button class="tab active px-3 py-1.5 border-b-2 border-transparent text-slate-400" data-f="all" onclick="setFilter('all')">All</button>
+            <button class="tab px-3 py-1.5 border-b-2 border-transparent text-slate-400" data-f="NEW" onclick="setFilter('NEW')">New</button>
+            <button class="tab px-3 py-1.5 border-b-2 border-transparent text-slate-400" data-f="CONTACTED" onclick="setFilter('CONTACTED')">Contacted</button>
+            <button class="tab px-3 py-1.5 border-b-2 border-transparent text-slate-400" data-f="CLOSED" onclick="setFilter('CLOSED')">Closed</button>
+          </div>
+        </div>
+        <div id="leadList" class="space-y-4"></div>
+        <p class="text-center text-[11px] text-slate-400 italic mt-6">Sample inbox — wired to <code>GET /api/leads/lawyer/me</code>, <code>PATCH /api/leads/:id/status</code>, contact reveal gated on <code>subscriptionStatus</code>.</p>
+      </section>
+
+      <!-- ===== SIDE ===== -->
+      <aside class="space-y-5">
+        <!-- subscription card -->
+        <div id="subCard" class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-5"></div>
+
+        <!-- profile completeness -->
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-5">
+          <h3 class="text-sm font-bold text-[#0B192C] mb-3">Profile strength</h3>
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1"><span>85% complete</span><span class="text-[#C9A24B]">Boost ranking</span></div>
+          <div class="h-2 rounded-full bg-slate-100 overflow-hidden mb-3"><div class="h-full bg-green-500 rounded-full" style="width:85%"></div></div>
+          <p class="text-xs text-slate-500 mb-3">Add <b>languages</b> and a longer <b>bio</b> to rank higher in search.</p>
+          <a href="lawyer-practice-review.html" class="text-sm font-semibold text-[#0B192C] hover:text-[#C9A24B]"><i class="fa-solid fa-pen text-xs mr-1"></i> Edit profile</a>
+        </div>
+
+        <!-- reviews -->
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-3"><h3 class="text-sm font-bold text-[#0B192C]">Recent reviews</h3><span class="text-xs text-slate-400">4.8 · 120</span></div>
+          <div class="text-sm text-slate-600 border-l-2 border-[#C9A24B] pl-3 mb-2">"Patient and clear through my divorce." <span class="block text-[11px] text-slate-400 mt-0.5">— R. Kumar</span></div>
+          <a href="lawyer-details.html#reviews" class="text-xs font-semibold text-[#0B192C] hover:text-[#C9A24B]">See all reviews →</a>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- report client modal -->
+  <div id="reportModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50" onclick="closeReport()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+      <div class="flex items-start justify-between mb-1">
+        <h3 class="text-lg font-bold text-[#0B192C]"><i class="fa-regular fa-flag text-rose-500 mr-1"></i> Report this client</h3>
+        <button onclick="closeReport()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-slate-500 mb-5">Reports go to our team for review and are confidential. Use this for no-shows, abuse, spam, or fake enquiries.</p>
+      <div id="reportForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Reason</label>
+          <select id="rReason" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B]">
+            <option value="">Select a reason…</option>
+            <option>No-show / didn't respond</option>
+            <option>Abusive or threatening</option>
+            <option>Spam or fake enquiry</option>
+            <option>Wrong / misleading information</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Details <span class="text-slate-400 normal-case font-medium">(optional)</span></label>
+          <textarea id="rDetails" rows="3" placeholder="What happened?" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B] resize-none"></textarea>
+        </div>
+        <button onclick="submitReport()" class="w-full bg-[#0B192C] hover:bg-slate-800 text-white font-bold py-3 rounded-xl">Submit report</button>
+        <p class="text-[11px] text-slate-400 text-center">→ <code>POST /api/reports { reportedUserId, leadId, reason, details }</code></p>
+      </div>
+      <div id="reportDone" class="hidden text-center py-6">
+        <div class="w-14 h-14 rounded-full bg-green-50 text-green-500 flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fa-solid fa-circle-check"></i></div>
+        <h4 class="font-bold text-[#0B192C]">Report received</h4>
+        <p class="text-sm text-slate-500 mt-1">Our team will review it shortly.</p>
+        <button onclick="closeReport()" class="mt-5 text-sm font-semibold text-[#C9A24B] hover:underline">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- toast -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 opacity-0 translate-y-3 pointer-events-none bg-[#0B192C] text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 z-50 transition-all">
+    <i class="fa-solid fa-circle-check text-[#C9A24B]"></i> <span id="toastMsg">Done</span>
+  </div>
+
+  <script>
+    // ---- state (in production: from GET /api/lawyers/me + /api/subscriptions/me) ----
+    const S = { verif:'APPROVED', sub:'TRIAL' };
+    const subscribed = () => S.sub==='TRIAL' || S.sub==='ACTIVE';   // trial = full access
+    let filter = 'all';
+
+    const leads = [
+      { id:'l1', name:'Rohit Kumar', ini:'RK', area:'Family Law', city:'Bengaluru', ago:'2 hours ago', phone:'+91 98450 11234', desc:'Need help with a mutual-consent divorce and child custody arrangement.', status:'NEW', revealed:false, note:'' },
+      { id:'l2', name:'Priya Verma', ini:'PV', area:'Property Law', city:'Bengaluru', ago:'5 hours ago', phone:'+91 99000 55678', desc:'Boundary dispute with a neighbour; want advice before filing a suit.', status:'NEW', revealed:false, note:'' },
+      { id:'l3', name:'Sunil Nair', ini:'SN', area:'Consumer Law', city:'Bengaluru', ago:'1 day ago', phone:'+91 98860 22190', desc:'Defective product, seller refusing refund. Want to send a legal notice.', status:'CONTACTED', revealed:true, note:'Called, sending notice draft Monday.' },
+      { id:'l4', name:'Meera Reddy', ini:'MR', area:'Family Law', city:'Bengaluru', ago:'4 days ago', phone:'+91 98900 77345', desc:'Maintenance case follow-up.', status:'CLOSED', revealed:true, note:'Engaged — retainer signed.' },
+    ];
+
+    const badge = s => ({ NEW:'bg-blue-50 text-blue-600', CONTACTED:'bg-amber-50 text-amber-600', CLOSED:'bg-green-50 text-green-600' }[s]);
+    const label = s => ({ NEW:'New', CONTACTED:'Contacted', CLOSED:'Closed' }[s]);
+
+    function renderAll(){
+      // demo toggles active styling
+      document.querySelectorAll('[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v===S.verif));
+      document.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('on', b.dataset.s===S.sub));
+      renderStatus(); renderSubPrompt(); renderSubCard(); render();
+    }
+
+    function renderStatus(){
+      const pill = document.getElementById('statusPill');
+      const sub = document.getElementById('subhead');
+      const vb = document.getElementById('verifBanner');
+      if(S.verif==='PENDING'){
+        pill.className = 'inline-flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full self-start bg-amber-50 text-amber-700 border border-amber-200';
+        pill.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span> Verification pending';
+        sub.textContent = "You'll start receiving leads once you're approved.";
+        vb.classList.remove('hidden');
+      } else {
+        pill.className = 'inline-flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full self-start bg-green-50 text-green-700 border border-green-200';
+        pill.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500"></span> Live &amp; visible in search';
+        sub.textContent = 'Here are the clients waiting to hear from you.';
+        vb.classList.add('hidden');
+      }
+    }
+
+    function renderSubPrompt(){
+      const p = document.getElementById('subPrompt');
+      const title = document.getElementById('promptTitle');
+      const psub = document.getElementById('promptSub');
+      if(S.verif==='PENDING' && subscribed()){ p.classList.add('hidden'); return; }
+      if(S.verif==='PENDING' && !subscribed()){
+        title.textContent = 'Get set up while we review you';
+        psub.textContent = 'Subscribe now so you can start contacting clients the moment your verification is approved.';
+        p.classList.remove('hidden'); return;
+      }
+      if(!subscribed()){ // approved but expired/free
+        title.textContent = 'Subscribe to unlock client contacts';
+        psub.textContent = 'Your plan is inactive, so client contact details are locked. Pick a plan to start reaching clients.';
+        p.classList.remove('hidden'); return;
+      }
+      p.classList.add('hidden'); // trial/active + approved → no prompt
+    }
+
+    function renderSubCard(){
+      const c = document.getElementById('subCard');
+      if(S.sub==='TRIAL'){
+        c.innerHTML = `
+          <div class="flex items-center justify-between mb-1"><h3 class="text-sm font-bold text-[#0B192C]">Free trial</h3><span class="text-[11px] font-bold text-[#C9A24B]">18 days left</span></div>
+          <p class="text-xs text-slate-400 mb-4">Full access — leads &amp; contact reveal included.</p>
+          <a href="lawyer-plan.html" class="block text-center bg-[#0B192C] hover:bg-slate-800 text-white text-sm font-semibold py-2.5 rounded-xl">Choose a plan</a>
+          <p class="text-[11px] text-slate-400 text-center mt-2">Subscribe before the trial ends to keep receiving leads.</p>`;
+      } else if(S.sub==='ACTIVE'){
+        c.innerHTML = `
+          <div class="flex items-center justify-between mb-1"><h3 class="text-sm font-bold text-[#0B192C]">Basic plan</h3><span class="text-[11px] font-bold text-green-600">● Active</span></div>
+          <p class="text-xs text-slate-400 mb-4">Renews 12 Aug 2026</p>
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1"><span>Leads this month</span><span>3 / 25</span></div>
+          <div class="h-2 rounded-full bg-slate-100 overflow-hidden mb-4"><div class="h-full bg-[#C9A24B] rounded-full" style="width:12%"></div></div>
+          <a href="lawyer-plan.html" class="block text-center bg-[#0B192C] hover:bg-slate-800 text-white text-sm font-semibold py-2.5 rounded-xl">Upgrade to Premium</a>
+          <p class="text-[11px] text-slate-400 text-center mt-2">Premium = unlimited leads + priority routing</p>`;
+      } else {
+        c.innerHTML = `
+          <div class="flex items-center justify-between mb-1"><h3 class="text-sm font-bold text-[#0B192C]">No active plan</h3><span class="text-[11px] font-bold text-rose-500">● Inactive</span></div>
+          <p class="text-xs text-slate-400 mb-4">Client contacts are locked until you subscribe.</p>
+          <a href="lawyer-plan.html" class="block text-center bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] font-bold text-sm py-2.5 rounded-xl">Subscribe now</a>`;
+      }
+    }
+
+    function render(){
+      const listEl = document.getElementById('leadList');
+      if(S.verif==='PENDING'){
+        listEl.innerHTML = `<div class="bg-white rounded-2xl border border-dashed border-gray-200 p-10 text-center text-sm text-slate-400">
+          <i class="fa-regular fa-hourglass-half text-2xl block mb-2"></i> No leads yet — you'll receive intent-matched clients here as soon as your profile is approved.</div>`;
+        document.getElementById('kNew').textContent = 0;
+        document.getElementById('kContacted').textContent = 0;
+        return;
+      }
+      const list = leads.filter(l => filter==='all' || l.status===filter);
+      listEl.innerHTML = list.length ? list.map(l => `
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-5 ${l.status==='CLOSED'?'opacity-70':''}">
+          <div class="flex gap-4">
+            <div class="w-11 h-11 rounded-xl hero-gradient flex items-center justify-center text-[#C9A24B] font-bold text-sm shrink-0">${(subscribed() && l.revealed) ? l.ini : '<i class="fa-solid fa-lock"></i>'}</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <h3 class="font-bold text-slate-900">${(subscribed() && l.revealed) ? l.name : 'New client'}</h3>
+                  <p class="text-[11px] text-slate-400 mt-0.5">${l.area} · ${l.city} · ${l.ago}</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-full ${badge(l.status)} whitespace-nowrap">${label(l.status)}</span>
+                  ${l.revealed ? `<button onclick="openReport('${l.id}')" title="Report this client" class="text-slate-300 hover:text-rose-500 text-xs"><i class="fa-regular fa-flag"></i></button>` : ''}
+                </div>
+              </div>
+              <p class="text-sm text-slate-600 mt-2">${l.desc}</p>
+              ${(subscribed() && l.revealed) ? `<p class="text-sm mt-3 inline-flex items-center gap-2 bg-slate-50 border border-gray-100 rounded-lg px-3 py-1.5"><i class="fa-solid fa-phone text-[#C9A24B]"></i> <a href="tel:${l.phone.replace(/\s/g,'')}" class="font-semibold text-[#0B192C]">${l.phone}</a></p>` : ''}
+              ${l.note ? `<p class="text-[12px] text-slate-500 mt-3 bg-amber-50/60 border border-amber-100 rounded-lg px-3 py-2"><i class="fa-solid fa-note-sticky text-[#C9A24B] mr-1"></i> ${l.note}</p>` : ''}
+              <div class="flex flex-wrap gap-2 mt-4">${actions(l)}</div>
+            </div>
+          </div>
+        </div>`).join('') : `<div class="bg-white rounded-2xl border border-dashed border-gray-200 p-10 text-center text-sm text-slate-400"><i class="fa-regular fa-folder-open text-2xl block mb-2"></i> No ${filter==='all'?'':label(filter).toLowerCase()+' '}leads.</div>`;
+      document.getElementById('kNew').textContent = leads.filter(l=>l.status==='NEW').length;
+      document.getElementById('kContacted').textContent = leads.filter(l=>l.status==='CONTACTED').length;
+    }
+
+    function actions(l){
+      if(!subscribed()){
+        return `<a href="lawyer-plan.html" class="bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] text-sm font-bold px-4 py-2 rounded-lg"><i class="fa-solid fa-lock mr-1"></i> Subscribe to reveal contact</a>`;
+      }
+      if(l.status==='NEW'){
+        return `
+          ${l.revealed
+            ? `<button onclick="mark('${l.id}','CONTACTED')" class="bg-[#0B192C] hover:bg-slate-800 text-white text-sm font-semibold px-4 py-2 rounded-lg">Mark as contacted</button>`
+            : `<button onclick="reveal('${l.id}', this)" class="bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C] text-sm font-bold px-4 py-2 rounded-lg"><i class="fa-solid fa-phone-volume mr-1"></i> Reveal contact</button>`}
+          <button onclick="addNote('${l.id}')" class="border border-gray-200 hover:border-[#C9A24B] text-slate-600 text-sm font-semibold px-4 py-2 rounded-lg">Add note</button>`;
+      }
+      if(l.status==='CONTACTED'){
+        return `
+          <button onclick="mark('${l.id}','CLOSED')" class="bg-[#0B192C] hover:bg-slate-800 text-white text-sm font-semibold px-4 py-2 rounded-lg">Mark as closed</button>
+          <button onclick="addNote('${l.id}')" class="border border-gray-200 hover:border-[#C9A24B] text-slate-600 text-sm font-semibold px-4 py-2 rounded-lg">Add note</button>`;
+      }
+      return `<span class="text-xs text-slate-400"><i class="fa-solid fa-check mr-1"></i> Engagement closed</span>`;
+    }
+
+    function setVerif(v){ S.verif=v; renderAll(); }
+    function setSub(s){ S.sub=s; renderAll(); }
+    function setFilter(f){ filter=f; [...document.querySelectorAll('.tab')].forEach(t=>t.classList.toggle('active', t.dataset.f===f)); render(); }
+    async function reveal(id, btn){
+      const l = leads.find(x=>x.id===id);
+      if(btn){ btn.disabled = true; btn.classList.add('opacity-60'); }
+      try {
+        // real integration → server enforces the subscription gate and logs the reveal
+        const res = await fetch(`/api/leads/${id}/reveal-contact`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + (window.LM_TOKEN || '') },
+        });
+        if(res.status === 401){ window.location = 'login.html'; return; }
+        if(res.status === 403){ window.location = 'lawyer-plan.html'; return; } // no active plan
+        if(!res.ok) throw new Error('reveal failed');
+        const data = await res.json();            // { leadId, mobile, email }
+        l.phone = data.mobile; l.email = data.email;
+        l.revealed = true;
+        render(); showToast('Contact revealed — reach out soon');
+      } catch (e) {
+        // demo fallback (no live API in this static preview) — reveal the sample contact
+        l.revealed = true; render(); showToast('Contact revealed — reach out soon');
+      }
+    }
+    function mark(id, status){ const l=leads.find(x=>x.id===id); l.status=status; render(); showToast(status==='CONTACTED'?'Marked as contacted':'Lead closed'); }
+    function addNote(id){ const l=leads.find(x=>x.id===id); const n=prompt('Private note for this lead:', l.note||''); if(n!==null){ l.note=n.trim(); render(); showToast('Note saved'); } }
+    function showToast(m){ const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=m; t.style.opacity='1'; t.style.transform='translate(-50%,0)'; setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translate(-50%,12px)'; },2400); }
+
+    // avatar menu
+    function toggleMenu(e){ e.stopPropagation(); document.getElementById('userMenu').classList.toggle('hidden'); }
+    document.addEventListener('click', () => document.getElementById('userMenu').classList.add('hidden'));
+
+    // report a client
+    let reportLeadId = null;
+    function openReport(id){ reportLeadId = id; document.getElementById('reportModal').classList.remove('hidden'); }
+    function closeReport(){ document.getElementById('reportModal').classList.add('hidden'); document.getElementById('reportForm').classList.remove('hidden'); document.getElementById('reportDone').classList.add('hidden'); document.getElementById('rReason').classList.remove('border-rose-400'); }
+    function submitReport(){
+      const r = document.getElementById('rReason');
+      if(!r.value){ r.classList.add('border-rose-400'); return; }
+      // demo only → POST /api/reports { reportedUserId, leadId: reportLeadId, reason, details }
+      document.getElementById('reportForm').classList.add('hidden');
+      document.getElementById('reportDone').classList.remove('hidden');
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>

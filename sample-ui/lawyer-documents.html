@@ -149,10 +149,14 @@
       b.disabled = !ok;
       b.className = 'font-bold py-3 px-7 rounded-xl text-sm transition-all ' + (ok ? 'bg-[#C9A24B] hover:bg-[#b58f3f] text-[#0B192C]' : 'bg-[#C9A24B] text-[#0B192C] opacity-50 cursor-not-allowed');
     }
-    function submitDocs(){ alert('Sample — upload to S3 then POST /api/lawyers/me/verification → UNDER_REVIEW'); }
+    function submitDocs(){
+      // demo only → upload to S3, POST /api/lawyers/me/verification → UNDER_REVIEW
+      alert('Submitted for verification. Your profile is now UNDER_REVIEW.');
+      window.location = 'lawyer-dashboard.html';
+    }
 
     // drag styling
-    ['dropPhoto','dropCert','dropId'].forEach(id => {
+    ['dropPhoto','dropCert'].forEach(id => {
       const el = document.getElementById(id); const input = el.querySelector('input');
       ['dragenter','dragover'].forEach(ev => el.addEventListener(ev, e => { e.preventDefault(); el.classList.add('drag'); }));
       ['dragleave','drop'].forEach(ev => el.addEventListener(ev, e => { e.preventDefault(); el.classList.remove('drag'); }));

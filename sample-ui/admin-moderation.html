@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Moderation | Lawmitran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .nav-item.active { background:#16306b; color:#fff; } .nav-item.active i { color:#C9A24B; }
+    .modal { display:none; } .modal.open { display:flex; }
+    .tab.active { color:#0B192C; border-color:#C9A24B; }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+  <div class="flex min-h-screen">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 bg-[#0B192C] text-slate-300 flex-shrink-0 hidden lg:flex flex-col">
+      <a href="index.html" class="flex items-center gap-3 px-6 h-20 border-b border-slate-800"><img src="assets/logo-light.svg" alt="LawMitran" style="height:36px;display:block" /></a>
+      <nav class="flex-1 p-4 space-y-1 text-sm font-medium">
+        <a href="admin-dashboard.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-gauge-high w-4"></i> Dashboard</a>
+        <a href="admin-lawyers.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-user-check w-4"></i> Lawyer Approvals <span class="ml-auto text-[10px] bg-[#C9A24B] text-[#0B192C] font-bold px-2 py-0.5 rounded-full">7</span></a>
+        <a href="admin-users.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-users w-4"></i> Users</a>
+        <a href="admin-documents.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-folder-open w-4"></i> Documents</a>
+        <a href="admin-plans.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-tags w-4"></i> Plans</a>
+        <a href="admin-moderation.html" class="nav-item active flex items-center gap-3 px-4 py-2.5 rounded-xl"><i class="fa-solid fa-flag w-4"></i> Moderation <span class="ml-auto text-[10px] bg-rose-500 text-white font-bold px-2 py-0.5 rounded-full">3</span></a>
+        <a href="admin-reports.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-chart-line w-4"></i> Reports</a>
+      </nav>
+      <div class="p-4 border-t border-slate-800"><a href="login.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm hover:bg-slate-800/60"><i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Sign out</a></div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-40">
+        <div><h1 class="text-xl font-extrabold text-[#0B192C]">Moderation</h1><p class="text-xs text-slate-400">Reports from clients &amp; lawyers — review and act</p></div>
+        <div class="flex items-center gap-4">
+          <a href="admin-moderation.html" class="relative text-slate-500 hover:text-[#0B192C]" title="Notifications"><i class="fa-solid fa-bell text-lg"></i><span class="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">3</span></a>
+          <div class="w-9 h-9 rounded-full bg-[#0B192C] text-[#C9A24B] flex items-center justify-center font-bold text-sm">SA</div>
+        </div>
+      </header>
+
+      <main class="p-6 space-y-5">
+        <!-- tabs -->
+        <div class="flex gap-1 border-b border-gray-200 text-sm font-semibold">
+          <button class="tab active px-3 py-2 border-b-2 border-transparent text-slate-400" data-f="OPEN" onclick="setFilter('OPEN')">Open</button>
+          <button class="tab px-3 py-2 border-b-2 border-transparent text-slate-400" data-f="ACTIONED" onclick="setFilter('ACTIONED')">Actioned</button>
+          <button class="tab px-3 py-2 border-b-2 border-transparent text-slate-400" data-f="DISMISSED" onclick="setFilter('DISMISSED')">Dismissed</button>
+          <button class="tab px-3 py-2 border-b-2 border-transparent text-slate-400" data-f="all" onclick="setFilter('all')">All</button>
+        </div>
+        <div id="list" class="space-y-3"></div>
+        <p class="text-[11px] text-slate-400 italic">Wired to <code>GET /api/admin/reports?status=</code> and <code>PATCH /api/admin/reports/:id</code>.</p>
+      </main>
+    </div>
+  </div>
+
+  <!-- review modal -->
+  <div id="modal" class="modal fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+      <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold text-[#0B192C]">Review report</h3><button onclick="closeModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+      <div id="mBody" class="text-sm space-y-2 mb-4"></div>
+      <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Admin note</label>
+      <textarea id="mNote" rows="2" placeholder="Action taken / reasoning…" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#C9A24B] resize-none mb-3"></textarea>
+      <label class="flex items-center gap-2 text-sm text-slate-600 mb-4"><input id="mSuspend" type="checkbox" class="rounded border-gray-300 text-rose-500" /> Suspend the reported user</label>
+      <div class="flex justify-end gap-2">
+        <button onclick="review('DISMISSED')" class="border border-gray-200 text-slate-600 font-semibold text-sm px-4 py-2.5 rounded-xl">Dismiss</button>
+        <button onclick="review('ACTIONED')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl">Take action</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let filter = 'OPEN', current = null;
+    const reasonBadge = { 'No-show':'bg-amber-50 text-amber-700', 'Abusive':'bg-rose-50 text-rose-700', 'Spam':'bg-slate-100 text-slate-600', 'Fake':'bg-rose-50 text-rose-700' };
+    let reports = [
+      { id:'r1', reporter:'Adv. A. Sharma (Lawyer)', reported:'Rohit Kumar (Client)', reason:'No-show / didn\'t respond', details:'Client never picked up after I called twice.', ago:'2h ago', status:'OPEN' },
+      { id:'r2', reporter:'Priya Verma (Client)', reported:'Adv. M. Reddy (Lawyer)', reason:'Wrong / misleading information', details:'Profile claimed 20 years but seemed inexperienced on the call.', ago:'6h ago', status:'OPEN' },
+      { id:'r3', reporter:'Adv. S. Bakshi (Lawyer)', reported:'Sunil Nair (Client)', reason:'Abusive or threatening', details:'Used abusive language when I quoted my fee.', ago:'1d ago', status:'OPEN' },
+      { id:'r4', reporter:'Meera Reddy (Client)', reported:'Adv. K. Menon (Lawyer)', reason:'Spam or fake enquiry', details:'', ago:'3d ago', status:'ACTIONED' },
+      { id:'r5', reporter:'Adv. D. Gupta (Lawyer)', reported:'Test Client (Client)', reason:'Fake enquiry', details:'', ago:'5d ago', status:'DISMISSED' }
+    ];
+    const stBadge = s => ({OPEN:'bg-blue-50 text-blue-700',ACTIONED:'bg-rose-50 text-rose-700',DISMISSED:'bg-slate-100 text-slate-500'}[s]);
+
+    function render(){
+      const list = reports.filter(r => filter==='all' || r.status===filter);
+      document.getElementById('list').innerHTML = list.length ? list.map(r => `
+        <div class="bg-white rounded-2xl border border-gray-200/60 shadow-sm p-5">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-sm"><span class="font-bold text-slate-900">${r.reporter}</span> <span class="text-slate-400">reported</span> <span class="font-bold text-slate-900">${r.reported}</span></p>
+              <p class="text-xs mt-1"><span class="font-semibold text-slate-600">${r.reason}</span> · <span class="text-slate-400">${r.ago}</span></p>
+              ${r.details?`<p class="text-sm text-slate-500 mt-2 bg-slate-50 border border-gray-100 rounded-lg px-3 py-2">"${r.details}"</p>`:''}
+            </div>
+            <div class="flex flex-col items-end gap-2 shrink-0">
+              <span class="text-[11px] font-bold px-2.5 py-1 rounded-full ${stBadge(r.status)}">${r.status}</span>
+              ${r.status==='OPEN'?`<button onclick="openModal('${r.id}')" class="bg-[#0B192C] hover:bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 rounded-lg">Review</button>`:''}
+            </div>
+          </div>
+        </div>`).join('') : '<div class="text-center text-sm text-slate-400 py-16"><i class="fa-regular fa-flag text-2xl block mb-2"></i> No reports here.</div>';
+    }
+    function setFilter(f){ filter=f; document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.f===f)); render(); }
+    function openModal(id){
+      current = reports.find(r=>r.id===id);
+      document.getElementById('mBody').innerHTML = `
+        <p><span class="text-slate-400">Reporter:</span> <b>${current.reporter}</b></p>
+        <p><span class="text-slate-400">Reported:</span> <b>${current.reported}</b></p>
+        <p><span class="text-slate-400">Reason:</span> ${current.reason}</p>
+        ${current.details?`<p class="text-slate-500">"${current.details}"</p>`:''}`;
+      document.getElementById('mNote').value=''; document.getElementById('mSuspend').checked=false;
+      document.getElementById('modal').classList.add('open');
+    }
+    function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+    function review(status){
+      if(current){ current.status = status; }
+      // demo only → PATCH /api/admin/reports/:id { status, adminNote, suspendReportedUser }
+      closeModal(); render();
+    }
+    render();
+  </script>
+</body>
+</html>

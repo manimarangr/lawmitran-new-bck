@@ -7,19 +7,28 @@ import {
 } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PaymentStatus, SubscriptionStatus } from '@prisma/client';
+import { MailService } from '../../common/mail/mail.service';
 import { RazorpayService } from '../../common/payments/razorpay.service';
+import { WhatsappService } from '../../common/whatsapp/whatsapp.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ActivateSubscriptionDto } from './dto/activate-subscription.dto';
 import { VerifyPaymentDto } from './dto/verify-payment.dto';
 
 const DEFAULT_PLAN_NAME = 'BASIC';
 const DEFAULT_DURATION_DAYS = 30;
+// Days before end to send renewal reminders (configurable, e.g. RENEWAL_REMINDER_DAYS=30,15,0).
+const RENEWAL_REMINDER_DAYS = (process.env.RENEWAL_REMINDER_DAYS ?? '30,15,0')
+  .split(',')
+  .map((d) => Number(d.trim()))
+  .filter((d) => !Number.isNaN(d));
 
 @Injectable()
 export class SubscriptionsService {
   constructor(
     private prisma: PrismaService,
     private razorpay: RazorpayService,
+    private mail: MailService,
+    private whatsapp: WhatsappService,
   ) {}
 
   private async getLawyerByUserId(userId: string) {
@@ -280,5 +289,78 @@ export class SubscriptionsService {
   @Cron(CronExpression.EVERY_HOUR)
   async handleExpiryCron() {
     await this.expireDueSubscriptions();
+  }
+
+  /**
+   * Renewal reminders: for each configured offset (default 30, 15, and 0 days before end), notify
+   * lawyers whose paid subscription — or free trial — ends that day, over email + WhatsApp.
+   * Runs daily; each subscription matches a given offset on exactly one calendar day, so no dedupe needed.
+   */
+  async sendRenewalReminders() {
+    let sent = 0;
+    for (const daysLeft of RENEWAL_REMINDER_DAYS) {
+      const { start, end } = this.dayWindowFromNow(daysLeft);
+
+      // Paid subscriptions ending on that day
+      const subs = await this.prisma.subscription.findMany({
+        where: {
+          status: SubscriptionStatus.ACTIVE,
+          endDate: { gte: start, lt: end },
+        },
+        select: { lawyer: { select: { user: { select: { email: true, mobile: true } } } } },
+      });
+      for (const s of subs) {
+        await this.notifyRenewal(s.lawyer.user, daysLeft, 'subscription');
+        sent++;
+      }
+
+      // Free trials ending on that day
+      const trials = await this.prisma.lawyer.findMany({
+        where: {
+          subscriptionStatus: SubscriptionStatus.TRIAL,
+          trialEndDate: { gte: start, lt: end },
+        },
+        select: { user: { select: { email: true, mobile: true } } },
+      });
+      for (const l of trials) {
+        await this.notifyRenewal(l.user, daysLeft, 'trial');
+        sent++;
+      }
+    }
+    return { remindersSent: sent };
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_9AM)
+  async handleRenewalReminderCron() {
+    await this.sendRenewalReminders();
+  }
+
+  private dayWindowFromNow(daysFromNow: number) {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() + daysFromNow);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
+    return { start, end };
+  }
+
+  private async notifyRenewal(
+    user: { email: string; mobile: string },
+    daysLeft: number,
+    kind: 'subscription' | 'trial',
+  ) {
+    const what = kind === 'trial' ? 'free trial' : 'LawMitran subscription';
+    const subject =
+      daysLeft <= 0
+        ? `Your ${what} has ended — renew to keep receiving leads`
+        : `Your ${what} ends in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`;
+    const action =
+      daysLeft <= 0
+        ? `Renew now to become visible again and unlock client contacts.`
+        : `Renew before it ends to avoid any interruption to your leads.`;
+    const body = `${subject}. ${action}`;
+
+    await this.mail.sendSubscriptionReminder(user.email, subject, body);
+    await this.whatsapp.sendMessage(user.mobile, body);
   }
 }

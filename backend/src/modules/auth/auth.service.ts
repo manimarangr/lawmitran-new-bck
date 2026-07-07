@@ -47,11 +47,35 @@ export class AuthService {
       throw new BadRequestException('Captcha verification failed');
     }
 
-    const existing = await this.prisma.user.findFirst({
-      where: { OR: [{ email: dto.email }, { mobile: dto.mobile }] },
-    });
-    if (existing) {
-      throw new BadRequestException('Email or mobile already registered');
+    // Field-specific duplicate check so the signup UI can point to the exact field.
+    // (Enumeration is acceptable here — the person supplied both values themselves.)
+    const [emailTaken, mobileTaken] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { email: dto.email },
+        select: { id: true },
+      }),
+      this.prisma.user.findUnique({
+        where: { mobile: dto.mobile },
+        select: { id: true },
+      }),
+    ]);
+    if (emailTaken && mobileTaken) {
+      throw new ConflictException({
+        message: 'This email and mobile number are both already registered',
+        fields: ['email', 'mobile'],
+      });
+    }
+    if (emailTaken) {
+      throw new ConflictException({
+        message: 'This email is already registered',
+        fields: ['email'],
+      });
+    }
+    if (mobileTaken) {
+      throw new ConflictException({
+        message: 'This mobile number is already registered',
+        fields: ['mobile'],
+      });
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 12);

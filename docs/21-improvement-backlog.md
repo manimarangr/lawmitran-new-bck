@@ -158,6 +158,9 @@ A two-sided marketplace is supply-constrained at launch; nothing in the plan boo
   plan; `leadCreditBalance` on `Lawyer`.
 - **Document ↔ lawyer cross-sell:** "Buy this template **+** have a verified lawyer review it" — links the
   two revenue lines and raises AOV. **Where:** [11-document-marketplace.md](./11-document-marketplace.md).
+- **Client membership (demand-side revenue):** a freemium plan bundling the AI legal chatbot + document
+  generation with quotas, while keeping find-a-lawyer free. Full spec:
+  [23-client-membership.md](./23-client-membership.md).
 
 ---
 

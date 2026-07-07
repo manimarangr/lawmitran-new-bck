@@ -11,25 +11,31 @@ Two distinct verification gates — never conflate them:
 - **Account verified** = mobile OTP passed (`User.mobileVerified = true`). The user can log in and use their dashboard.
 - **Professionally verified** = admin approved bar details (`Lawyer.verificationStatus = APPROVED`). Only this gate controls public search visibility and lead routing.
 
+> **Verification responsibility — admin approves lawyers only.** Clients are **auto-active** the moment
+> their mobile OTP passes; there is **no client-approval queue**. Only **lawyers** go through admin
+> review (their bar credentials must be genuine). Client trust is handled by automated + reactive
+> controls instead of up-front approval: mobile OTP, reCAPTCHA, lead rate-limits/dedupe, and **reactive
+> suspension** — an admin can set a client's `UserStatus = SUSPENDED` if they abuse the platform, but
+> never has to approve them to begin with. See [10-admin-module.md](./10-admin-module.md).
+
 ### Rules
 
 1. **Mobile OTP is mandatory at signup for both roles** (CLIENT and LAWYER). A 6-digit OTP is sent **WhatsApp-first with SMS fallback** (WhatsApp is far cheaper in India); the user cannot proceed past signup until it is verified. Email verification is **soft/async** (a free verification link) and must not block login or progress.
    - **OTP is used only at signup verification — never on login.** Login is **password-only** for both roles, so there is no per-login SMS/WhatsApp cost (~1 OTP per user lifetime, plus resends). Password reset uses a free email link, not OTP.
 2. **Clients are OTP'd, but browsing is never gated.** Public search, profiles, and document browsing stay unauthenticated for SEO. A client only needs a verified account at the point of action — submitting a lead or buying a document.
-3. **Lawyer onboarding is a resumable wizard after OTP:**
-   - Signup → mobile OTP → account exists with `verificationStatus = PENDING` and trial started.
-   - Wizard collects, as **mandatory to submit for review**: full name (as per Bar Council), **Bar Council enrollment number** (text) **+ state**, **profile photo**, and **Bar Council certificate**. There is **no separate ID-card upload** — enrollment is verified against the certificate. Practice area, city, languages, and bio complete the profile.
-   - Submit → `UNDER_REVIEW` → admin approves → `APPROVED`.
+3. **Lawyer signup is two pages, then a document-upload step:**
+   - **Page 1** collects the account (name, email, mobile, password) **and** professional details in one form: **Bar Council enrollment number** (text), **state**, **years of experience**, **primary city**, and **areas of practice** (a **multi-select, up to 5** — used for lead matching).
+   - **Page 2** verifies the mobile with **one OTP** → account exists with `verificationStatus = PENDING` and trial started.
+   - After OTP the lawyer uploads **profile photo + Bar Council certificate** (no separate ID-card upload — enrollment is verified against the certificate). Submit → `UNDER_REVIEW` → admin approves → `APPROVED`.
 4. **Mandatory photo/bar enforced at the review gate, not account creation.** A lawyer account exists after OTP even with an incomplete profile (so progress can be saved); `profileImageUrl` stays nullable in the DB but is **required before `APPROVED`** at the app layer. `certificateImageUrl` is required.
 5. **Login is never blocked on professional verification.** A PENDING/UNDER_REVIEW lawyer can log in and see a "verification pending" dashboard; they are simply hidden from search and receive no leads until APPROVED.
 
 ```mermaid
 flowchart LR
-    S[Signup: name, email, mobile, password] --> O{Mobile OTP}
+    S["Page 1: account + (lawyer) enrollment, state, experience, city, practice areas"] --> O{"Page 2: Mobile OTP"}
     O -->|client| CV[Account verified → can act]
-    O -->|lawyer| LW[Onboarding wizard]
-    LW --> M[Bar no.+state, photo, certificate - mandatory]
-    M --> UR[UNDER_REVIEW] --> AP[APPROVED → visible + leads]
+    O -->|lawyer| UP[Upload photo + certificate]
+    UP --> UR[UNDER_REVIEW] --> AP[APPROVED → visible + leads]
 ```
 
 See [08-lawyer-module.md](./08-lawyer-module.md) for the wizard and [16-security.md](./16-security.md) for OTP hardening.

@@ -24,7 +24,18 @@
         <a href="lawyer-search.html" class="text-slate-600 hover:text-[#0B192C]">Find Lawyers</a>
         <a href="index.html#documents" class="text-slate-600 hover:text-[#0B192C]">Legal Documents</a>
         <a href="client-dashboard.html" class="text-[#0B192C] font-bold">My Requirements</a>
-        <span class="w-9 h-9 rounded-full hero-gradient text-[#C9A24B] flex items-center justify-center font-bold text-sm">MK</span>
+        <a href="notifications.html" class="relative text-slate-500 hover:text-[#0B192C]" title="Notifications"><i class="fa-regular fa-bell text-lg"></i><span class="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span></a>
+        <div class="relative">
+          <button onclick="toggleMenu(event)" class="w-9 h-9 rounded-full hero-gradient text-[#C9A24B] flex items-center justify-center font-bold text-sm">MK</button>
+          <div id="userMenu" class="hidden absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+            <div class="px-4 py-2 border-b border-gray-100"><p class="font-bold text-slate-800 text-sm">Mani K.</p><p class="text-[11px] text-slate-400">maran.mean@gmail.com</p></div>
+            <a href="client-dashboard.html" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-list-check w-4 mr-2 text-slate-400"></i> My Requirements</a>
+            <a href="lawyer-search.html" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-magnifying-glass w-4 mr-2 text-slate-400"></i> Find Lawyers</a>
+            <a href="notifications.html" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"><i class="fa-regular fa-bell w-4 mr-2 text-slate-400"></i> Notifications</a>
+            <a href="settings.html" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-gear w-4 mr-2 text-slate-400"></i> Settings</a>
+            <a href="login.html" class="block px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 border-t border-gray-100 mt-1"><i class="fa-solid fa-arrow-right-from-bracket w-4 mr-2"></i> Log out</a>
+          </div>
+        </div>
       </div>
     </div>
   </nav>
@@ -148,6 +159,9 @@
   </div>
 
   <script>
+    function toggleMenu(e){ e.stopPropagation(); document.getElementById('userMenu').classList.toggle('hidden'); }
+    document.addEventListener('click', () => document.getElementById('userMenu').classList.add('hidden'));
+
     function showToast(m){ const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=m;
       t.style.opacity='1'; t.style.transform='translate(-50%,0)';
       setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translate(-50%,12px)'; },2400); }

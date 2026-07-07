@@ -14,12 +14,16 @@ import { ReviewLawyerDto } from './dto/review-lawyer.dto';
 import { SearchLawyersDto } from './dto/search-lawyers.dto';
 import { UpdateLawyerProfileDto } from './dto/update-lawyer-profile.dto';
 
+// Free-trial length in days — configurable (e.g. set TRIAL_DAYS=15 to shorten the trial).
+const TRIAL_DAYS = Number(process.env.TRIAL_DAYS ?? 30);
+
 export interface LawyerProfileFiles {
   certificate?: Express.Multer.File[];
 }
 
 const PUBLIC_SELECT = {
   id: true,
+  slug: true,
   fullName: true,
   barCouncilState: true,
   experienceYears: true,
@@ -89,7 +93,7 @@ export class LawyersService {
     // trialEndDate is non-nullable but the trial only actually starts once an
     // admin approves the profile (see review()) — this is just a placeholder.
     const placeholderTrialEnd = new Date();
-    placeholderTrialEnd.setDate(placeholderTrialEnd.getDate() + 30);
+    placeholderTrialEnd.setDate(placeholderTrialEnd.getDate() + TRIAL_DAYS);
 
     // city and practiceAreas are relational; connect them via dedicated endpoints
     const lawyer = await this.prisma.lawyer.create({
@@ -238,6 +242,28 @@ export class LawyersService {
     return lawyer;
   }
 
+  /** SEO-friendly lookup: /lawyer/:slug → profile (only APPROVED lawyers). */
+  async getPublicProfileBySlug(slug: string) {
+    const lawyer = await this.prisma.lawyer.findFirst({
+      where: { slug, verificationStatus: VerificationStatus.APPROVED },
+      select: PUBLIC_SELECT,
+    });
+    if (!lawyer) {
+      throw new NotFoundException('Lawyer not found');
+    }
+    return lawyer;
+  }
+
+  private slugify(text: string): string {
+    return text
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+  }
+
   listPending() {
     return this.prisma.lawyer.findMany({
       where: {
@@ -267,9 +293,13 @@ export class LawyersService {
 
     if (dto.status === VerificationStatus.APPROVED) {
       const trialEndDate = new Date(now);
-      trialEndDate.setDate(trialEndDate.getDate() + 30);
+      trialEndDate.setDate(trialEndDate.getDate() + TRIAL_DAYS);
       data.trialStartDate = now;
       data.trialEndDate = trialEndDate;
+      // Generate an SEO slug once (kept stable across re-approvals).
+      if (!lawyer.slug) {
+        data.slug = `${this.slugify(lawyer.fullName)}-${lawyerId.slice(0, 6)}`;
+      }
     }
 
     const [updated] = await this.prisma.$transaction([

@@ -17,6 +17,7 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
 import { LeadsModule } from './modules/leads/leads.module';
 import { AiIntakeModule } from './modules/ai-intake/ai-intake.module';
 import { RatingsModule } from './modules/ratings/ratings.module';
+import { SeoModule } from './modules/seo/seo.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { RatingsModule } from './modules/ratings/ratings.module';
     LeadsModule,
     AiIntakeModule,
     RatingsModule,
+    SeoModule,
   ],
   controllers: [AppController],
   providers: [

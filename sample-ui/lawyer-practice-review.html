@@ -6,12 +6,15 @@
   <title>Practice &amp; review | Lawmitran</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     body { font-family: 'Inter', sans-serif; }
     .hero-gradient { background: linear-gradient(135deg, #0B192C 0%, #1E3E62 100%); }
     .chip { cursor:pointer; transition:.15s; }
     .chip.on { background:#0B192C; color:#fff; border-color:#0B192C; }
+    #officeMap { height:220px; border-radius:0.75rem; z-index:0; }
+    .leaflet-container { font-family:'Inter',sans-serif; }
   </style>
 </head>
 <body class="bg-gray-50 text-slate-800">
@@ -65,6 +68,23 @@
           <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5">Short bio</label>
           <textarea rows="4" placeholder="Describe your practice and approach…" class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[#C9A24B]"></textarea>
         </div>
+
+        <!-- office location (pin → Lawyer.latitude/longitude) -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500">Office location <span class="text-slate-400 normal-case font-medium">— helps clients find you on the map</span></label>
+            <button type="button" onclick="useMyLocation()" class="text-xs font-semibold text-[#C9A24B] hover:underline"><i class="fa-solid fa-location-crosshairs mr-1"></i> Use my location</button>
+          </div>
+          <div class="flex gap-2 mb-2">
+            <input id="addr" type="text" placeholder="Search your office address…" class="flex-1 border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[#C9A24B]" />
+            <button type="button" onclick="geocodeAddr()" class="bg-[#0B192C] hover:bg-slate-800 text-white text-sm font-semibold px-4 rounded-xl">Locate</button>
+          </div>
+          <div id="officeMap"></div>
+          <p class="text-[11px] text-slate-400 mt-2"><i class="fa-solid fa-hand-pointer text-[#C9A24B] mr-1"></i> Click the map or drag the pin to set your exact office point.
+            <span id="coords" class="block mt-0.5 font-semibold text-slate-500">No location set yet.</span></p>
+          <input type="hidden" id="lat" name="latitude" />
+          <input type="hidden" id="lng" name="longitude" />
+        </div>
       </div>
 
       <!-- review summary -->
@@ -92,8 +112,45 @@
     </form>
   </section>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script>
     document.querySelectorAll('#areas .chip').forEach(c => c.addEventListener('click', () => c.classList.toggle('on')));
+
+    // ---- Office location pin → captures Lawyer.latitude / longitude ----
+    const officeMap = L.map('officeMap').setView([12.9716, 77.5946], 12); // default: Bengaluru
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(officeMap);
+
+    let pin = null;
+    function setPin(lat, lng, zoom){
+      if(pin) pin.setLatLng([lat, lng]);
+      else {
+        pin = L.marker([lat, lng], { draggable: true }).addTo(officeMap);
+        pin.on('dragend', () => { const p = pin.getLatLng(); saveCoords(p.lat, p.lng); });
+      }
+      officeMap.setView([lat, lng], zoom || officeMap.getZoom());
+      saveCoords(lat, lng);
+    }
+    function saveCoords(lat, lng){
+      document.getElementById('lat').value = lat.toFixed(6);
+      document.getElementById('lng').value = lng.toFixed(6);
+      document.getElementById('coords').textContent = `Pinned at ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    }
+    // click map to drop / move the pin
+    officeMap.on('click', e => setPin(e.latlng.lat, e.latlng.lng));
+
+    function useMyLocation(){
+      if(!navigator.geolocation){ alert('Location is not supported on this device.'); return; }
+      navigator.geolocation.getCurrentPosition(
+        pos => setPin(pos.coords.latitude, pos.coords.longitude, 15),
+        ()   => alert("Couldn't get your location. Click the map to drop the pin manually.")
+      );
+    }
+    function geocodeAddr(){
+      // demo only → in production: GET a geocoding API for #addr, then setPin(lat,lng).
+      // Here we just nudge the map so the flow is visible.
+      const c = officeMap.getCenter();
+      setPin(c.lat + (Math.random()-0.5)*0.04, c.lng + (Math.random()-0.5)*0.04, 14);
+    }
   </script>
 </body>
 </html>

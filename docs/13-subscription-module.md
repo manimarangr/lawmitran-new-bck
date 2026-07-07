@@ -17,11 +17,16 @@ stateDiagram-v2
     CANCELLED --> ACTIVE: re-subscribes
 ```
 
-## 30-Day Trial
+## Free Trial (configurable length)
 
-- Starts automatically on lawyer creation (`trialStartDate` = now, `trialEndDate` = +30 days).
-- Full privileges: once `APPROVED`, the lawyer receives leads during the trial.
-- On `trialEndDate` with no active paid plan → `EXPIRED`.
+- Starts automatically on lawyer creation (`trialStartDate` = now, `trialEndDate` = now + trial length).
+- **Trial length is configurable via `TRIAL_DAYS` (default 30).** Set `TRIAL_DAYS=15` for a shorter, more
+  urgent trial. *Guidance:* keep **30 days** for early stage — lead volume can be slow at first, so a
+  lawyer needs enough time to actually receive and convert leads to feel the value; shorten to 15 later if
+  data shows lawyers convert quickly.
+- Full privileges: once `APPROVED`, the lawyer receives leads **and can reveal client contacts** during
+  the trial.
+- On `trialEndDate` with no active paid plan → `EXPIRED` (leads stop, contact reveal locks).
 
 ## Plans
 
@@ -101,7 +106,19 @@ sequenceDiagram
 
 - Lawyer renews before `endDate` to stay `ACTIVE` continuously.
 - Renewal extends `Subscription.endDate`; a new `Subscription`/`Payment` record is created for history.
-- Reminders sent as `endDate` approaches (email/SMS/WhatsApp).
+
+### Renewal reminders (implemented)
+
+A daily cron (`sendRenewalReminders`, 9am) notifies lawyers whose paid subscription **or free trial** ends
+soon, over **email + WhatsApp**:
+
+- Reminder offsets are configurable via `RENEWAL_REMINDER_DAYS` (default `30,15,0`) — i.e. **30 days
+  before, 15 days before, and on expiry day**. Each subscription matches a given offset on exactly one
+  calendar day, so no de-dupe tracking is needed.
+- Copy escalates: *"Your subscription ends in 30/15 days — renew before it ends to avoid interruption"*,
+  then on day 0 *"Your subscription has ended — renew to keep receiving leads."* Trials get the equivalent
+  *"free trial ends…"* wording nudging them to pick a plan.
+- Sends go through `MailService` + `WhatsappService` (WhatsApp is the cheap primary in India).
 
 ## Expiry & Grace Period
 
@@ -114,14 +131,24 @@ sequenceDiagram
 
 ## Restrictions by State
 
-| State | In search? | Receives leads? | Notes |
-|---|---|---|---|
-| TRIAL | Yes (if APPROVED) | Yes | Full access for 30 days |
-| ACTIVE | Yes | Yes | Premium gets boost/priority |
-| EXPIRED | Yes | **No** | Must renew to resume leads |
-| CANCELLED | Yes | **No** | History retained |
+| State | In search? | Receives leads? | Reveal client contact? | Notes |
+|---|---|---|---|---|
+| TRIAL | Yes (if APPROVED) | Yes | **Yes** | Full access for 30 days |
+| ACTIVE | Yes | Yes | **Yes** | Premium gets boost/priority |
+| EXPIRED | Yes | **No** | **No** | Locked → prompt to subscribe/renew (win-back) |
+| CANCELLED | Yes | **No** | **No** | Locked → prompt to subscribe; history retained |
 
 Routing eligibility always also requires `verificationStatus = APPROVED`.
+
+### Contact reveal is subscription-gated
+
+- **Revealing a client's contact details requires an active plan — `subscriptionStatus ∈ {TRIAL, ACTIVE}`**
+  (trial counts as full access). `EXPIRED`/`CANCELLED`/no-plan lawyers see that leads exist but the
+  contact is **locked**, and the dashboard shows a **subscription prompt describing the benefits**
+  (unlock contacts, more/unlimited leads, search visibility, priority routing, premium badge, GST invoice).
+- **Pending lawyers can pre-subscribe.** A lawyer with `verificationStatus = PENDING/UNDER_REVIEW` isn't
+  visible and gets no leads yet, but may **buy a subscription while under review** so they're active the
+  moment they're approved — the dashboard surfaces this as "get set up while we review you."
 
 ## Endpoints
 

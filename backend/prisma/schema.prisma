@@ -90,13 +90,56 @@ model User {
   passwordResetToken     String?   @unique
   passwordResetExpiresAt DateTime?
 
-  lawyer        Lawyer?
-  leads         Lead[]             @relation("ClientLeads")
-  refreshTokens RefreshToken[]
-  ratings       Rating[]
-  documents     CustomerDocument[]
-  bookmarks     Bookmark[]
-  notifications Notification[]
+  // change-mobile flow: OTP is sent to pendingMobile; on verify it becomes `mobile`
+  pendingMobile String?
+
+  avatarUrl String?
+  status    UserStatus @default(ACTIVE)
+  deletedAt DateTime? // soft delete
+
+  lawyer          Lawyer?
+  leads           Lead[]             @relation("ClientLeads")
+  refreshTokens   RefreshToken[]
+  ratings         Rating[]
+  documents       CustomerDocument[]
+  bookmarks       Bookmark[]
+  notifications   Notification[]
+  reportsMade     Report[]           @relation("Reporter")
+  reportsAgainst  Report[]           @relation("ReportedUser")
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWING
+  ACTIONED
+  DISMISSED
+}
+
+// Two-sided reporting: a client can report a lawyer and a lawyer can report a client
+// (usually about a specific contacted lead). Admin reviews and acts.
+model Report {
+  id             String       @id @default(uuid())
+  reporterId     String
+  reporter       User         @relation("Reporter", fields: [reporterId], references: [id])
+  reportedUserId String
+  reportedUser   User         @relation("ReportedUser", fields: [reportedUserId], references: [id])
+  leadId         String? // optional context: the lead they were in contact over
+  reason         String // FAKE_PROFILE, MISCONDUCT, SPAM, NO_SHOW, ABUSIVE, WRONG_INFO, OTHER
+  details        String?
+  status         ReportStatus @default(OPEN)
+  adminNote      String?
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([reportedUserId, status])
+  @@index([status])
 }
 
 model RefreshToken {
@@ -114,6 +157,7 @@ model Lawyer {
   userId               String  @unique
   user                 User    @relation(fields: [userId], references: [id])
   fullName             String
+  slug                 String? @unique // SEO URL: /lawyer/:slug (generated at approval)
   barCouncilNumber     String  @unique
   barCouncilState      String
   experienceYears      Int
@@ -230,6 +274,9 @@ model Lead {
   description  String
   status       LeadStatus    @default(NEW)
   createdAt    DateTime      @default(now())
+
+  clientConfirmedAt DateTime? // client confirmed the lawyer actually made contact
+  closedReason      String? // e.g. WITHDRAWN, HIRED, DECLINED, EXPIRED
 
   rating  Rating?
   history LeadHistory[]
@@ -425,6 +472,19 @@ model Notification {
   createdAt   DateTime            @default(now())
 
   @@index([userId, readAt])
+}
+
+// Editable SEO copy per city × practice-area landing page (keeps content unique, not boilerplate).
+model LandingContent {
+  id           String   @id @default(uuid())
+  citySlug     String
+  practiceSlug String
+  title        String // H1 override
+  intro        String // unique SEO intro copy
+  faqJson      Json? // [{ q, a }]
+  updatedAt    DateTime @updatedAt
+
+  @@unique([citySlug, practiceSlug])
 }
 
 model AuditLog {

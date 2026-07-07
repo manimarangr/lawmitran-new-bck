@@ -27,6 +27,7 @@
         <a href="admin-users.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-users w-4"></i> Users</a>
         <a href="admin-documents.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-folder-open w-4"></i> Documents</a>
         <a href="admin-plans.html" class="nav-item active flex items-center gap-3 px-4 py-2.5 rounded-xl"><i class="fa-solid fa-tags w-4"></i> Plans</a>
+        <a href="admin-moderation.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-flag w-4"></i> Moderation <span class="ml-auto text-[10px] bg-rose-500 text-white font-bold px-2 py-0.5 rounded-full">3</span></a>
         <a href="admin-reports.html" class="nav-item flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-800/60"><i class="fa-solid fa-chart-line w-4"></i> Reports</a>
       </nav>
       <div class="p-4 border-t border-slate-800"><a href="login.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm hover:bg-slate-800/60"><i class="fa-solid fa-arrow-right-from-bracket w-4"></i> Sign out</a></div>
@@ -36,7 +37,11 @@
     <div class="flex-1 flex flex-col min-w-0">
       <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-40">
         <div><h1 class="text-xl font-extrabold text-[#0B192C]">Subscription Plans</h1><p class="text-xs text-slate-400">Manage lawyer plan pricing &amp; features</p></div>
-        <button onclick="openModal()" class="bg-[#0B192C] hover:bg-slate-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2"><i class="fa-solid fa-plus"></i> New plan</button>
+        <div class="flex items-center gap-4">
+          <button onclick="openModal()" class="bg-[#0B192C] hover:bg-slate-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2"><i class="fa-solid fa-plus"></i> New plan</button>
+          <a href="admin-moderation.html" class="relative text-slate-500 hover:text-[#0B192C]" title="Notifications"><i class="fa-solid fa-bell text-lg"></i><span class="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">3</span></a>
+          <div class="w-9 h-9 rounded-full bg-[#0B192C] text-[#C9A24B] flex items-center justify-center font-bold text-sm">SA</div>
+        </div>
       </header>
 
       <main class="p-6 space-y-6">

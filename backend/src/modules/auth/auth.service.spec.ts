@@ -99,22 +99,24 @@ describe('AuthService', () => {
           captchaToken: 'bad-token',
         }),
       ).rejects.toThrow(BadRequestException);
-      expect(prisma.user.findFirst).not.toHaveBeenCalled();
+      expect(prisma.user.findUnique).not.toHaveBeenCalled();
     });
 
     it('sends one mobile OTP and an email link for a CLIENT', async () => {
-      prisma.user.findFirst.mockResolvedValue(null);
+      // duplicate check (email, mobile) → both free; then sendMobileOtp re-reads the user
+      prisma.user.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValue({
+          id: 'user-1',
+          mobile: '9999999999',
+          mobileVerified: false,
+        });
       prisma.user.create.mockResolvedValue({
         id: 'user-1',
         email: 'a@b.com',
         mobile: '9999999999',
         role: Role.CLIENT,
-      });
-      // sendMobileOtp() re-reads the user
-      prisma.user.findUnique.mockResolvedValue({
-        id: 'user-1',
-        mobile: '9999999999',
-        mobileVerified: false,
       });
 
       const result = await service.register({
@@ -138,17 +140,19 @@ describe('AuthService', () => {
     });
 
     it('sends a mobile OTP for a LAWYER too', async () => {
-      prisma.user.findFirst.mockResolvedValue(null);
+      prisma.user.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValue({
+          id: 'user-2',
+          mobile: '9999999998',
+          mobileVerified: false,
+        });
       prisma.user.create.mockResolvedValue({
         id: 'user-2',
         email: 'lawyer@b.com',
         mobile: '9999999998',
         role: Role.LAWYER,
-      });
-      prisma.user.findUnique.mockResolvedValue({
-        id: 'user-2',
-        mobile: '9999999998',
-        mobileVerified: false,
       });
 
       const result = await service.register({
@@ -161,6 +165,26 @@ describe('AuthService', () => {
 
       expect(result.mobileVerificationRequired).toBe(true);
       expect(otp.deliver).toHaveBeenCalledWith('9999999998', '123456');
+    });
+
+    it('rejects a duplicate email with a field-specific 409', async () => {
+      // email taken, mobile free
+      prisma.user.findUnique
+        .mockResolvedValueOnce({ id: 'existing' })
+        .mockResolvedValueOnce(null);
+
+      await expect(
+        service.register({
+          email: 'taken@b.com',
+          mobile: '9999999997',
+          password: 'password123',
+          role: Role.CLIENT,
+          captchaToken: 'good-token',
+        }),
+      ).rejects.toMatchObject({
+        response: { fields: ['email'] },
+      });
+      expect(prisma.user.create).not.toHaveBeenCalled();
     });
   });
 

@@ -61,7 +61,35 @@ experience, "Practice areas: X +N more", verification badge.
 - **Homepage search:** city + practice area → results.
 - **Location search:** by city/state (target: district drill-down).
 - **Practice-area search:** by one or more areas.
+- **Map / "near me" search:** proximity ranking from the user's coordinates (see below).
 - **Combined + filters** on the results page.
+
+## Geolocation & map search ("near me")
+
+The map search page (`lawyer-search-map`) ranks lawyers by distance from the user. This needs coordinates
+on **both** sides:
+
+**1. Lawyer coordinates (stored).** `Lawyer.latitude` / `Lawyer.longitude` are captured at onboarding /
+profile edit — by **geocoding** the lawyer's city + office address (server-side, e.g. a geocoding API) or
+letting the lawyer **drop a pin** on a map. Stored once; used for all proximity queries.
+
+**2. User coordinates (per-request, not stored by default).** The client's location comes from the
+**browser Geolocation API** (`navigator.geolocation.getCurrentPosition`) on an explicit **"Use my
+location"** tap — never silently. Behaviour:
+- Requires the user's OS/browser permission; if **denied or unavailable, fall back to city-based results**
+  (no dead end).
+- The returned `lat/lng` are sent to the search as query params and used only to sort/filter — we do
+  **not** persist a client's precise location unless they opt in (DPDP-minimisation; see
+  [16-security.md](./16-security.md)).
+
+**3. Geo query.** `GET /api/lawyers?lat=<>&lng=<>&radiusKm=<>&sort=distance` — filter to a radius and/or
+sort nearest-first. Compute distance with **Haversine** at small scale, or **PostGIS / geospatial index**
+(and later ElasticSearch geo) at scale. Always still enforce `verificationStatus = APPROVED` and the other
+filters.
+
+> The sample UI (`lawyer-search-map.html`) implements the client side: "Use my location" requests
+> geolocation, drops a "you are here" marker, computes Haversine distance to each lawyer, shows "~X km
+> away" on each card, and sorts nearest-first — with a city-based fallback on denial.
 
 ## Results Page (Search) — UI + Backend Spec
 
@@ -239,9 +267,11 @@ enforced server-side regardless of filters.
 
 ## SEO
 
-- Public pages SSR/ISR with clean slugs (`/lawyers/<city>/<practice-area>`, `/lawyers/:id`).
-- Per-page metadata + JSON-LD (`LegalService` / `Person`), sitemaps, canonical URLs.
-- Showcase and profile pages indexable; dashboards `noindex`.
+- Public pages SSR/ISR with clean slugs (`/lawyers/<city>/<practice-area>`, `/lawyer/<slug>`).
+- Per-page metadata + JSON-LD, sitemaps, canonical URLs; dashboards `noindex`.
+- **Programmatic city × practice landing pages** are the main organic-acquisition play — full spec
+  (URL structure, ISR, JSON-LD, sitemaps, content strategy) in
+  **[24-seo-and-landing-pages.md](./24-seo-and-landing-pages.md)**.
 - Future: **ElasticSearch** for full-text, geo, and faceted search at scale.
 
 ---

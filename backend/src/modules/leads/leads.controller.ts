@@ -11,6 +11,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { CurrentUserPayload } from '../../common/decorators/current-user.decorator';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadStatusDto } from './dto/update-lead-status.dto';
+import { WithdrawLeadDto } from './dto/withdraw-lead.dto';
 import { LeadsService } from './leads.service';
 
 @ApiTags('leads')
@@ -52,5 +53,44 @@ export class LeadsController {
     @Body() dto: UpdateLeadStatusDto,
   ) {
     return this.leadsService.updateStatus(user.userId, id, dto);
+  }
+
+  @Roles(Role.LAWYER)
+  @Post(':id/reveal-contact')
+  @ApiOperation({
+    summary:
+      "Reveal a lead's client contact (requires an active plan; logged for anti-abuse)",
+  })
+  @ApiResponse({ status: 201, description: 'Client mobile + email returned' })
+  revealContact(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+  ) {
+    return this.leadsService.revealContact(user.userId, id);
+  }
+
+  @Roles(Role.CLIENT)
+  @Post(':id/confirm-contact')
+  @ApiOperation({
+    summary: 'Client confirms the lawyer actually made contact',
+  })
+  @ApiResponse({ status: 201, description: 'Lead marked as client-confirmed contacted' })
+  confirmContact(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+  ) {
+    return this.leadsService.confirmContact(user.userId, id);
+  }
+
+  @Roles(Role.CLIENT)
+  @Patch(':id/withdraw')
+  @ApiOperation({ summary: 'Client withdraws their requirement (closes the lead)' })
+  @ApiResponse({ status: 200, description: 'Lead closed as withdrawn' })
+  withdraw(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+    @Body() dto: WithdrawLeadDto,
+  ) {
+    return this.leadsService.withdraw(user.userId, id, dto.reason);
   }
 }

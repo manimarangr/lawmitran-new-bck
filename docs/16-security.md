@@ -8,6 +8,13 @@ sanitisation, security headers, reCAPTCHA); the rest are the target standard.
 - **Password + mobile-OTP registration for both roles; password-only login.** A mobile OTP is sent once at signup to verify the number; login never sends an OTP (keeps SMS cost ~1 per user). Email verification is a free, non-blocking link.
 - Passwords hashed (bcrypt, cost 12) — never stored or logged in plaintext.
 - `ADMIN` accounts cannot be self-registered.
+- **Duplicate handling & enumeration policy:**
+  - *Signup* checks email and mobile **separately** and returns a **field-specific** `409`
+    (`{ message, fields: ['email'|'mobile'] }`) so the form can flag the exact field. Enumeration is
+    acceptable here — the person supplied both values themselves. **No "is this taken?" lookup runs as the
+    user types** (check-at-submit only).
+  - *Forgot-password* stays **enumeration-neutral** (always the same "if an account exists…" reply). The
+    two policies are intentionally different because the threat models differ.
 
 ### Mobile OTP hardening (implemented in `common/otp` + `auth.service`)
 

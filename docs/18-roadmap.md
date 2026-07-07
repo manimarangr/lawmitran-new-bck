@@ -41,6 +41,8 @@ Goal: smarter intake, matching, and assistance.
 - AI Document Generator (conversational template fill).
 - AI Contract Review (clause flagging).
 - AI Legal Assistant (RAG over knowledge base).
+- **Client membership** — freemium plan bundling the AI chatbot + document generation with quotas; keeps
+  find-a-lawyer free. See [23-client-membership.md](./23-client-membership.md).
 - Notifications (multi-channel) and analytics.
 
 ## Phase 4 — Scale
@@ -52,6 +54,9 @@ Goal: reach and resilience.
 - Microservices extraction for hot paths (search, notifications, documents).
 - AI Contract Review at scale.
 - Case tracking (post-introduction engagement lifecycle).
+- **Multi-professional expansion** — "Find Professionals" (CA/CS/GST) on a generalized `Professional`
+  model, with per-body verification and its own advertising-rule review. See
+  [25-multi-professional-expansion.md](./25-multi-professional-expansion.md).
 
 ## At a Glance
 
