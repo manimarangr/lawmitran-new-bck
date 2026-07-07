@@ -7,7 +7,10 @@ import {
   revealContact,
   updateLeadStatus,
 } from '@/lib/api/leads';
+import Link from 'next/link';
 import { fetchMySubscription } from '@/lib/api/subscriptions';
+import { getMyProfile } from '@/lib/api/lawyers';
+import { ReportModal } from '@/components/ReportModal';
 import type { Lead, LeadStatus, RevealedContact } from '@/types/lead';
 
 const badge: Record<LeadStatus, string> = {
@@ -20,9 +23,12 @@ const badge: Record<LeadStatus, string> = {
 export default function LawyerDashboardPage() {
   const qc = useQueryClient();
   const [revealed, setRevealed] = useState<Record<string, RevealedContact>>({});
+  const [reportLead, setReportLead] = useState<string | null>(null);
 
-  const leadsQ = useQuery({ queryKey: ['lawyer-leads'], queryFn: fetchLawyerLeads });
-  const subQ = useQuery({ queryKey: ['my-subscription'], queryFn: fetchMySubscription });
+  const profileQ = useQuery({ queryKey: ['my-lawyer-profile'], queryFn: getMyProfile });
+  const hasProfile = !!profileQ.data;
+  const leadsQ = useQuery({ queryKey: ['lawyer-leads'], queryFn: fetchLawyerLeads, enabled: hasProfile });
+  const subQ = useQuery({ queryKey: ['my-subscription'], queryFn: fetchMySubscription, enabled: hasProfile });
 
   const revealM = useMutation({
     mutationFn: (id: string) => revealContact(id),
@@ -37,6 +43,21 @@ export default function LawyerDashboardPage() {
   const sub = subQ.data;
   const canReveal =
     sub?.subscriptionStatus === 'TRIAL' || sub?.subscriptionStatus === 'ACTIVE';
+
+  // New lawyer without a profile yet → prompt to complete onboarding.
+  if (!profileQ.isLoading && !hasProfile) {
+    return (
+      <main className="mx-auto max-w-2xl px-6 py-16 text-center">
+        <h1 className="text-2xl font-extrabold text-[#0B192C]">Complete your profile</h1>
+        <p className="mt-2 text-sm text-slate-500">
+          Add your Bar Council details and certificate to get verified and start receiving leads.
+        </p>
+        <Link href="/dashboard/onboarding" className="mt-6 inline-block rounded-xl bg-[#C9A24B] px-6 py-3 text-sm font-bold text-[#0B192C] hover:bg-[#b58f3f]">
+          Complete profile
+        </Link>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-8">
@@ -108,7 +129,7 @@ export default function LawyerDashboardPage() {
                       Reveal contact
                     </button>
                   ) : (
-                    <a href="/lawyers/plan" className="rounded-lg bg-[#C9A24B] px-4 py-2 text-sm font-bold text-[#0B192C] hover:bg-[#b58f3f]">
+                    <a href="/dashboard/plan" className="rounded-lg bg-[#C9A24B] px-4 py-2 text-sm font-bold text-[#0B192C] hover:bg-[#b58f3f]">
                       Subscribe to reveal contact
                     </a>
                   )
@@ -129,11 +150,18 @@ export default function LawyerDashboardPage() {
                     Mark as closed
                   </button>
                 )}
+                {contact && (
+                  <button onClick={() => setReportLead(lead.id)} className="ml-auto text-xs font-medium text-slate-400 hover:text-rose-500">
+                    Report client
+                  </button>
+                )}
               </div>
             </div>
           );
         })}
       </div>
+
+      {reportLead && <ReportModal leadId={reportLead} who="client" onClose={() => setReportLead(null)} />}
     </main>
   );
 }

@@ -35,7 +35,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </Link>
           <div className="flex items-center gap-6 text-sm font-medium">
             <Link href="/dashboard/lawyer" className="text-slate-600 hover:text-[#0B192C]">Leads</Link>
+            <Link href="/dashboard/plan" className="text-slate-600 hover:text-[#0B192C]">Subscription</Link>
             <Link href="/lawyers" className="text-slate-600 hover:text-[#0B192C]">Find Lawyers</Link>
+            <Link href="/dashboard/notifications" className="text-slate-600 hover:text-[#0B192C]" aria-label="Notifications">Notifications</Link>
+            <Link href="/dashboard/settings" className="text-slate-600 hover:text-[#0B192C]">Settings</Link>
             <button onClick={logout} className="font-semibold text-rose-600 hover:underline">Log out</button>
           </div>
         </div>

@@ -2,7 +2,9 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
+import { useState } from 'react';
 import { confirmContact, fetchMyLeads, withdrawLead } from '@/lib/api/leads';
+import { ReportModal } from '@/components/ReportModal';
 import type { Lead, LeadStatus } from '@/types/lead';
 
 const badge: Record<LeadStatus, string> = {
@@ -14,6 +16,7 @@ const badge: Record<LeadStatus, string> = {
 
 export default function ClientDashboardPage() {
   const qc = useQueryClient();
+  const [reportLead, setReportLead] = useState<string | null>(null);
   const leadsQ = useQuery({ queryKey: ['my-leads'], queryFn: fetchMyLeads });
 
   const confirmM = useMutation({
@@ -86,10 +89,15 @@ export default function ClientDashboardPage() {
               {lead.clientConfirmedAt && (
                 <span className="text-xs font-semibold text-green-600">✓ Contact confirmed</span>
               )}
+              <button onClick={() => setReportLead(lead.id)} className="ml-auto text-xs font-medium text-slate-400 hover:text-rose-500">
+                Report lawyer
+              </button>
             </div>
           </div>
         ))}
       </div>
+
+      {reportLead && <ReportModal leadId={reportLead} who="lawyer" onClose={() => setReportLead(null)} />}
     </main>
   );
 }

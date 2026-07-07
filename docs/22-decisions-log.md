@@ -96,6 +96,15 @@ remain the authoritative detail.
   marketing). → [21](./21-improvement-backlog.md)
 - **Report a lawyer** action + admin moderation (proposed) — client-facing report modal built. → [21](./21-improvement-backlog.md)
 
+## 8b. Frontend (Next.js) — built this cycle
+
+The `frontend/` Next.js 16 app was wired to the live API: SEO routes (`/lawyers/[city]/[area]`,
+`/lawyer/[slug]`, sitemap, robots, root metadata), the auth flow (signup → OTP → login, password reset),
+lawyer + client dashboards (lead inbox with subscription-gated reveal, confirm/withdraw), lawyer
+onboarding/profile submit, settings (password/mobile-OTP/avatar/delete), and notifications — all via a
+shared `authFetch` + react-query pattern. Session tokens are in `localStorage` today (httpOnly-cookie
+hardening is a follow-up). Full detail: [26-frontend-implementation.md](./26-frontend-implementation.md).
+
 ## 9. Config flags introduced
 
 | Env | Default | Purpose |

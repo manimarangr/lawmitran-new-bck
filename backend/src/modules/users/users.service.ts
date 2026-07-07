@@ -198,11 +198,32 @@ export class UsersService {
   // ---------- Reports (two-sided) ----------
 
   async createReport(reporterId: string, dto: CreateReportDto) {
-    if (dto.reportedUserId === reporterId) {
+    let reportedUserId = dto.reportedUserId;
+
+    // Resolve the counterparty from the lead if not given directly.
+    if (!reportedUserId) {
+      if (!dto.leadId) {
+        throw new BadRequestException('reportedUserId or leadId is required');
+      }
+      const lead = await this.prisma.lead.findUnique({
+        where: { id: dto.leadId },
+        include: { lawyer: { select: { userId: true } } },
+      });
+      if (!lead) throw new NotFoundException('Lead not found');
+      if (lead.clientId === reporterId) {
+        reportedUserId = lead.lawyer.userId; // client reports the lawyer
+      } else if (lead.lawyer.userId === reporterId) {
+        reportedUserId = lead.clientId; // lawyer reports the client
+      } else {
+        throw new ForbiddenException('You were not party to this lead');
+      }
+    }
+
+    if (reportedUserId === reporterId) {
       throw new BadRequestException('You cannot report yourself');
     }
     const reported = await this.prisma.user.findUnique({
-      where: { id: dto.reportedUserId },
+      where: { id: reportedUserId },
       select: { id: true },
     });
     if (!reported) throw new NotFoundException('Reported user not found');
@@ -210,12 +231,45 @@ export class UsersService {
     return this.prisma.report.create({
       data: {
         reporterId,
-        reportedUserId: dto.reportedUserId,
+        reportedUserId,
         leadId: dto.leadId,
         reason: dto.reason,
         details: dto.details,
       },
     });
+  }
+
+  // ---------- Admin: user management ----------
+
+  adminListUsers(role?: string, status?: UserStatus) {
+    return this.prisma.user.findMany({
+      where: {
+        ...(role ? { role: role as never } : {}),
+        ...(status ? { status } : {}),
+      },
+      select: {
+        id: true,
+        email: true,
+        mobile: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+  }
+
+  async adminSetUserStatus(id: string, status: UserStatus) {
+    await this.prisma.user.update({ where: { id }, data: { status } });
+    if (status !== UserStatus.ACTIVE) {
+      // suspended/deleted → revoke sessions
+      await this.prisma.refreshToken.updateMany({
+        where: { userId: id, revoked: false },
+        data: { revoked: true },
+      });
+    }
+    return { success: true };
   }
 
   adminListReports(status?: ReportStatus) {

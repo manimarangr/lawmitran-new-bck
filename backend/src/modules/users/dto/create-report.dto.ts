@@ -12,9 +12,12 @@ const REASONS = [
 ] as const;
 
 export class CreateReportDto {
-  @ApiProperty({ description: 'User being reported (lawyer or client)' })
+  @ApiPropertyOptional({
+    description: 'User being reported. Omit and pass leadId to auto-resolve the counterparty.',
+  })
+  @IsOptional()
   @IsString()
-  reportedUserId: string;
+  reportedUserId?: string;
 
   @ApiPropertyOptional({ description: 'Lead the two parties were in contact over' })
   @IsOptional()

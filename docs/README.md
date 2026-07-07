@@ -47,6 +47,7 @@ This `docs/` folder is the product + engineering reference.
 | 23 | [Client Membership](./23-client-membership.md) | Freemium client plan: AI legal chatbot + dynamic document generation; plans/quotas, schema, endpoints, legal framing, phasing |
 | 24 | [SEO & Landing Pages](./24-seo-and-landing-pages.md) | Slugged URLs, programmatic city×practice pages, JSON-LD, sitemaps/robots, canonical/pagination, content + internal linking |
 | 25 | [Multi-Professional Expansion](./25-multi-professional-expansion.md) | Future "Find Professionals" — CA/CS/GST; generalized Professional model, per-body verification, discovery vs productized services, phasing |
+| 26 | [Frontend Implementation](./26-frontend-implementation.md) | **What's built** in the Next.js app: route map, API/auth layer, SEO routes, wired-vs-remaining, run steps |
 
 ## Tech stack (target)
 
