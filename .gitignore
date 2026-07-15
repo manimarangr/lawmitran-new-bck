@@ -17,10 +17,16 @@ out/
 *.tsbuildinfo
 
 # Environment / secrets
+# Each app owns its own env; there is no root .env anymore.
 .env
 .env.*
+backend/.env
+frontend/.env.local
+# Keep templates tracked
 !.env.example
 !.env.*.example
+!backend/.env.example
+!frontend/.env.example
 *.pem
 *.key
 secrets.*

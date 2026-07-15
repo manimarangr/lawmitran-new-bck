@@ -41,14 +41,15 @@ docker compose -f infra/docker/compose.yml -f infra/docker/compose.prod.override
 
 ## Environment variables
 
-Each stack reads the repo-root `.env` (`env_file: ../../.env`). On each server this file differs per environment (distinct DB name, secrets, `NEXT_PUBLIC_API_BASE_URL`, buckets) — see [docs/devops/10-environment-variables.md](../../docs/devops/10-environment-variables.md). Key build-time / runtime vars:
+Each app owns its env file: the backend reads `backend/.env` and the frontend reads `frontend/.env.local` (`env_file:` in the base compose). There is no root `.env` dependency. Postgres/MinIO container credentials come from compose interpolation defaults (or the shell). See [docs/devops/10-environment-variables.md](../../docs/devops/10-environment-variables.md). Key build-time / runtime vars:
 
 | Variable | Used by | Notes |
 |---|---|---|
 | `IMAGE_TAG` | qa/prod | Commit SHA of the image to run (rollback = older SHA) |
 | `GHCR_OWNER` | qa/prod | GHCR namespace for pulled images |
-| `NEXT_PUBLIC_API_BASE_URL` | frontend build | Baked at build time (per environment) |
-| `POSTGRES_*`, `S3_*`, `JWT_*`, `REDIS_URL` | services | From `.env` |
+| `NEXT_PUBLIC_API_URL` | frontend build | Baked at build time (per environment) |
+| `POSTGRES_*` | postgres/minio containers | compose interpolation (defaults provided) |
+| `DATABASE_URL`, `S3_*`, `JWT_*` | backend | From `backend/.env` |
 
 ## Port map
 

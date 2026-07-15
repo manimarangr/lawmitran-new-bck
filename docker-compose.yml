@@ -39,7 +39,7 @@ services:
     build:
       context: ./backend
     restart: unless-stopped
-    env_file: .env
+    env_file: ./backend/.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -50,7 +50,7 @@ services:
     build:
       context: ./frontend
     restart: unless-stopped
-    env_file: .env
+    env_file: ./frontend/.env.local
     depends_on:
       - backend
     ports:

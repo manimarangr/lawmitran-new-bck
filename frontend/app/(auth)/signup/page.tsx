@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { register as registerUser, type Role } from '@/lib/api/auth';
 import Icon from '@/components/ui/Icon';
+import Captcha, { type CaptchaHandle } from '@/components/ui/Captcha';
 
 const schema = z.object({
   fullName: z.string().min(2, 'Enter your full name'),
@@ -31,6 +32,12 @@ function SignupForm() {
   );
   const [error, setError] = useState('');
   const [showPw, setShowPw] = useState(false);
+  const [captcha, setCaptcha] = useState({ token: '', required: false });
+  const captchaRef = useRef<CaptchaHandle>(null);
+  const onCaptcha = useCallback(
+    (token: string, required: boolean) => setCaptcha({ token, required }),
+    [],
+  );
 
   const {
     register,
@@ -40,6 +47,10 @@ function SignupForm() {
 
   async function onSubmit(data: FormValues) {
     setError('');
+    if (captcha.required && !captcha.token) {
+      setError('Please complete the captcha to continue.');
+      return;
+    }
     try {
       await registerUser({
         fullName: data.fullName,
@@ -50,12 +61,13 @@ function SignupForm() {
         acceptTerms: true,
         acceptProcessing: true,
         marketingOptIn: data.marketing ?? false,
-        // TODO: integrate reCAPTCHA (react-google-recaptcha) and pass the real token
-        captchaToken: 'dev-token',
+        // Real reCAPTCHA token when enabled; placeholder is ignored server-side
+        // when reCAPTCHA is disabled in admin settings.
+        captchaToken: captcha.token || 'dev-token',
       });
-      // register sends the OTP; go verify the mobile
       router.push(`/verify-otp?mobile=${encodeURIComponent(data.mobile)}&role=${role}`);
     } catch (err) {
+      captchaRef.current?.reset();
       setError(err instanceof Error ? err.message : 'Signup failed');
     }
   }
@@ -70,7 +82,6 @@ function SignupForm() {
       <h1 className="text-2xl font-extrabold text-navy">Create your account</h1>
       <p className="mb-6 mt-1 text-sm text-slate-500">Choose how you want to use LawMitran.</p>
 
-      {/* role toggle */}
       <div role="radiogroup" aria-label="Account type" className="mb-6 grid grid-cols-2 gap-3">
         {roles.map((r) => {
           const active = role === r.value;
@@ -294,12 +305,14 @@ function SignupForm() {
           You can withdraw consent or delete your account anytime from Settings.
         </p>
 
+        <Captcha ref={captchaRef} onChange={onCaptcha} />
+
         <button
           type="submit"
           disabled={isSubmitting}
           className="w-full rounded-xl bg-navy py-3.5 font-bold text-white shadow-md transition-colors hover:bg-slate-800 disabled:opacity-60"
         >
-          {isSubmitting ? 'Creating…' : 'Create account'}
+          {isSubmitting ? 'Creating...' : 'Create account'}
         </button>
       </form>
 

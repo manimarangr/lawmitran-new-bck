@@ -18,10 +18,15 @@ export interface LoginResponse {
   twoFaRequired?: boolean;
 }
 
-export function login(email: string, password: string, rememberMe: boolean) {
+export function login(
+  email: string,
+  password: string,
+  rememberMe: boolean,
+  captchaToken?: string,
+) {
   return apiFetch<LoginResponse>('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, password, rememberMe }),
+    body: JSON.stringify({ email, password, rememberMe, captchaToken }),
   });
 }
 
@@ -69,10 +74,10 @@ export function verifyMobileOtp(mobile: string, code: string) {
   });
 }
 
-export function forgotPassword(email: string) {
+export function forgotPassword(email: string, captchaToken?: string) {
   return apiFetch<{ message: string }>('/auth/forgot-password', {
     method: 'POST',
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, captchaToken }),
   });
 }
 

@@ -41,8 +41,9 @@ Cross-cutting (`src/common`): storage (S3/MinIO), mail, SMS, WhatsApp, payments 
 # install dependencies
 npm install
 
-# copy env template and fill in secrets
-cp .env.example .env
+# copy per-app env templates and fill in secrets (each app owns its own env)
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
 
 # start infra (Postgres, Redis, MinIO, nginx)
 docker compose up -d postgres redis minio
@@ -50,8 +51,9 @@ docker compose up -d postgres redis minio
 # apply database schema
 npx prisma migrate dev --schema backend/prisma/schema.prisma
 
-# run the backend in watch mode
+# run the apps in watch mode
 npm run dev:backend
+npm run dev:frontend
 ```
 
 The API is served under `/api`, with Swagger docs at `/api/docs`.
@@ -84,7 +86,45 @@ docker compose up -d
 
 ## Environment variables
 
-See `.env.example` for the full list (database, Redis, S3/MinIO, JWT secrets, rate limiting, reCAPTCHA, Razorpay, frontend API base URL).
+Each application owns its own environment file — there is **no root `.env`**. Copy the templates and fill in values:
+
+### Backend
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Loaded automatically by `@nestjs/config` and Prisma (both run with `backend/` as the working directory). Required / core variables:
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `NODE_ENV` | Runtime mode | `development` |
+| `PORT` | API port | `3001` |
+| `FRONTEND_ORIGIN` | CORS origin + email links | `http://localhost:3000` |
+| `DATABASE_URL` | PostgreSQL connection (Prisma) | — |
+| `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | Token signing | — |
+| `JWT_ACCESS_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN` / `JWT_REFRESH_EXPIRES_IN_LONG` | Token lifetimes | `15m` / `7d` / `30d` |
+| `S3_ENDPOINT` / `S3_REGION` / `S3_BUCKET` / `S3_ACCESS_KEY` / `S3_SECRET_KEY` / `S3_FORCE_PATH_STYLE` | MinIO / S3 storage | — / `us-east-1` / `lawmitran-documents` / — / — / `true` |
+| `RATE_LIMIT_MAX` / `RATE_LIMIT_WINDOW_MS` | Default rate limit | `100` / `60000` |
+| `ADMIN_EMAIL` / `ADMIN_MOBILE` / `ADMIN_PASSWORD` | Admin seed (`prisma/seed.ts`) | — |
+| `AWARD_CC_*` / `AWARD_TR_*` / `AWARD_RS_*` | Lawyer award thresholds | see example |
+| `REDIS_URL` | Reserved (container runs; not yet consumed by backend code) | `redis://localhost:6379` |
+
+Integration keys (Razorpay, SMTP/email, reCAPTCHA, SMS, WhatsApp, AI, GST, business rules) are **managed in the Admin console** and stored in the database; the corresponding env vars in `backend/.env.example` are an optional fallback/bootstrap. See the commented section of that file.
+
+### Frontend
+
+```bash
+cp frontend/.env.example frontend/.env.local
+```
+
+Next.js auto-loads `frontend/.env.local` for local development. `NEXT_PUBLIC_*` values are inlined at build time (never put secrets here):
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | Backend API base URL | `http://localhost:3001/api` |
+| `NEXT_PUBLIC_SITE_URL` | Canonical URL for SEO / sitemap / robots | `https://www.lawmitran.com` |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps key for lawyer search (optional) | _(empty)_ |
 
 ## Documentation
 

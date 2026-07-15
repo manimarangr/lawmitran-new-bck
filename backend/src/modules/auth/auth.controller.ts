@@ -69,7 +69,7 @@ export class AuthController {
   @RateLimit(5, 60_000)
   @Post('forgot-password')
   forgotPassword(@Body() dto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(dto.email);
+    return this.authService.forgotPassword(dto.email, dto.captchaToken);
   }
 
   @Public()

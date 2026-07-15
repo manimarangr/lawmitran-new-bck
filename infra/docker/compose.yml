@@ -56,7 +56,7 @@ services:
     # Prebuilt image (pulled in qa/prod). dev override adds a local build.
     image: ghcr.io/${GHCR_OWNER:-lawmitran}/lawmitran-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
-    env_file: ../../.env
+    env_file: ../../backend/.env
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -71,7 +71,7 @@ services:
   frontend:
     image: ghcr.io/${GHCR_OWNER:-lawmitran}/lawmitran-frontend:${IMAGE_TAG:-latest}
     restart: unless-stopped
-    env_file: ../../.env
+    env_file: ../../frontend/.env.local
     depends_on:
       backend: { condition: service_healthy }
     networks: [lawmitran]

@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { forgotPassword } from '@/lib/api/auth';
 import Icon from '@/components/ui/Icon';
+import Captcha, { type CaptchaHandle } from '@/components/ui/Captcha';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -16,6 +17,12 @@ type FormValues = z.infer<typeof schema>;
 export default function ForgotPasswordPage() {
   const [sentTo, setSentTo] = useState('');
   const [error, setError] = useState('');
+  const [captcha, setCaptcha] = useState({ token: '', required: false });
+  const captchaRef = useRef<CaptchaHandle>(null);
+  const onCaptcha = useCallback(
+    (token: string, required: boolean) => setCaptcha({ token, required }),
+    [],
+  );
 
   const {
     register,
@@ -25,10 +32,15 @@ export default function ForgotPasswordPage() {
 
   async function onSubmit(data: FormValues) {
     setError('');
+    if (captcha.required && !captcha.token) {
+      setError('Please complete the captcha to continue.');
+      return;
+    }
     try {
-      await forgotPassword(data.email);
+      await forgotPassword(data.email, captcha.token || undefined);
       setSentTo(data.email);
     } catch {
+      captchaRef.current?.reset();
       setError('Something went wrong. Please try again.');
     }
   }
@@ -99,12 +111,14 @@ export default function ForgotPasswordPage() {
           </p>
         )}
 
+        <Captcha ref={captchaRef} onChange={onCaptcha} />
+
         <button
           type="submit"
           disabled={isSubmitting}
           className="w-full rounded-xl bg-navy py-3.5 font-bold text-white shadow-md transition-colors hover:bg-slate-800 disabled:opacity-60"
         >
-          {isSubmitting ? 'Sending…' : 'Send reset link'}
+          {isSubmitting ? 'Sending...' : 'Send reset link'}
         </button>
       </form>
 

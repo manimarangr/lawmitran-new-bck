@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useCallback, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { login, loginTwoFa } from '@/lib/api/auth';
 import Icon from '@/components/ui/Icon';
+import Captcha, { type CaptchaHandle } from '@/components/ui/Captcha';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -27,6 +28,12 @@ function LoginForm() {
   const [showPw, setShowPw] = useState(false);
   const [twoFa, setTwoFa] = useState<{ email: string; password: string; rememberMe: boolean } | null>(null);
   const [code, setCode] = useState('');
+  const [captcha, setCaptcha] = useState({ token: '', required: false });
+  const captchaRef = useRef<CaptchaHandle>(null);
+  const onCaptcha = useCallback(
+    (token: string, required: boolean) => setCaptcha({ token, required }),
+    [],
+  );
 
   const {
     register,
@@ -35,10 +42,8 @@ function LoginForm() {
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   function finish(res: { role: string; accessToken?: string; refreshToken?: string }) {
-    // Store tokens — swap for a proper session/cookie strategy in production
     localStorage.setItem('accessToken', res.accessToken!);
     localStorage.setItem('refreshToken', res.refreshToken!);
-    // Straight to the right dashboard for the role
     router.push(
       res.role === 'ADMIN'
         ? '/admin'
@@ -50,15 +55,24 @@ function LoginForm() {
 
   async function onSubmit(data: FormValues) {
     setError('');
+    if (captcha.required && !captcha.token) {
+      setError('Please complete the captcha to continue.');
+      return;
+    }
     try {
-      const res = await login(data.email, data.password, data.rememberMe ?? false);
+      const res = await login(
+        data.email,
+        data.password,
+        data.rememberMe ?? false,
+        captcha.token || undefined,
+      );
       if (res.twoFaRequired) {
-        // Admin 2FA — a code was emailed; ask for it before issuing the session.
         setTwoFa({ email: data.email, password: data.password, rememberMe: data.rememberMe ?? false });
         return;
       }
       finish(res);
     } catch (err) {
+      captchaRef.current?.reset();
       setError(err instanceof Error ? err.message : 'Login failed');
     }
   }
@@ -95,7 +109,7 @@ function LoginForm() {
           inputMode="numeric"
           maxLength={6}
           aria-label="6-digit admin login code"
-          placeholder="••••••"
+          placeholder="######"
           className="mt-6 w-40 rounded-xl border border-gray-200 py-3 text-center text-2xl font-bold tracking-[0.4em] text-navy focus:border-gold focus:outline-none"
         />
         <button
@@ -164,7 +178,7 @@ function LoginForm() {
               id="password"
               type={showPw ? 'text' : 'password'}
               autoComplete="current-password"
-              placeholder="••••••••"
+              placeholder="Your password"
               aria-invalid={!!errors.password}
               aria-describedby={errors.password ? 'password-error' : undefined}
               {...register('password')}
@@ -201,12 +215,14 @@ function LoginForm() {
           </p>
         )}
 
+        <Captcha ref={captchaRef} onChange={onCaptcha} />
+
         <button
           type="submit"
           disabled={isSubmitting}
           className="w-full rounded-xl bg-navy py-3.5 font-bold text-white shadow-md transition-colors hover:bg-slate-800 disabled:opacity-60"
         >
-          {isSubmitting ? 'Signing in…' : 'Sign in'}
+          {isSubmitting ? 'Signing in...' : 'Sign in'}
         </button>
       </form>
 
@@ -236,4 +252,3 @@ export default function LoginPage() {
     </Suspense>
   );
 }
-

@@ -10,6 +10,11 @@ export class LoginDto {
   @IsOptional()
   @IsBoolean()
   rememberMe?: boolean;
+
+  /** reCAPTCHA token — only enforced when reCAPTCHA is enabled in admin settings. */
+  @IsOptional()
+  @IsString()
+  captchaToken?: string;
 }
 
 export class LoginTwoFaDto extends LoginDto {

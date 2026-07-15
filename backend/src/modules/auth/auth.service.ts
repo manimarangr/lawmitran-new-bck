@@ -120,6 +120,11 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
+    const captchaValid = await this.recaptcha.verify(dto.captchaToken);
+    if (!captchaValid) {
+      throw new BadRequestException('Captcha verification failed');
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -206,7 +211,12 @@ export class AuthService {
     return { role: user.role, ...tokens };
   }
 
-  async forgotPassword(email: string) {
+  async forgotPassword(email: string, captchaToken?: string) {
+    const captchaValid = await this.recaptcha.verify(captchaToken);
+    if (!captchaValid) {
+      throw new BadRequestException('Captcha verification failed');
+    }
+
     const user = await this.prisma.user.findUnique({ where: { email } });
     const SAFE_RESPONSE = {
       message: 'If an account with that email exists, a reset link has been sent.',
