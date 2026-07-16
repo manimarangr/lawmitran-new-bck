@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { getSitemapFeed } from '@/lib/api/seo';
+import { guideSlugs } from '@/lib/legal-guides/guides';
+import { categorySlugs } from '@/lib/legal-guides/categories';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
@@ -11,6 +13,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/lawyers`, changeFrequency: 'daily', priority: 0.9 },
     { url: `${SITE_URL}/faq`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE_URL}/legal-documents`, changeFrequency: 'weekly', priority: 0.6 },
+    { url: `${SITE_URL}/legal-guides`, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${SITE_URL}/legal-guides/all`, changeFrequency: 'weekly', priority: 0.5 },
+    ...categorySlugs().map((slug) => ({
+      url: `${SITE_URL}/legal-guides/category/${slug}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    })),
+    ...guideSlugs().map((slug) => ({
+      url: `${SITE_URL}/legal-guides/${slug}`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })),
   ];
 
   try {

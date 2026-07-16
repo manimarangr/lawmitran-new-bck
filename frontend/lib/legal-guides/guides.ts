@@ -1,0 +1,995 @@
+/**
+ * Legal Guides content (SEO-friendly legal-awareness articles for India).
+ * Each guide follows a fixed 12-part visible structure; SEO metadata, JSON-LD,
+ * and internal links are generated from these fields by the page components.
+ * Content is general information, not legal advice.
+ */
+export interface GuideFAQ {
+  q: string;
+  a: string;
+}
+export interface GuideStep {
+  title: string;
+  detail: string;
+}
+export interface GuideLink {
+  href: string;
+  label: string;
+}
+export interface LegalGuide {
+  slug: string;
+  category: string;
+  title: string;
+  seoTitle: string; // <= 60 chars
+  metaDescription: string; // <= 155 chars
+  published: string; // ISO date
+  updated: string; // ISO date
+  readMins: number;
+  intro: string;
+  whoShouldRead: string[];
+  whatLawSays: string[];
+  steps: GuideStep[];
+  documents: string[];
+  fees: string[];
+  timeline: string;
+  mistakes: string[];
+  faqs: GuideFAQ[];
+  whenConsult: string[];
+  related: GuideLink[];
+}
+
+export const GUIDE_DISCLAIMER =
+  'This article is for general informational purposes only and is not legal advice. Laws, fees, and procedures can change and may vary by state and the specific facts of your case. Please consult a qualified lawyer before acting.';
+
+/** Byline shown on every guide (E-E-A-T). Replace GUIDE_REVIEWER with a real,
+ *  verified advocate before publishing widely. */
+export const GUIDE_AUTHOR = {
+  name: 'LawMitran Legal Content Team',
+  url: '/about',
+};
+export const GUIDE_REVIEWER = {
+  name: 'Adv. LawMitran Panel',
+  title: 'Advocate, reviewed for accuracy',
+};
+
+export const GUIDES: LegalGuide[] = [
+  {
+    slug: 'cheque-bounce-case-section-138',
+    category: 'banking-finance',
+    title: 'Cheque Bounce Case in India: Section 138 Explained',
+    seoTitle: 'Cheque Bounce Case (Section 138): Simple Guide',
+    metaDescription:
+      'What to do when a cheque bounces in India: Section 138 notice, timelines, documents, fees, and how to file a case. Plain-English guide.',
+    published: '2026-06-01',
+    updated: '2026-07-15',
+    readMins: 8,
+    intro:
+      'A bounced (dishonoured) cheque is one of the most common money disputes in India. If a cheque you received is returned unpaid for reasons like insufficient funds, the law gives you a specific remedy under Section 138 of the Negotiable Instruments Act, 1881. This guide explains, in simple language, what the law says, the strict timelines you must follow, and the steps to recover your money.',
+    whoShouldRead: [
+      'Anyone who received a cheque that was returned unpaid by the bank.',
+      'Businesses and freelancers whose payment cheques have bounced.',
+      'People who gave a cheque and received a legal notice, and want to understand their position.',
+    ],
+    whatLawSays: [
+      'Section 138 of the Negotiable Instruments Act, 1881 makes dishonour of a cheque a criminal offence when the cheque was issued to discharge a legally enforceable debt or liability.',
+      'The cheque must be presented to the bank within its validity period (generally three months from the date on the cheque).',
+      'On dishonour, the payee must send a written demand notice to the drawer within 30 days of receiving the bank return memo, demanding payment of the cheque amount.',
+      'The drawer gets 15 days from receiving the notice to pay. Only if payment is not made within these 15 days does a cause of action to file a complaint arise.',
+      'Punishment can extend to imprisonment up to two years, or a fine up to twice the cheque amount, or both. Courts can also award compensation.',
+    ],
+    steps: [
+      { title: 'Present the cheque', detail: 'Deposit the cheque within its validity. If it bounces, collect the bank return/dishonour memo stating the reason.' },
+      { title: 'Send the legal notice', detail: 'Within 30 days of the return memo, send a demand notice (usually through an advocate) to the drawer by registered post/courier, keeping proof of dispatch and delivery.' },
+      { title: 'Wait 15 days', detail: 'Give the drawer 15 days from delivery of the notice to pay. If they pay, the matter ends.' },
+      { title: 'File the complaint', detail: 'If unpaid, file a criminal complaint under Section 138 before the appropriate Magistrate within one month of the 15-day period expiring.' },
+      { title: 'Attend the proceedings', detail: 'The court issues summons to the drawer. Evidence, your affidavit, and cross-examination follow before a decision.' },
+    ],
+    documents: [
+      'The original dishonoured cheque.',
+      'The bank return/dishonour memo.',
+      'A copy of the legal demand notice with postal receipts and delivery proof.',
+      'Proof of the underlying debt or liability (invoice, agreement, loan record, ledger).',
+      'Your ID and address proof.',
+    ],
+    fees: [
+      'Advocate professional fees, which vary by lawyer and city.',
+      'Court fees for a Section 138 complaint are relatively nominal and depend on the state and cheque amount.',
+      'Notice dispatch charges (registered post/courier).',
+    ],
+    timeline:
+      'The notice stage is fixed by law (30 + 15 days). After filing, the case duration varies widely with court workload and cooperation of parties, often several months and sometimes longer.',
+    mistakes: [
+      'Missing the 30-day window to send the demand notice after the return memo.',
+      'Not keeping proof that the notice was dispatched and delivered.',
+      'Filing the complaint too early (before 15 days) or too late (after the one-month limitation).',
+      'Having no document to show the cheque was for a legally enforceable debt.',
+      'Filing in the wrong court (jurisdiction is usually where the payee bank branch is located).',
+    ],
+    faqs: [
+      { q: 'What is the time limit to send a cheque bounce notice?', a: 'You must send the written demand notice within 30 days of receiving the bank return memo. Missing this window can defeat your Section 138 case.' },
+      { q: 'How long do I give the other person to pay?', a: 'Fifteen days from the date they receive the notice. A complaint can only be filed if they do not pay within these 15 days.' },
+      { q: 'Is cheque bounce a criminal or civil matter?', a: 'Section 138 is a criminal offence. You can separately pursue a civil recovery suit for the money, and many people do both.' },
+      { q: 'Can I file the case myself without a lawyer?', a: 'You can, but the strict timelines, notice drafting, and evidence rules make errors costly. Most people use a lawyer for a Section 138 case.' },
+      { q: 'What if the cheque bounced due to a signature mismatch?', a: 'Section 138 covers dishonour for insufficient funds or if the amount exceeds an arrangement. Some other reasons may need legal advice on whether Section 138 applies.' },
+    ],
+    whenConsult: [
+      'The notice window is closing or has passed and you are unsure of your options.',
+      'The cheque amount is large or linked to a complex transaction.',
+      'You received a Section 138 notice and need to respond correctly.',
+      'You want to pursue both criminal (138) and civil recovery together.',
+    ],
+    related: [
+      { href: '/legal-documents', label: 'Send a legal notice using a ready template' },
+      { href: '/lawyers', label: 'Find a verified lawyer for cheque bounce cases' },
+    ],
+  },
+  {
+    slug: 'rent-agreement-registration-india',
+    category: 'property-real-estate',
+    title: 'Rent Agreement Registration in India: A Simple Guide',
+    seoTitle: 'Rent Agreement Registration in India: Guide',
+    metaDescription:
+      'When a rent agreement must be registered in India, stamp duty, documents, fees, timelines, and common mistakes. Plain-English guide.',
+    published: '2026-06-01',
+    updated: '2026-07-15',
+    readMins: 7,
+    intro:
+      'A rent or lease agreement records the terms between a landlord and tenant. In India, whether it must be registered depends mainly on the lease period. This guide explains, in simple language, when registration is required, how stamp duty works, and the steps to do it correctly so your agreement holds up if there is ever a dispute.',
+    whoShouldRead: [
+      'Tenants and landlords entering a residential or commercial rental.',
+      'Anyone signing a lease longer than 11 months.',
+      'People who want their agreement to be valid evidence in court.',
+    ],
+    whatLawSays: [
+      'Under the Registration Act, 1908, a lease of immovable property from year to year, or for a term exceeding one year, generally must be registered.',
+      'To avoid mandatory registration, many rental agreements in India are made for 11 months, though practice varies by state and local law.',
+      'Stamp duty is payable under the Indian Stamp Act, 1899 and applicable state stamp laws; the rate and computation vary by state.',
+      'An agreement that is required to be registered but is not may be inadmissible as evidence of its terms in court.',
+      'Some states have their own tenancy or rent-control laws that add requirements, such as police intimation or model tenancy provisions.',
+    ],
+    steps: [
+      { title: 'Draft the agreement', detail: 'Set out rent, deposit, duration, notice period, maintenance, and other terms clearly.' },
+      { title: 'Pay stamp duty', detail: 'Execute the agreement on e-stamp paper or pay stamp duty as prescribed by your state.' },
+      { title: 'Decide on registration', detail: 'For leases over 11 months (or as your state requires), book an appointment at the Sub-Registrar office.' },
+      { title: 'Register', detail: 'Both parties and two witnesses attend the Sub-Registrar with documents; biometrics/photos are captured and the agreement is registered.' },
+      { title: 'Keep records', detail: 'Retain the registered copy and stamp/registration receipts safely.' },
+    ],
+    documents: [
+      'Identity and address proof of landlord and tenant (Aadhaar, PAN, passport, etc.).',
+      'Passport-size photographs of both parties.',
+      'Proof of ownership of the property (sale deed, tax receipt, or as accepted locally).',
+      'Two witnesses with their ID proof (for registration).',
+      'The agreement on e-stamp paper of the correct value.',
+    ],
+    fees: [
+      'Stamp duty, which varies by state and is often based on rent and deposit or lease value.',
+      'Registration fee charged by the Sub-Registrar (varies by state).',
+      'Optional service/facilitation charges if you use an agent or online service.',
+    ],
+    timeline:
+      'A ready agreement can often be registered within a day to a few days, depending on Sub-Registrar appointment availability in your city.',
+    mistakes: [
+      'Signing a long lease (over 11 months) without registering it.',
+      'Paying the wrong stamp duty value for your state.',
+      'Leaving key terms vague, such as notice period, deposit refund, or maintenance.',
+      'Not keeping the registered copy and payment receipts.',
+      'Assuming a notarized agreement is the same as a registered one.',
+    ],
+    faqs: [
+      { q: 'Is an 11-month rent agreement valid without registration?', a: 'In many states an 11-month agreement is commonly used and not compulsorily registrable, but rules vary. Leases over a year generally must be registered.' },
+      { q: 'Who pays the stamp duty and registration charges?', a: 'This is a matter of agreement between the parties; commonly the tenant pays, but it can be shared. Confirm and write it into the agreement.' },
+      { q: 'Does a rent agreement need to be notarized?', a: 'Notarization is not the same as registration. For short agreements some people notarize; for long leases, registration is what gives legal strength.' },
+      { q: 'Can I register a rent agreement online?', a: 'Several states offer online stamp duty payment and e-registration or facilitation. Availability and process vary by state.' },
+      { q: 'What happens if my lease is not registered?', a: 'If registration was required, the document may not be accepted as evidence of its terms, which weakens your position in a dispute.' },
+    ],
+    whenConsult: [
+      'The lease is for more than 11 months or is a commercial property.',
+      'The deposit or rent is high, or the terms are complex.',
+      'You are unsure of your state stamp duty or registration rules.',
+      'There is an existing dispute about an unregistered agreement.',
+    ],
+    related: [
+      { href: '/legal-documents', label: 'Create a rental agreement from a template' },
+      { href: '/lawyers', label: 'Find a verified property lawyer' },
+    ],
+  },
+  {
+    slug: 'how-to-file-consumer-complaint-india',
+    category: 'consumer-rights',
+    title: 'How to File a Consumer Complaint in India',
+    seoTitle: 'How to File a Consumer Complaint in India',
+    metaDescription:
+      'File a consumer complaint under the Consumer Protection Act 2019: where to file, documents, fees, timelines, e-Daakhil, and mistakes to avoid.',
+    published: '2026-06-01',
+    updated: '2026-07-15',
+    readMins: 7,
+    intro:
+      'If you paid for a product or service and received something defective, deficient, or unfair, the Consumer Protection Act, 2019 lets you seek a remedy without heavy legal cost. This guide explains, in plain language, where to file, what you need, and how the process works so you can act with confidence.',
+    whoShouldRead: [
+      'Anyone who bought a defective product or received poor service.',
+      'People facing unfair trade practices, false claims, or refused refunds.',
+      'Buyers on e-commerce platforms with delivery or quality issues.',
+    ],
+    whatLawSays: [
+      'The Consumer Protection Act, 2019 protects consumers against defective goods, deficient services, and unfair trade practices.',
+      'Complaints are filed before Consumer Commissions at District, State, or National level based on the value of goods/services and compensation claimed (pecuniary limits are set by rules and have been revised over time).',
+      'A complaint must generally be filed within two years from the date the cause of action arose, unless the delay is condoned for sufficient reason.',
+      'Consumers can file online through the e-Daakhil portal, or physically before the relevant Commission.',
+      'Reliefs can include refund, replacement, removal of defect, compensation, and discontinuation of unfair practices.',
+    ],
+    steps: [
+      { title: 'Raise it with the seller first', detail: 'Send a written complaint to the company and keep their reply (or note the lack of one).' },
+      { title: 'Identify the right Commission', detail: 'Pick District, State, or National level based on the value and compensation claimed.' },
+      { title: 'Draft the complaint', detail: 'State the facts, the defect/deficiency, and the exact relief you want, supported by documents.' },
+      { title: 'File it', detail: 'Submit online via e-Daakhil or in person, paying the prescribed fee.' },
+      { title: 'Attend hearings', detail: 'The opposite party is notified and files a reply; evidence and arguments follow before an order.' },
+    ],
+    documents: [
+      'Bill, invoice, or proof of purchase/payment.',
+      'Warranty/guarantee card if applicable.',
+      'Photos or evidence of the defect or deficiency.',
+      'Copies of complaints and correspondence with the seller.',
+      'Your ID and a clear statement of the relief claimed.',
+    ],
+    fees: [
+      'A nominal filing fee based on the value slab of the claim.',
+      'Optional advocate fees (many consumers file without a lawyer).',
+    ],
+    timeline:
+      'The law aims for time-bound disposal, but actual timelines depend on the Commission workload and the parties. Simple matters may resolve faster than contested ones.',
+    mistakes: [
+      'Filing before the wrong Commission (wrong pecuniary level).',
+      'Missing the two-year limitation period.',
+      'Not keeping the bill or proof of purchase.',
+      'Being vague about the exact relief claimed.',
+      'Skipping written communication with the seller before filing.',
+    ],
+    faqs: [
+      { q: 'Where do I file a consumer complaint?', a: 'Before a District, State, or National Consumer Commission depending on the value of goods/services and the compensation you claim.' },
+      { q: 'Can I file a consumer complaint online?', a: 'Yes. The e-Daakhil portal allows online filing of consumer complaints in India.' },
+      { q: 'Is there a time limit to file?', a: 'Generally two years from when the cause of action arose. Delay can be condoned only with sufficient reason.' },
+      { q: 'Do I need a lawyer to file?', a: 'No, consumer forums are designed to be accessible without a lawyer, though you may engage one for complex or high-value matters.' },
+      { q: 'What compensation can I get?', a: 'Depending on the case: refund, replacement, defect removal, and compensation for loss or harassment, at the Commission discretion.' },
+    ],
+    whenConsult: [
+      'The claim is high-value or the facts are complex.',
+      'The opposite party has strong legal representation.',
+      'You are unsure which Commission has jurisdiction.',
+      'You need help drafting the complaint and evidence.',
+    ],
+    related: [
+      { href: '/legal-documents', label: 'Draft a consumer complaint or legal notice' },
+      { href: '/lawyers', label: 'Find a verified consumer-law lawyer' },
+    ],
+  },
+
+  {
+    slug: "mutual-consent-divorce-india",
+    category: "family-law",
+    title: "Mutual Consent Divorce in India: Step-by-Step",
+    seoTitle: "Mutual Consent Divorce in India: Simple Guide",
+    metaDescription:
+      "Mutual consent divorce in India: eligibility, the two-motion process, cooling-off period, documents, fees, and timelines. Plain-English guide.",
+    published: "2026-06-15",
+    updated: "2026-07-15",
+    readMins: 8,
+    intro:
+      "When both spouses agree to separate, mutual consent divorce is usually the fastest and least stressful route. This guide explains, in simple language, who can file, the two-stage court process, the cooling-off period, and the paperwork involved so you know what to expect.",
+    whoShouldRead: [
+      "Couples who both agree to end the marriage amicably.",
+      "Anyone wanting to understand alimony, custody, and settlement before filing.",
+      "People who want a faster alternative to a contested divorce.",
+    ],
+    whatLawSays: [
+      "Section 13B of the Hindu Marriage Act, 1955 allows divorce by mutual consent for Hindus; the Special Marriage Act, 1954 covers civil and inter-faith marriages, and other communities have their own laws.",
+      "The couple must have lived separately for at least one year and agree that the marriage cannot continue.",
+      "The process has two motions: a first motion (joint petition) and a second motion after a cooling-off period, generally six months (extendable to eighteen).",
+      "The Supreme Court has held the six-month cooling-off period can be waived in suitable cases, at the court's discretion.",
+      "Terms like alimony, child custody, and division of assets are settled by agreement and recorded by the court.",
+    ],
+    steps: [
+      { title: "File the joint petition", detail: "Both spouses file a joint petition for divorce by mutual consent before the family court having jurisdiction." },
+      { title: "First motion and statements", detail: "The court records both parties statements confirming consent." },
+      { title: "Cooling-off period", detail: "A period (usually six months) follows, which the court may waive in appropriate cases." },
+      { title: "Second motion", detail: "Both parties appear again to confirm consent and the settlement terms." },
+      { title: "Decree of divorce", detail: "If satisfied, the court grants the decree dissolving the marriage." },
+    ],
+    documents: [
+      "Marriage certificate or proof of marriage.",
+      "Address and identity proof of both spouses.",
+      "Photographs from the marriage.",
+      "Proof of separate residence for the required period.",
+      "The settlement terms on alimony, custody, and assets.",
+    ],
+    fees: [
+      "Court fees, which are modest and vary by state.",
+      "Advocate fees, which vary by lawyer and city.",
+    ],
+    timeline:
+      "With cooperation, the process often takes around six to eighteen months, and can be shorter if the cooling-off period is waived. Timelines vary by court workload.",
+    mistakes: [
+      "Not putting alimony, custody, and asset terms clearly in writing.",
+      "Assuming the divorce is instant; the two-motion process takes time.",
+      "One spouse withdrawing consent, which stalls the petition.",
+      "Filing in the wrong family court.",
+    ],
+    faqs: [
+      { q: "How long does a mutual consent divorce take in India?", a: "Commonly six to eighteen months. The cooling-off period between the two motions can be waived by the court in suitable cases." },
+      { q: "Can the six-month waiting period be waived?", a: "Yes. The Supreme Court has held the cooling-off period is not mandatory and can be waived where the court is satisfied." },
+      { q: "Can one spouse cancel after the first motion?", a: "Yes. Consent must continue until the decree; if one party withdraws, mutual consent divorce cannot proceed." },
+      { q: "Do we need separate lawyers?", a: "Not necessarily, but each spouse may prefer independent advice, especially on alimony and custody." },
+    ],
+    whenConsult: [
+      "There is disagreement about alimony, custody, or property.",
+      "One spouse may withdraw consent.",
+      "Your marriage is governed by a personal law you are unsure about.",
+      "You want the settlement drafted correctly to avoid future disputes.",
+    ],
+    related: [
+      { href: "/lawyers", label: "Find a verified family lawyer" },
+      { href: "/legal-guides/category/family-law", label: "More Family Law guides" },
+    ],
+  },
+  {
+    slug: "how-to-file-fir-india",
+    category: "criminal-law",
+    title: "How to File an FIR in India",
+    seoTitle: "How to File an FIR in India: Step-by-Step Guide",
+    metaDescription:
+      "How to file an FIR in India: what an FIR is, zero FIR, the police process, what to do if police refuse, documents, and your rights.",
+    published: "2026-06-15",
+    updated: "2026-07-15",
+    readMins: 7,
+    intro:
+      "An FIR (First Information Report) is the first step in setting the criminal law in motion when a serious (cognizable) offence takes place. This guide explains, in plain language, how to file an FIR, what a Zero FIR is, and what to do if the police refuse to register your complaint.",
+    whoShouldRead: [
+      "Anyone who is a victim of or witness to a cognizable offence like theft, assault, or fraud.",
+      "People whose complaint the police have refused to register.",
+      "Anyone who wants to understand their rights at a police station.",
+    ],
+    whatLawSays: [
+      "An FIR is registered for cognizable offences, where police can investigate without prior court permission.",
+      "The law requires the police to register an FIR for a cognizable offence; the Supreme Court has held registration is mandatory in such cases.",
+      "A Zero FIR can be filed at any police station regardless of jurisdiction, and is later transferred to the correct station.",
+      "For non-cognizable offences, the police record the information and you may need to approach a Magistrate.",
+      "If police refuse to register an FIR, you can approach a senior police officer or file a complaint before the Magistrate.",
+    ],
+    steps: [
+      { title: "Go to the police station", detail: "Report the incident, ideally at the station with jurisdiction, or file a Zero FIR anywhere." },
+      { title: "Give your statement", detail: "Narrate the facts clearly; the officer records them in writing." },
+      { title: "Read and sign", detail: "Read the recorded FIR carefully before signing to ensure it matches your statement." },
+      { title: "Get a free copy", detail: "You are entitled to a free copy of the FIR; keep it safe." },
+      { title: "Escalate if refused", detail: "If registration is refused, approach the Superintendent of Police or file a complaint before the Magistrate." },
+    ],
+    documents: [
+      "Your identity proof.",
+      "Any evidence you have (photos, messages, medical records, documents).",
+      "Details of the incident: date, time, place, and persons involved.",
+    ],
+    fees: [
+      "Filing an FIR is free.",
+      "You may incur lawyer fees only if you escalate to court.",
+    ],
+    timeline:
+      "An FIR should be registered promptly for a cognizable offence. Investigation and any trial that follows take their own time depending on the case.",
+    mistakes: [
+      "Delaying without a reason, which can raise questions later.",
+      "Signing the FIR without reading whether it matches your statement.",
+      "Not collecting the free FIR copy.",
+      "Giving vague facts instead of specific details.",
+    ],
+    faqs: [
+      { q: "Can police refuse to register an FIR?", a: "For a cognizable offence, registration is generally mandatory. If refused, approach a senior officer or the Magistrate." },
+      { q: "What is a Zero FIR?", a: "An FIR that can be filed at any police station irrespective of jurisdiction; it is transferred to the correct station later." },
+      { q: "Is there a fee to file an FIR?", a: "No. Filing an FIR is free of cost." },
+      { q: "Can I file an FIR online?", a: "Several states allow online complaints or e-FIRs for certain offences; availability varies by state." },
+    ],
+    whenConsult: [
+      "The police refuse to register your FIR.",
+      "The offence is serious or you fear for your safety.",
+      "You are named as an accused and need to respond.",
+      "You want to pursue the case in court.",
+    ],
+    related: [
+      { href: "/lawyers", label: "Find a verified criminal lawyer" },
+      { href: "/legal-guides/category/criminal-law", label: "More Criminal Law guides" },
+    ],
+  },
+  {
+    slug: "unpaid-salary-full-final-settlement-india",
+    category: "employment",
+    title: "Unpaid Salary and Full & Final Settlement",
+    seoTitle: "Unpaid Salary & Full and Final Settlement Guide",
+    metaDescription:
+      "Employer not paying salary or F&F dues in India? Your rights, who to complain to, documents, notice, and timelines. Plain-English guide.",
+    published: "2026-06-15",
+    updated: "2026-07-15",
+    readMins: 6,
+    intro:
+      "If your employer has not paid your salary, notice-period dues, or full and final settlement, the law gives you ways to recover it. This guide explains, in simple language, your rights and the practical steps to claim unpaid wages in India.",
+    whoShouldRead: [
+      "Employees whose salary or dues have been withheld.",
+      "People who resigned and are waiting on a full and final settlement.",
+      "Workers unsure where to complain about unpaid wages.",
+    ],
+    whatLawSays: [
+      "The Payment of Wages Act, 1936 requires timely payment of wages and restricts unauthorised deductions for covered employees.",
+      "Newer labour codes consolidate wage laws; specific rights depend on your role and salary level.",
+      "For many employees, the Labour Commissioner or labour authority can help recover wage dues.",
+      "Higher-paid or managerial staff may need to pursue recovery through a civil suit or other remedies.",
+      "Your employment contract and company policy also govern notice pay and settlement timelines.",
+    ],
+    steps: [
+      { title: "Ask in writing", detail: "Send a polite written request (email/letter) for the pending amount and a settlement statement." },
+      { title: "Send a legal notice", detail: "If ignored, send a formal legal notice demanding payment within a set time." },
+      { title: "Complain to the authority", detail: "Approach the Labour Commissioner or the appropriate authority for wage recovery, if eligible." },
+      { title: "Escalate", detail: "If unresolved, consider a civil recovery suit or other legal remedy with a lawyer." },
+    ],
+    documents: [
+      "Appointment letter and employment contract.",
+      "Salary slips and bank statements showing non-payment.",
+      "Resignation and relieving correspondence.",
+      "Emails or messages about the pending dues.",
+    ],
+    fees: [
+      "Complaints to labour authorities are usually low-cost or free.",
+      "Advocate fees apply if you send a legal notice or file a suit.",
+    ],
+    timeline:
+      "Simple cases may resolve within weeks after a notice; disputed matters before authorities or courts take longer.",
+    mistakes: [
+      "Relying only on verbal requests with no written record.",
+      "Not keeping salary slips and the appointment letter.",
+      "Approaching the wrong forum for your employment category.",
+      "Waiting too long to act.",
+    ],
+    faqs: [
+      { q: "Who do I complain to about unpaid salary?", a: "Often the Labour Commissioner or wage authority for covered employees; higher-paid staff may use a civil recovery route. It depends on your role." },
+      { q: "Can I claim notice-period pay?", a: "Yes, if your contract provides for it or the employer failed to follow agreed terms. Keep your contract handy." },
+      { q: "How long does an employer have to settle F&F?", a: "Timelines depend on company policy and contract; a common industry practice is within a set number of days of the last working day." },
+      { q: "Do I need a lawyer to recover unpaid wages?", a: "Not always for labour-authority complaints, but a lawyer helps for legal notices, disputed claims, and civil suits." },
+    ],
+    whenConsult: [
+      "The employer denies dues or the amount is large.",
+      "You are unsure which forum applies to your role.",
+      "You received a legal notice from the employer.",
+      "You need to file a recovery suit.",
+    ],
+    related: [
+      { href: "/legal-documents", label: "Send a legal notice for unpaid dues" },
+      { href: "/lawyers", label: "Find a verified employment lawyer" },
+    ],
+  },
+  {
+    slug: "how-to-register-company-india",
+    category: "business-startup",
+    title: "How to Register a Company in India (Pvt Ltd / LLP)",
+    seoTitle: "How to Register a Company in India: Simple Guide",
+    metaDescription:
+      "Register a Private Limited company or LLP in India: structure, MCA process, DSC/DIN, SPICe+, documents, fees, and timelines. Plain-English guide.",
+    published: "2026-06-15",
+    updated: "2026-07-15",
+    readMins: 7,
+    intro:
+      "Choosing the right structure and registering it correctly gives your business legal standing, limited liability, and credibility. This guide explains, in simple language, how to register a Private Limited company or an LLP in India through the Ministry of Corporate Affairs.",
+    whoShouldRead: [
+      "Founders starting a startup or small business.",
+      "Anyone deciding between a Private Limited company and an LLP.",
+      "People who want to understand the registration steps and cost.",
+    ],
+    whatLawSays: [
+      "Private Limited companies are governed by the Companies Act, 2013 and registered with the Ministry of Corporate Affairs (MCA).",
+      "Limited Liability Partnerships are governed by the LLP Act, 2008.",
+      "Directors need a Director Identification Number (DIN) and a Digital Signature Certificate (DSC) for online filing.",
+      "Company incorporation is done through the MCA SPICe+ form, which also bundles PAN, TAN, and other registrations.",
+      "Both structures offer limited liability, but compliance requirements differ.",
+    ],
+    steps: [
+      { title: "Choose a structure", detail: "Decide between Private Limited (better for raising funds) and LLP (simpler compliance)." },
+      { title: "Get DSC and DIN", detail: "Obtain Digital Signature Certificates for directors/partners and DIN where required." },
+      { title: "Reserve a name", detail: "Apply for and reserve a unique company/LLP name through the MCA portal." },
+      { title: "File incorporation", detail: "Submit the SPICe+ (company) or FiLLiP (LLP) forms with the required documents." },
+      { title: "Receive the certificate", detail: "On approval, get the Certificate of Incorporation with PAN and TAN." },
+    ],
+    documents: [
+      "PAN and identity/address proof of directors or partners.",
+      "Passport-size photographs.",
+      "Proof of registered office address (utility bill and NOC/rent agreement).",
+      "Memorandum and Articles of Association (for a company) or LLP agreement.",
+    ],
+    fees: [
+      "Government/MCA fees, which vary by authorised capital and state stamp duty.",
+      "Professional fees for a CA/CS/lawyer to file, which vary.",
+    ],
+    timeline:
+      "With documents ready, incorporation is often completed within a few working days to a couple of weeks, depending on approvals.",
+    mistakes: [
+      "Choosing the wrong structure for your funding plans.",
+      "Picking a name that clashes with an existing company or trademark.",
+      "Incomplete address proof or NOC for the registered office.",
+      "Ignoring post-incorporation compliance (filings, GST, etc.).",
+    ],
+    faqs: [
+      { q: "Private Limited or LLP: which is better?", a: "Private Limited suits startups planning to raise investment; LLP suits smaller businesses wanting simpler compliance. It depends on your goals." },
+      { q: "How long does company registration take?", a: "Often a few working days to a couple of weeks once documents and name approval are in place." },
+      { q: "Do I need a lawyer or CA/CS?", a: "You can file yourself, but a professional reduces errors on documents, MOA/AOA, and compliance." },
+      { q: "Can a single person register a company?", a: "Yes, through a One Person Company (OPC) or a proprietorship/LLP structure, each with its own rules." },
+    ],
+    whenConsult: [
+      "You are unsure which structure fits your funding and tax plans.",
+      "You have foreign directors or investment.",
+      "You need shareholder or founder agreements drafted.",
+      "You want ongoing compliance handled correctly.",
+    ],
+    related: [
+      { href: "/legal-documents", label: "Create founder and partnership agreements" },
+      { href: "/lawyers", label: "Find a verified corporate lawyer" },
+    ],
+  },
+  {
+    slug: "report-cyber-fraud-online-scam-india",
+    category: "cyber-crime",
+    title: "How to Report Cyber Fraud and Online Scams",
+    seoTitle: "Report Cyber Fraud & Online Scam in India: Guide",
+    metaDescription:
+      "Victim of online fraud or UPI scam in India? Report on the 1930 helpline and cybercrime.gov.in, the steps to freeze funds, documents, and rights.",
+    published: "2026-06-15",
+    updated: "2026-07-15",
+    readMins: 6,
+    intro:
+      "Online scams, UPI fraud, and phishing are rising fast. Acting quickly gives you the best chance to freeze and recover money. This guide explains, in simple language, how and where to report cyber fraud in India and what evidence to keep.",
+    whoShouldRead: [
+      "Anyone who lost money to an online, UPI, or card scam.",
+      "Victims of phishing, fake links, or social-media fraud.",
+      "People who want to know the fastest way to report and freeze funds.",
+    ],
+    whatLawSays: [
+      "The Information Technology Act, 2000 and provisions of the criminal law cover cyber fraud and related offences.",
+      "The national cyber crime helpline number 1930 and the portal cybercrime.gov.in are the primary channels to report financial cyber fraud.",
+      "Fast reporting helps authorities and banks attempt to freeze the fraudulent transaction.",
+      "You can also file an FIR at a cyber cell or police station for serious offences.",
+      "Banks have grievance and fraud-reporting mechanisms; timely intimation is important.",
+    ],
+    steps: [
+      { title: "Call 1930 immediately", detail: "Report financial cyber fraud on the helpline as soon as possible to improve the chance of freezing funds." },
+      { title: "Report online", detail: "File a complaint on cybercrime.gov.in with transaction details and evidence." },
+      { title: "Inform your bank", detail: "Notify your bank/UPI app fraud channel and request a block or reversal." },
+      { title: "Preserve evidence", detail: "Save screenshots, messages, transaction IDs, and any links used." },
+      { title: "File an FIR if needed", detail: "For serious cases, approach a cyber cell or police station to register an FIR." },
+    ],
+    documents: [
+      "Transaction details: date, time, amount, UPI/UTR or reference numbers.",
+      "Screenshots of messages, calls, or fake websites.",
+      "Bank statements showing the fraudulent debit.",
+      "Your identity proof.",
+    ],
+    fees: [
+      "Reporting on 1930 and cybercrime.gov.in is free.",
+      "Lawyer fees apply only if you pursue further legal action.",
+    ],
+    timeline:
+      "Report within the first hours for the best chance to freeze funds. Investigation and recovery depend on the case and cooperation of banks.",
+    mistakes: [
+      "Waiting before reporting, which reduces the chance of freezing funds.",
+      "Deleting messages or transaction records.",
+      "Sharing OTPs or passwords with anyone claiming to help.",
+      "Not informing the bank promptly.",
+    ],
+    faqs: [
+      { q: "What number do I call for cyber fraud in India?", a: "The national cyber crime helpline is 1930. You can also report on cybercrime.gov.in." },
+      { q: "Can I get my money back after a UPI scam?", a: "Sometimes, if reported fast enough to freeze the transaction. Recovery is not guaranteed and depends on timing and the banks." },
+      { q: "Should I file an FIR too?", a: "For serious or high-value fraud, yes. Approach a cyber cell or police station in addition to the online complaint." },
+      { q: "What evidence should I keep?", a: "Screenshots, transaction IDs/UTR numbers, messages, phone numbers, and any links or websites involved." },
+    ],
+    whenConsult: [
+      "The amount is large or the fraud is complex.",
+      "The bank or platform is not cooperating.",
+      "You are wrongly accused in a cyber matter.",
+      "You need to pursue recovery or a criminal case.",
+    ],
+    related: [
+      { href: "/lawyers", label: "Find a verified cyber-law lawyer" },
+      { href: "/legal-guides/category/cyber-crime", label: "More Cyber Crime guides" },
+    ],
+  },
+  {
+    slug: "motor-accident-claim-mact-india",
+    category: "motor-vehicle",
+    title: "Motor Accident Compensation Claim (MACT)",
+    seoTitle: "Motor Accident Claim (MACT) in India: Guide",
+    metaDescription:
+      "Claim compensation after a road accident in India through the Motor Accident Claims Tribunal: who can claim, process, documents, and timelines.",
+    published: "2026-06-15",
+    updated: "2026-07-15",
+    readMins: 7,
+    intro:
+      "A road accident can cause injury, disability, or loss of life, along with medical bills and lost income. The law provides compensation through the Motor Accident Claims Tribunal. This guide explains, in simple language, who can claim and how the process works.",
+    whoShouldRead: [
+      "People injured in a road accident.",
+      "Families who lost a member in a motor accident.",
+      "Anyone wanting to understand insurance and compensation claims.",
+    ],
+    whatLawSays: [
+      "The Motor Vehicles Act, 1988 provides for compensation claims through the Motor Accident Claims Tribunal (MACT).",
+      "Claims can be filed by the injured person, or by legal heirs in case of death.",
+      "Compensation considers medical expenses, loss of income, disability, and, in fatal cases, loss of dependency.",
+      "Third-party motor insurance is compulsory, and the insurer is usually a party to the claim.",
+      "There are also provisions for interim and no-fault relief in certain cases.",
+    ],
+    steps: [
+      { title: "Get medical care and records", detail: "Prioritise treatment and preserve all medical bills and reports." },
+      { title: "Ensure an FIR is filed", detail: "A police report/FIR of the accident supports the claim." },
+      { title: "Collect documents", detail: "Gather vehicle, insurance, and accident details of the vehicles involved." },
+      { title: "File the claim petition", detail: "Submit a claim before the MACT having jurisdiction, usually with a lawyer." },
+      { title: "Attend hearings", detail: "Evidence on injury, income, and expenses is presented before the tribunal decides compensation." },
+    ],
+    documents: [
+      "FIR and accident/police records.",
+      "Medical bills, reports, and disability certificate if any.",
+      "Proof of income (salary slips, income tax returns).",
+      "Vehicle and insurance details of the vehicles involved.",
+      "Identity proof and, in fatal cases, legal-heir proof.",
+    ],
+    fees: [
+      "Court/tribunal fees, which vary.",
+      "Advocate fees, often arranged case by case.",
+    ],
+    timeline:
+      "The law encourages time-bound disposal, but actual timelines depend on evidence, insurer response, and tribunal workload.",
+    mistakes: [
+      "Not preserving medical bills and the FIR.",
+      "Delaying the claim without reason.",
+      "Understating income or expenses due to missing proof.",
+      "Filing before the wrong tribunal.",
+    ],
+    faqs: [
+      { q: "Who can file a motor accident claim?", a: "The injured person, or the legal heirs of a person who died in the accident, can claim compensation before the MACT." },
+      { q: "Is third-party insurance compulsory?", a: "Yes, third-party motor insurance is mandatory, and the insurer is usually part of the claim." },
+      { q: "What compensation can I get?", a: "It depends on medical costs, loss of income, disability, and, in fatal cases, dependency loss, as assessed by the tribunal." },
+      { q: "Do I need a lawyer for a MACT claim?", a: "It is strongly advisable, as evidence on injury and income and dealing with insurers can be technical." },
+    ],
+    whenConsult: [
+      "There is serious injury, disability, or a death.",
+      "The insurer disputes or delays the claim.",
+      "You are unsure how to prove income or expenses.",
+      "You received a claim against you.",
+    ],
+    related: [
+      { href: "/lawyers", label: "Find a verified motor accident lawyer" },
+      { href: "/legal-guides/category/motor-vehicle", label: "More Motor Vehicle guides" },
+    ],
+  },
+  {
+    slug: "gst-registration-small-business-india",
+    category: "tax-gst",
+    title: "GST Registration for Small Businesses in India",
+    seoTitle: "GST Registration for Small Business: Simple Guide",
+    metaDescription:
+      "When GST registration is required in India, thresholds, the online process on the GST portal, documents, fees, and common mistakes.",
+    published: "2026-06-15",
+    updated: "2026-07-15",
+    readMins: 6,
+    intro:
+      "GST registration lets your business collect tax, claim input credit, and trade with larger clients. This guide explains, in simple language, when registration is required, how to register online, and what documents you need.",
+    whoShouldRead: [
+      "Small business owners, traders, and service providers.",
+      "Freelancers unsure whether they must register.",
+      "Anyone selling online or to GST-registered clients.",
+    ],
+    whatLawSays: [
+      "GST is governed by the Central Goods and Services Tax Act, 2017 and related state Acts.",
+      "Registration is required when turnover crosses the prescribed threshold, which differs for goods and services and by state; some categories must register regardless of turnover.",
+      "Registration is done online at the official GST portal, gst.gov.in.",
+      "Registered businesses charge GST, file returns, and can claim input tax credit.",
+      "The Composition Scheme offers simpler compliance for eligible small taxpayers.",
+    ],
+    steps: [
+      { title: "Check if you must register", detail: "Confirm whether your turnover or business type requires GST registration." },
+      { title: "Gather documents", detail: "Keep PAN, address proof, bank details, and business documents ready." },
+      { title: "Apply online", detail: "Submit the registration application on the GST portal with your details." },
+      { title: "Verification", detail: "Complete verification (including any e-verification) as prompted." },
+      { title: "Receive GSTIN", detail: "On approval, you get a GST Identification Number (GSTIN) and certificate." },
+    ],
+    documents: [
+      "PAN of the business or proprietor.",
+      "Identity and address proof of the owner/partners/directors.",
+      "Proof of business address (utility bill, rent agreement, NOC).",
+      "Bank account details or a cancelled cheque.",
+      "Business registration documents where applicable.",
+    ],
+    fees: [
+      "Government registration is free on the GST portal.",
+      "Professional fees apply only if you use a CA or agent.",
+    ],
+    timeline:
+      "If documents are in order and verification is smooth, registration is often granted within a few working days.",
+    mistakes: [
+      "Not registering after crossing the threshold.",
+      "Wrong or mismatched address proof.",
+      "Choosing the wrong scheme (regular vs composition).",
+      "Ignoring return-filing duties after registration.",
+    ],
+    faqs: [
+      { q: "Is GST registration mandatory for small businesses?", a: "Only above the prescribed turnover threshold or for certain categories; the threshold differs for goods, services, and states." },
+      { q: "How much does GST registration cost?", a: "It is free on the official GST portal. You only pay if you hire a professional to help." },
+      { q: "How long does GST registration take?", a: "Often a few working days when documents are correct and verification is completed." },
+      { q: "What is the Composition Scheme?", a: "A simpler, lower-compliance option for eligible small taxpayers, with some restrictions on input credit and interstate sales." },
+    ],
+    whenConsult: [
+      "You are unsure whether you must register.",
+      "You have interstate or e-commerce sales.",
+      "You need help choosing a scheme or filing returns.",
+      "You received a GST notice.",
+    ],
+    related: [
+      { href: "/lawyers", label: "Find a verified tax lawyer or advisor" },
+      { href: "/legal-guides/category/tax-gst", label: "More Tax & GST guides" },
+    ],
+  },
+  {
+    slug: "senior-citizen-maintenance-rights-india",
+    category: "senior-citizen-rights",
+    title: "Senior Citizen Maintenance Rights in India",
+    seoTitle: "Senior Citizen Maintenance Rights in India: Guide",
+    metaDescription:
+      "How parents and senior citizens can claim maintenance under the 2007 Act, the tribunal process, documents, and reclaiming gifted property.",
+    published: "2026-06-15",
+    updated: "2026-07-15",
+    readMins: 6,
+    intro:
+      "Older parents and senior citizens have a legal right to be maintained by their children or relatives. This guide explains, in simple language, the protections under the law, how to claim maintenance quickly, and how gifted property can sometimes be reclaimed.",
+    whoShouldRead: [
+      "Senior citizens and parents not being cared for or supported.",
+      "Elderly persons who transferred property and are now neglected.",
+      "Family members wanting to understand these protections.",
+    ],
+    whatLawSays: [
+      "The Maintenance and Welfare of Parents and Senior Citizens Act, 2007 lets parents and senior citizens claim maintenance from children or relatives.",
+      "Claims are decided by a Maintenance Tribunal through a relatively quick, low-cost process.",
+      "The Act aims for time-bound orders and provides for monthly maintenance.",
+      "If property was gifted on the condition of care and the senior is neglected, the transfer may be declared void by the tribunal in appropriate cases.",
+      "State rules add procedures such as designated officers and old-age home provisions.",
+    ],
+    steps: [
+      { title: "Apply to the tribunal", detail: "The senior citizen (or an authorised person) applies to the Maintenance Tribunal for their area." },
+      { title: "Notice to relatives", detail: "The tribunal notifies the children or relatives to respond." },
+      { title: "Hearing", detail: "Both sides are heard; the process is meant to be simple and quick." },
+      { title: "Maintenance order", detail: "The tribunal may order monthly maintenance and, where relevant, address neglected property transfers." },
+    ],
+    documents: [
+      "Identity and age proof of the senior citizen.",
+      "Proof of relationship with the children/relatives.",
+      "Details of income and needs.",
+      "Any property transfer or gift documents, if relevant.",
+    ],
+    fees: [
+      "The tribunal process is designed to be low-cost.",
+      "Lawyers are often not required, though you may seek help.",
+    ],
+    timeline:
+      "The law aims for a speedy, time-bound decision; actual timelines vary by tribunal.",
+    mistakes: [
+      "Not knowing that a special, faster tribunal exists.",
+      "Missing property-transfer documents when claiming neglect.",
+      "Applying to the wrong tribunal.",
+      "Assuming a long court battle is the only option.",
+    ],
+    faqs: [
+      { q: "Can parents claim maintenance from children in India?", a: "Yes. The 2007 Act lets parents and senior citizens claim maintenance from children or relatives through a special tribunal." },
+      { q: "Can gifted property be taken back?", a: "In appropriate cases, if the property was gifted on a condition of care and the senior is neglected, the tribunal may declare the transfer void." },
+      { q: "Do I need a lawyer?", a: "The process is designed to be accessible without a lawyer, though you may seek assistance for complex situations." },
+      { q: "Where do I apply?", a: "To the Maintenance Tribunal designated for your area under the state rules." },
+    ],
+    whenConsult: [
+      "There is a dispute over gifted property.",
+      "The family contests the maintenance claim.",
+      "You are unsure which tribunal has jurisdiction.",
+      "There are safety or abuse concerns.",
+    ],
+    related: [
+      { href: "/lawyers", label: "Find a verified lawyer for senior citizen matters" },
+      { href: "/legal-guides/category/senior-citizen-rights", label: "More Senior Citizen guides" },
+    ],
+  },
+  {
+    slug: "domestic-violence-protection-pwdva-india",
+    category: "women-rights",
+    title: "Protection from Domestic Violence (PWDVA 2005)",
+    seoTitle: "Domestic Violence Protection in India: PWDVA Guide",
+    metaDescription:
+      "Rights and remedies under the Protection of Women from Domestic Violence Act 2005: who is protected, reliefs, process, and where to get help.",
+    published: "2026-06-15",
+    updated: "2026-07-15",
+    readMins: 6,
+    intro:
+      "Domestic violence is not limited to physical harm; it includes emotional, economic, and other abuse. The law offers civil protections and reliefs to keep women safe. This guide explains, in simple language, the rights and remedies available and how to seek them.",
+    whoShouldRead: [
+      "Women facing abuse in a domestic relationship.",
+      "Family or friends supporting someone at risk.",
+      "Anyone wanting to understand protection orders and reliefs.",
+    ],
+    whatLawSays: [
+      "The Protection of Women from Domestic Violence Act, 2005 protects women in a domestic relationship from physical, emotional, sexual, and economic abuse.",
+      "It provides civil reliefs, including protection orders, residence orders, monetary relief, custody orders, and compensation.",
+      "Protection Officers and service providers help women access the system.",
+      "Complaints are made to a Magistrate, who can pass urgent and interim orders.",
+      "This is in addition to any criminal remedies that may apply.",
+    ],
+    steps: [
+      { title: "Reach a Protection Officer or helpline", detail: "Contact a Protection Officer, service provider, or women helpline for support and to record the incident." },
+      { title: "File an application", detail: "A Domestic Incident Report and application for relief can be filed before the Magistrate." },
+      { title: "Seek interim orders", detail: "The court can pass urgent protection or residence orders to ensure safety." },
+      { title: "Final orders", detail: "After hearing, the Magistrate can grant protection, residence, monetary relief, and more." },
+    ],
+    documents: [
+      "Identity and address proof.",
+      "Any evidence of abuse (medical records, messages, photos, witnesses).",
+      "Details of the respondent and the domestic relationship.",
+    ],
+    fees: [
+      "The process is meant to be accessible and low-cost.",
+      "Free legal aid may be available for eligible women.",
+    ],
+    timeline:
+      "Interim protection can be granted quickly given the urgency; final orders follow the hearing and vary by court.",
+    mistakes: [
+      "Not seeking urgent interim protection when at risk.",
+      "Not preserving evidence of abuse.",
+      "Assuming only criminal complaints are available.",
+      "Not using Protection Officers or legal aid.",
+    ],
+    faqs: [
+      { q: "Who is protected under the PWDVA 2005?", a: "Women in a domestic relationship, including wives and partners, facing physical, emotional, sexual, or economic abuse." },
+      { q: "What reliefs can a woman get?", a: "Protection orders, residence orders, monetary relief, custody orders, and compensation, among others." },
+      { q: "Is this a criminal case?", a: "The PWDVA provides civil reliefs, though breach of a protection order and other conduct can attract criminal consequences." },
+      { q: "Can I get free legal help?", a: "Yes, free legal aid may be available for eligible women; Protection Officers and service providers also assist." },
+    ],
+    whenConsult: [
+      "You are in immediate danger and need urgent orders.",
+      "You need residence or custody protection.",
+      "The respondent is contesting or violating orders.",
+      "You want to combine civil and criminal remedies.",
+    ],
+    related: [
+      { href: "/lawyers", label: "Find a verified lawyer for women rights" },
+      { href: "/legal-guides/category/women-rights", label: "More Women Rights guides" },
+    ],
+  },
+  {
+    slug: "how-to-file-rti-application-india",
+    category: "government-services",
+    title: "How to File an RTI Application in India",
+    seoTitle: "How to File an RTI Application in India: Guide",
+    metaDescription:
+      "File an RTI under the Right to Information Act 2005: what you can ask, the PIO, fees, timelines, appeals, and common mistakes. Plain-English guide.",
+    published: "2026-06-15",
+    updated: "2026-07-15",
+    readMins: 6,
+    intro:
+      "The Right to Information Act lets you ask government departments for information and hold public authorities accountable. This guide explains, in simple language, how to file an RTI, what it costs, how long it takes, and what to do if you do not get a reply.",
+    whoShouldRead: [
+      "Anyone who needs information from a government office.",
+      "People stuck with delays in public services or schemes.",
+      "Citizens who want transparency on a public authority decision.",
+    ],
+    whatLawSays: [
+      "The Right to Information Act, 2005 gives citizens the right to seek information from public authorities.",
+      "Each public authority has a Public Information Officer (PIO) who must respond to RTI requests.",
+      "Information is generally to be provided within 30 days, with exceptions for certain matters and a shorter timeline where life or liberty is involved.",
+      "A small application fee applies, with exemptions for those below the poverty line.",
+      "If you get no reply or an unsatisfactory one, you can file a first appeal and then a second appeal to the Information Commission.",
+    ],
+    steps: [
+      { title: "Identify the department", detail: "Find which public authority holds the information you need." },
+      { title: "Write the application", detail: "Address it to the PIO, state your questions clearly, and keep them specific." },
+      { title: "Pay the fee", detail: "Attach the prescribed fee (or claim exemption if eligible)." },
+      { title: "Submit", detail: "File by post, in person, or online where available (such as the central RTI portal)." },
+      { title: "Follow up or appeal", detail: "If no reply within the timeline, file a first appeal, then a second appeal to the Information Commission." },
+    ],
+    documents: [
+      "Your name and contact address.",
+      "A clear list of the information sought.",
+      "Proof of fee payment or BPL exemption if applicable.",
+    ],
+    fees: [
+      "A nominal application fee (with exemptions for BPL applicants).",
+      "Small per-page charges may apply for copies.",
+    ],
+    timeline:
+      "Information is generally due within 30 days; a faster timeline applies where life or liberty is concerned. Appeals have their own timelines.",
+    mistakes: [
+      "Asking vague or overly broad questions.",
+      "Sending the RTI to the wrong department.",
+      "Not keeping proof of filing and fee.",
+      "Missing the appeal window after no reply.",
+    ],
+    faqs: [
+      { q: "Who can file an RTI in India?", a: "Any citizen of India can file an RTI application seeking information from a public authority." },
+      { q: "How long does an RTI reply take?", a: "Generally within 30 days; shorter where life or liberty is involved. Timelines are set by the Act." },
+      { q: "What if I get no reply?", a: "File a first appeal with the appellate authority, and if still unsatisfied, a second appeal to the Information Commission." },
+      { q: "Can I file an RTI online?", a: "Yes for central public authorities via the RTI online portal; many states also offer online filing." },
+    ],
+    whenConsult: [
+      "Your RTI is repeatedly denied or ignored.",
+      "The information relates to a larger legal dispute.",
+      "You need to draft appeals effectively.",
+      "You face retaliation for filing.",
+    ],
+    related: [
+      { href: "/legal-documents", label: "Draft an RTI application" },
+      { href: "/legal-guides/category/government-services", label: "More Government Services guides" },
+    ],
+  },
+  {
+    slug: "how-to-send-legal-notice-india",
+    category: "court-procedures",
+    title: "How to Send a Legal Notice in India",
+    seoTitle: "How to Send a Legal Notice in India: Simple Guide",
+    metaDescription:
+      "What a legal notice is, when it is required, what it should contain, how to send it, fees, and mistakes to avoid. Plain-English guide for India.",
+    published: "2026-06-15",
+    updated: "2026-07-15",
+    readMins: 5,
+    intro:
+      "A legal notice is a formal written communication warning the other party of your intended legal action and giving them a chance to resolve the matter. It is often the first practical step in many disputes. This guide explains, in simple language, when and how to send one.",
+    whoShouldRead: [
+      "Anyone facing a dispute over money, property, service, or contract.",
+      "People who want to resolve a matter before going to court.",
+      "Those who received a legal notice and want to understand it.",
+    ],
+    whatLawSays: [
+      "A legal notice puts the other side on formal notice of your grievance and demand before litigation.",
+      "In some matters a notice is a legal pre-condition, for example the demand notice in a cheque bounce case or notice to a government body in certain suits.",
+      "The notice should clearly state the facts, the legal basis, the demand, and a reasonable time to comply.",
+      "It is usually sent through an advocate by registered post or courier, keeping proof of dispatch and delivery.",
+      "A well-drafted notice can lead to settlement and avoids the cost of a full case.",
+    ],
+    steps: [
+      { title: "Set out the facts", detail: "Describe what happened, dates, and the parties involved." },
+      { title: "State the demand", detail: "Say clearly what you want (payment, action, or stopping something) and by when." },
+      { title: "Draft and review", detail: "Have the notice drafted, ideally by an advocate, on their letterhead." },
+      { title: "Send with proof", detail: "Dispatch by registered post/courier and keep receipts and delivery proof." },
+      { title: "Await response", detail: "Give the stated time for a reply before considering further legal steps." },
+    ],
+    documents: [
+      "Facts and timeline of the dispute.",
+      "Supporting documents (agreement, invoice, messages).",
+      "Correct name and address of the other party.",
+    ],
+    fees: [
+      "Advocate drafting fees, which vary by lawyer and complexity.",
+      "Postage/courier charges for sending the notice.",
+    ],
+    timeline:
+      "A notice is usually sent within days once facts are ready; the notice itself gives the other party a set period (often 15 to 30 days) to respond.",
+    mistakes: [
+      "Sending a vague notice without a clear demand or deadline.",
+      "Getting the other party name or address wrong.",
+      "Not keeping proof of dispatch and delivery.",
+      "Missing a legally required notice step for your specific matter.",
+    ],
+    faqs: [
+      { q: "Is a legal notice compulsory before filing a case?", a: "Not always, but it is required in some matters (like cheque bounce or notice to a government body) and is often a sensible first step." },
+      { q: "Can I send a legal notice myself?", a: "You can, but most people use an advocate so the notice is correctly drafted on letterhead and legally sound." },
+      { q: "How long should I give for a reply?", a: "Commonly 15 to 30 days, or the period fixed by law for that type of matter." },
+      { q: "What if there is no reply?", a: "You may proceed with the appropriate legal action, such as a suit or complaint, depending on the dispute." },
+    ],
+    whenConsult: [
+      "Your matter legally requires a specific notice.",
+      "The dispute is high-value or complex.",
+      "You received a legal notice and must respond.",
+      "You want the notice drafted to hold up in court.",
+    ],
+    related: [
+      { href: "/legal-documents", label: "Create a legal notice from a template" },
+      { href: "/lawyers", label: "Find a verified lawyer" },
+    ],
+  },
+];
+
+export const guideSlugs = (): string[] => GUIDES.map((g) => g.slug);
+export const getGuide = (slug: string): LegalGuide | undefined =>
+  GUIDES.find((g) => g.slug === slug);
+export const guidesByCategory = (slug: string): LegalGuide[] =>
+  GUIDES.filter((g) => g.category === slug);
+export const latestGuides = (n = 6): LegalGuide[] => GUIDES.slice(0, n);

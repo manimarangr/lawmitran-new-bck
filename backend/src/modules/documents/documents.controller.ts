@@ -6,6 +6,7 @@ import {
   Patch,
   Post,
   Query,
+  StreamableFile,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminRole, Role, TemplateStatus } from '@prisma/client';
@@ -16,6 +17,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { RateLimit } from '../../common/security/rate-limit.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { DocumentsService } from './documents.service';
+import { ReviewService } from './review.service';
 import {
   PrefillDto,
   AdminCategoryDto,
@@ -23,14 +25,22 @@ import {
   AdminUpdateTemplateDto,
   CheckoutDto,
   PreviewDto,
+  QuoteDto,
   SetTemplateStatusDto,
+  StampDutyUpdateDto,
+  StampDutyUpsertDto,
   VerifyDocPaymentDto,
+  ReviewPaymentDto,
+  ReviewDecisionDto,
 } from './dto/documents.dto';
 
 @ApiTags('documents')
 @Controller('documents')
 export class DocumentsController {
-  constructor(private documentsService: DocumentsService) {}
+  constructor(
+    private documentsService: DocumentsService,
+    private reviewService: ReviewService,
+  ) {}
 
   // ---- public catalog ----
 
@@ -48,6 +58,13 @@ export class DocumentsController {
     return this.documentsService.listTemplates(category);
   }
 
+  @Public()
+  @Get('verify/:id')
+  @ApiOperation({ summary: 'Verify a document\'s authenticity (public, content hash)' })
+  verify(@Param('id') id: string) {
+    return this.documentsService.verifyDocument(id);
+  }
+
   // ---- buyer (declared before templates/:id so "me" never matches :id) ----
 
   @Get('me')
@@ -62,16 +79,95 @@ export class DocumentsController {
     return this.documentsService.myDocument(user.userId, id);
   }
 
+  @Get('me/:id/pdf')
+  @ApiOperation({ summary: 'Download my document as a PDF (generated on demand)' })
+  async myDocumentPdf(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+  ): Promise<StreamableFile> {
+    const { buffer, filename } = await this.documentsService.getPdf(user.userId, id);
+    return new StreamableFile(buffer, {
+      type: 'application/pdf',
+      disposition: `attachment; filename="${filename}"`,
+    });
+  }
+
+  @Post('me/:id/request-review')
+  @ApiOperation({ summary: 'Request a lawyer review (opens a Razorpay order for the fee)' })
+  requestReview(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.reviewService.requestReview(user.userId, id);
+  }
+
+  @Post('me/:id/review-payment')
+  @ApiOperation({ summary: 'Confirm the review-fee payment; enters the review queue' })
+  reviewPayment(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+    @Body() dto: ReviewPaymentDto,
+  ) {
+    return this.reviewService.verifyReviewPayment(user.userId, id, dto);
+  }
+
+  @Get('me/:id/review')
+  @ApiOperation({ summary: 'Review timeline for my document' })
+  reviewTimeline(@Param('id') id: string) {
+    return this.reviewService.timeline(id);
+  }
+
   @Post('checkout')
   @ApiOperation({ summary: 'Answers → draft document + Razorpay order' })
   checkout(@CurrentUser() user: CurrentUserPayload, @Body() dto: CheckoutDto) {
-    return this.documentsService.checkout(user.userId, dto.templateId, dto.input);
+    return this.documentsService.checkout(user.userId, dto.templateId, dto.input, {
+      state: dto.state,
+      declaredValue: dto.declaredValue,
+    });
+  }
+
+  @Post('quote')
+  @ApiOperation({ summary: 'Price quote incl. stamp duty for a state' })
+  quote(@Body() dto: QuoteDto) {
+    return this.documentsService.quote(dto.templateId, {
+      state: dto.state,
+      declaredValue: dto.declaredValue,
+    });
   }
 
   @Post('verify-payment')
   @ApiOperation({ summary: 'Verify Razorpay signature; freezes and unlocks the document' })
   verifyPayment(@CurrentUser() user: CurrentUserPayload, @Body() dto: VerifyDocPaymentDto) {
     return this.documentsService.verifyPayment(user.userId, dto);
+  }
+
+  // ---- lawyer review queue ----
+
+  @Roles(Role.LAWYER)
+  @Get('reviews/queue')
+  @ApiOperation({ summary: 'Reviews I can claim or am working on' })
+  reviewQueue(@CurrentUser() user: CurrentUserPayload) {
+    return this.reviewService.queue(user.userId);
+  }
+
+  @Roles(Role.LAWYER)
+  @Post('reviews/:id/claim')
+  @ApiOperation({ summary: 'Claim a requested review' })
+  claimReview(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+    return this.reviewService.claim(user.userId, id);
+  }
+
+  @Roles(Role.LAWYER)
+  @Post('reviews/:id/decision')
+  @ApiOperation({ summary: 'Approve / reject / request changes' })
+  reviewDecision(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+    @Body() dto: ReviewDecisionDto,
+  ) {
+    return this.reviewService.decide(
+      user.userId,
+      id,
+      dto.decision as 'APPROVED' | 'REJECTED' | 'REVISION',
+      dto.comment,
+    );
   }
 
   // ---- admin catalog (OPS) ----
@@ -137,6 +233,27 @@ export class DocumentsController {
   @Get('admin/orders')
   adminListOrders(@Query('page') page?: string, @Query('pageSize') pageSize?: string) {
     return this.documentsService.adminListOrders(page, pageSize);
+  }
+
+  @Roles(Role.ADMIN)
+  @AdminScopes(AdminRole.OPS)
+  @Get('admin/stamp-duty')
+  adminListStampDuty() {
+    return this.documentsService.adminListStampDuty();
+  }
+
+  @Roles(Role.ADMIN)
+  @AdminScopes(AdminRole.OPS)
+  @Post('admin/stamp-duty')
+  adminUpsertStampDuty(@Body() dto: StampDutyUpsertDto) {
+    return this.documentsService.adminUpsertStampDuty(dto);
+  }
+
+  @Roles(Role.ADMIN)
+  @AdminScopes(AdminRole.OPS)
+  @Patch('admin/stamp-duty/:id')
+  adminUpdateStampDuty(@Param('id') id: string, @Body() dto: StampDutyUpdateDto) {
+    return this.documentsService.adminUpdateStampDuty(id, dto);
   }
 
   // ---- public preview + template detail (dynamic segments last) ----

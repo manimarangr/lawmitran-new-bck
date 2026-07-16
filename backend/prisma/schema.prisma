@@ -664,10 +664,120 @@ model CustomerDocument {
   deliveryFee     Decimal?         @db.Decimal(10, 2)
   deliveryAddress Json?
   paymentId       String?
+  lawyerId        String?
+  reviewStatus    DocReviewStatus       @default(NONE)
+  reviewFee       Decimal?              @db.Decimal(10, 2)
+  lawyerPayout    Decimal?              @db.Decimal(10, 2)
+  reviewOrderId   String?
+  reviewPaymentId String?
+  reviewEvents    DocumentReviewEvent[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
   @@index([userId, status])
+  @@index([reviewStatus])
+}
+
+// ---------- e-Sign / e-Stamp (vendor-agnostic) ----------
+
+enum ESignStatus {
+  PENDING
+  SENT
+  AWAITING_SIGNATURE
+  SIGNED
+  REJECTED
+  EXPIRED
+  FAILED
+  CANCELLED
+}
+
+enum EStampStatus {
+  PENDING
+  SENT
+  PAID
+  STAMPED
+  REJECTED
+  EXPIRED
+  FAILED
+  CANCELLED
+}
+
+// Provider-independent e-sign request. `provider` records which adapter owns it
+// so late webhooks route correctly even after the default provider changes.
+model ESignRequest {
+  id                String      @id @default(uuid())
+  provider          String
+  providerRequestId String?
+  documentId        String
+  userId            String
+  status            ESignStatus @default(PENDING)
+  signerEmail       String?
+  callbackPayload   Json?
+  signedDocumentUrl String?
+  auditLog          Json? // append-only array of { at, event, status }
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([documentId])
+  @@index([providerRequestId])
+  @@index([status])
+}
+
+model EStampRequest {
+  id                String       @id @default(uuid())
+  provider          String
+  stateCode         String
+  documentId        String
+  userId            String
+  amount            Decimal      @db.Decimal(10, 2)
+  status            EStampStatus @default(PENDING)
+  providerRequestId String?
+  certificateNumber String?
+  certificateUrl    String?
+  callbackPayload   Json?
+  auditLog          Json?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([documentId])
+  @@index([providerRequestId])
+  @@index([status])
+}
+
+enum DocReviewStatus {
+  NONE
+  REQUESTED
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model DocumentReviewEvent {
+  id         String           @id @default(uuid())
+  documentId String
+  document   CustomerDocument @relation(fields: [documentId], references: [id])
+  actorId    String
+  action     String // REQUESTED | CLAIMED | APPROVED | REJECTED | REVISION | COMMENT
+  comment    String?
+  createdAt  DateTime         @default(now())
+
+  @@index([documentId, createdAt])
+}
+
+// Seeded per state x stampBasis; admin-editable. calcType: FLAT | PERCENT | SLAB.
+model StampDutyRate {
+  id           String   @id @default(uuid())
+  state        String
+  documentType String // matches DocumentTemplate.stampBasis
+  calcType     String   @default("FLAT")
+  flatAmount   Decimal? @db.Decimal(10, 2)
+  percent      Decimal? @db.Decimal(5, 2)
+  minAmount    Decimal? @db.Decimal(10, 2)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([state, documentType])
 }
 
 // ---------- Platform: bookmarks, notifications, audit ----------

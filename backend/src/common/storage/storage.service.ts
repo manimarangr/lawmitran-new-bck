@@ -2,6 +2,7 @@ import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config';
 import {
   CreateBucketCommand,
+  GetObjectCommand,
   HeadBucketCommand,
   PutObjectCommand,
   S3Client,
@@ -70,5 +71,35 @@ export class StorageService {
       );
     }
     return `${this.publicBaseUrl}/${key}`;
+  }
+  /** Store raw bytes at an explicit key (used for generated PDFs). Returns the key. */
+  async putBytes(key: string, body: Buffer, contentType: string): Promise<string> {
+    await this.ensureBucket();
+    try {
+      await this.client.send(
+        new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+          Body: body,
+          ContentType: contentType,
+        }),
+      );
+    } catch (err) {
+      this.logger.error(`putBytes failed: ${(err as Error).message}`);
+      throw new ServiceUnavailableException('Could not store the generated document');
+    }
+    return key;
+  }
+
+  /** Fetch an object's bytes by key (backend-proxied private download). */
+  async getBytes(key: string): Promise<Buffer> {
+    await this.ensureBucket();
+    const res = await this.client.send(
+      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+    );
+    const chunks: Buffer[] = [];
+    const stream = res.Body as unknown as AsyncIterable<Uint8Array>;
+    for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+    return Buffer.concat(chunks);
   }
 }

@@ -31,6 +31,33 @@ export class CheckoutDto {
 
   @IsObject()
   input: Record<string, unknown>;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(4)
+  state?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  declaredValue?: number;
+}
+
+export class QuoteDto {
+  @IsString()
+  templateId: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(4)
+  state?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  declaredValue?: number;
 }
 
 export class VerifyDocPaymentDto {
@@ -147,4 +174,88 @@ export class AdminUpdateTemplateDto {
 export class SetTemplateStatusDto {
   @IsIn(['DRAFT', 'PUBLISHED', 'ARCHIVED'])
   status: string;
+}
+
+export class StampDutyUpsertDto {
+  @IsString()
+  @MaxLength(4)
+  state: string;
+
+  @IsString()
+  @MaxLength(60)
+  documentType: string;
+
+  @IsIn(['FLAT', 'PERCENT', 'SLAB'])
+  calcType: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  flatAmount?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  percent?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  minAmount?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
+}
+
+export class StampDutyUpdateDto {
+  @IsOptional()
+  @IsIn(['FLAT', 'PERCENT', 'SLAB'])
+  calcType?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  flatAmount?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  percent?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  minAmount?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
+}
+
+export class ReviewPaymentDto {
+  @IsString()
+  razorpayOrderId: string;
+
+  @IsString()
+  razorpayPaymentId: string;
+
+  @IsString()
+  razorpaySignature: string;
+}
+
+export class ReviewDecisionDto {
+  @IsIn(['APPROVED', 'REJECTED', 'REVISION'])
+  decision: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  comment?: string;
 }

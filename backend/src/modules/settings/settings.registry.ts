@@ -20,6 +20,7 @@ export const GROUPS: { id: string; title: string; description: string }[] = [
   { id: 'security', title: 'Security & compliance', description: 'Admin login protection and the IT-Rules grievance officer shown publicly.' },
   { id: 'billing', title: 'Billing & GST', description: 'Appears on generated tax invoices. Set your GSTIN before going live.' },
   { id: 'business', title: 'Business rules', description: 'Operational knobs — apply to new signups/renewals immediately.' },
+  { id: 'documents', title: 'Document marketplace', description: 'Feature flags, pricing, and provider config for the legal-document marketplace.' },
 ];
 
 export const SETTINGS_REGISTRY: SettingDef[] = [
@@ -70,6 +71,26 @@ export const SETTINGS_REGISTRY: SettingDef[] = [
   { key: 'TRIAL_DAYS', group: 'business', label: 'Free trial (days)', type: 'number', placeholder: '30' },
   { key: 'RENEWAL_REMINDER_DAYS', group: 'business', label: 'Renewal reminders (days before end)', type: 'text', placeholder: '30,15,0' },
   { key: 'LEAD_SLA_HOURS', group: 'business', label: 'Lead response SLA (hours)', type: 'number', placeholder: '48', help: 'Uncontacted leads older than this trigger a lawyer nudge + admin digest.' },
+  // -- document marketplace: master + phase flags --
+  { key: 'DOCS_MARKETPLACE_ENABLED', group: 'documents', label: 'Enable marketplace (master)', type: 'toggle', help: 'When off, document checkout is paused. Defaults on.' },
+  { key: 'DOCS_PDF_ENABLED', group: 'documents', label: 'Enable PDF downloads', type: 'toggle' },
+  { key: 'DOCS_PDF_ENGINE', group: 'documents', label: 'PDF engine', type: 'select', options: ['gotenberg', 'puppeteer'] },
+  { key: 'DOCS_STAMP_DUTY_ENABLED', group: 'documents', label: 'Enable stamp-duty calculator', type: 'toggle' },
+  { key: 'DOCS_STAMP_DUTY_MODE', group: 'documents', label: 'Stamp-duty mode', type: 'select', options: ['estimate', 'strict'] },
+  { key: 'DOCS_LAWYER_REVIEW_ENABLED', group: 'documents', label: 'Enable lawyer review (Tier 3)', type: 'toggle' },
+  { key: 'DOCS_LAWYER_REVIEW_FEE', group: 'documents', label: 'Default review fee (INR)', type: 'number', placeholder: '499' },
+  { key: 'DOCS_LAWYER_PAYOUT_PERCENT', group: 'documents', label: 'Lawyer payout (% of review fee)', type: 'number', placeholder: '70' },
+  { key: 'DOCS_ESIGN_ENABLED', group: 'documents', label: 'Enable e-sign', type: 'toggle' },
+  { key: 'DOCS_ESIGN_PROVIDER', group: 'documents', label: 'e-sign provider', type: 'select', options: ['digio', 'leegality', 'emudhra'] },
+  { key: 'DOCS_ESIGN_API_KEY', group: 'documents', label: 'e-sign API key', type: 'secret' },
+  { key: 'DOCS_ESIGN_API_SECRET', group: 'documents', label: 'e-sign API secret', type: 'secret' },
+  { key: 'DOCS_ESTAMP_ENABLED', group: 'documents', label: 'Enable e-stamp', type: 'toggle' },
+  { key: 'DOCS_ESTAMP_PROVIDER', group: 'documents', label: 'e-stamp provider', type: 'select', options: ['shcil', 'digio', 'leegality'] },
+  { key: 'DOCS_ESTAMP_API_KEY', group: 'documents', label: 'e-stamp API key', type: 'secret' },
+  { key: 'DOCS_SUBSCRIPTIONS_ENABLED', group: 'documents', label: 'Enable subscription bundles', type: 'toggle' },
+  { key: 'DOCS_PHYSICAL_DELIVERY_ENABLED', group: 'documents', label: 'Enable physical delivery', type: 'toggle' },
+  { key: 'DOCS_DELIVERY_FEE', group: 'documents', label: 'Physical delivery fee (INR)', type: 'number', placeholder: '150' },
+  { key: 'DOCS_DELIVERY_PROVIDER', group: 'documents', label: 'Courier provider', type: 'text', placeholder: 'Shiprocket' },
 ];
 
 export const REGISTRY_KEYS = new Set(SETTINGS_REGISTRY.map((s) => s.key));

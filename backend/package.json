@@ -20,7 +20,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:seed": "ts-node prisma/seed.ts",
     "seed": "ts-node prisma/seed.ts",
-    "seed:demo": "ts-node prisma/seed-demo.ts"
+    "seed:demo": "ts-node prisma/seed-demo.ts",
+    "seed:documents": "ts-node prisma/seed-documents.ts",
+    "seed:stamp-duty": "ts-node prisma/seed-stamp-duty.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -43,7 +45,8 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -72,7 +75,8 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.20.0"
+    "typescript-eslint": "^8.20.0",
+    "@types/qrcode": "^1.5.5"
   },
   "jest": {
     "moduleFileExtensions": [

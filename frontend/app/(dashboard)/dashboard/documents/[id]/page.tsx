@@ -1,9 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { fetchMyDocument } from '@/lib/api/documents';
+import { fetchMyDocument, downloadMyDocumentPdf } from '@/lib/api/documents';
 import Icon from '@/components/ui/Icon';
 
 export default function MyDocumentPage() {
@@ -11,6 +12,7 @@ export default function MyDocumentPage() {
   const q = useQuery({ queryKey: ['my-document', id], queryFn: () => fetchMyDocument(id), enabled: !!id });
   const doc = q.data;
   const paid = doc && doc.status !== 'DRAFT' && doc.contentHtml;
+  const [dlErr, setDlErr] = useState('');
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-8">
@@ -19,12 +21,30 @@ export default function MyDocumentPage() {
           <Icon name="chevron-left" aria-hidden="true" className="mr-1 text-xs" /> My documents
         </Link>
         {paid && (
-          <button onClick={() => window.print()} className="rounded-xl bg-navy px-5 py-2 text-sm font-bold text-white hover:bg-slate-800">
-            <Icon name="download" aria-hidden="true" className="mr-1" /> Print / Save PDF
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={async () => {
+                setDlErr('');
+                try {
+                  await downloadMyDocumentPdf(id, `${doc!.template.title}.pdf`);
+                } catch (e) {
+                  setDlErr(e instanceof Error ? e.message : 'Download failed');
+                }
+              }}
+              className="rounded-xl border border-gray-200 px-5 py-2 text-sm font-bold text-navy hover:border-gold"
+            >
+              <Icon name="download" aria-hidden="true" className="mr-1" /> Download PDF
+            </button>
+            <button onClick={() => window.print()} className="rounded-xl bg-navy px-5 py-2 text-sm font-bold text-white hover:bg-slate-800">
+              <Icon name="print" aria-hidden="true" className="mr-1" /> Print
+            </button>
+          </div>
         )}
       </div>
 
+      {dlErr && (
+        <p role="alert" className="mb-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{dlErr}</p>
+      )}
       {q.isLoading && <p role="status" className="text-sm text-slate-400">Loading…</p>}
       {q.isError && (
         <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{(q.error as Error).message}</p>

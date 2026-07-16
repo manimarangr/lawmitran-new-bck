@@ -22,6 +22,8 @@ import { LeadsModule } from './modules/leads/leads.module';
 import { AiIntakeModule } from './modules/ai-intake/ai-intake.module';
 import { RatingsModule } from './modules/ratings/ratings.module';
 import { SeoModule } from './modules/seo/seo.module';
+import { ESignModule } from './common/esign/esign.module';
+import { EStampModule } from './common/estamp/estamp.module';
 import { PropertyModule } from './modules/property/property.module';
 import { ContactModule } from './modules/contact/contact.module';
 
@@ -45,6 +47,8 @@ import { ContactModule } from './modules/contact/contact.module';
     SeoModule,
     ContactModule,
     PropertyModule,
+    ESignModule,
+    EStampModule,
   ],
   controllers: [AppController],
   providers: [

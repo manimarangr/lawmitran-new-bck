@@ -5,12 +5,14 @@ import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import { CATEGORIES } from '@/lib/legal-guides/categories';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 const LINKS = [
   { href: '/lawyers', label: 'Find Lawyers' },
   { href: '/legal-documents', label: 'Legal Documents' },
+  { href: '/legal-guides', label: 'Legal Guides' },
   { href: '/#how', label: 'How it Works' },
   { href: '/signup?role=lawyer', label: 'For Lawyers' },
 ];
@@ -70,11 +72,40 @@ export default function SiteHeader() {
         </Link>
 
         <nav aria-label="Main" className="ml-auto mr-6 hidden items-center gap-7 md:flex">
-          {LINKS.map((l) => (
-            <Link key={l.label} href={l.href} className="text-[15px] font-semibold text-ink hover:text-gold">
-              {l.label}
-            </Link>
-          ))}
+          {LINKS.map((l) =>
+            l.href === '/legal-guides' ? (
+              <div key={l.label} className="group relative">
+                <Link href="/legal-guides" className="text-[15px] font-semibold text-ink hover:text-gold">
+                  {l.label}
+                </Link>
+                <div className="invisible absolute left-1/2 top-full z-50 w-[560px] -translate-x-1/2 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                  <div className="rounded-2xl border border-line bg-white p-4 shadow-lg">
+                    <div className="grid grid-cols-2 gap-1">
+                      {CATEGORIES.map((c) => (
+                        <Link
+                          key={c.slug}
+                          href={`/legal-guides/category/${c.slug}`}
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-bg-soft hover:text-gold"
+                        >
+                          <Icon name={c.icon} aria-hidden="true" className="text-gold" />
+                          {c.name}
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="mt-2 border-t border-line pt-2 text-center">
+                      <Link href="/legal-guides/all" className="text-sm font-semibold text-gold hover:underline">
+                        Browse all guides
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Link key={l.label} href={l.href} className="text-[15px] font-semibold text-ink hover:text-gold">
+                {l.label}
+              </Link>
+            ),
+          )}
           {!me && (
             <Link href="/login" className="text-[15px] font-semibold text-ink hover:text-gold">
               Login
@@ -155,17 +186,42 @@ export default function SiteHeader() {
       {open && (
         <nav id="mobile-nav" aria-label="Main menu" className="border-t border-line bg-white px-5 py-4 md:hidden">
           <ul className="space-y-1">
-            {LINKS.map((l) => (
-              <li key={l.label}>
-                <Link
-                  href={l.href}
-                  className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-ink hover:bg-bg-soft"
-                  onClick={() => setOpen(false)}
-                >
-                  {l.label}
-                </Link>
-              </li>
-            ))}
+            {LINKS.map((l) =>
+              l.href === '/legal-guides' ? (
+                <li key={l.label}>
+                  <Link
+                    href="/legal-guides"
+                    className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-ink hover:bg-bg-soft"
+                    onClick={() => setOpen(false)}
+                  >
+                    {l.label}
+                  </Link>
+                  <ul className="ml-3 border-l border-line pl-2">
+                    {CATEGORIES.map((c) => (
+                      <li key={c.slug}>
+                        <Link
+                          href={`/legal-guides/category/${c.slug}`}
+                          className="block rounded-lg px-3 py-2 text-sm text-slate-500 hover:bg-bg-soft hover:text-gold"
+                          onClick={() => setOpen(false)}
+                        >
+                          {c.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ) : (
+                <li key={l.label}>
+                  <Link
+                    href={l.href}
+                    className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-ink hover:bg-bg-soft"
+                    onClick={() => setOpen(false)}
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ),
+            )}
             {me ? (
               <>
                 <li>

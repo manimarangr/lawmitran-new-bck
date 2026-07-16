@@ -106,14 +106,40 @@ export interface DocCheckoutResponse {
   orderId: string;
   amount: number;
   currency: string;
+  stampDuty?: number;
   razorpayKeyId: string | null;
   title: string;
 }
 
-export function checkoutDocument(templateId: string, input: Record<string, unknown>) {
+export interface DocQuote {
+  base: number;
+  stampDuty: number;
+  total: number;
+  currency: string;
+  requiresStamp: boolean;
+  stampNote: string | null;
+  breakdown: { label: string; amount: number }[];
+}
+
+/** Price quote incl. stamp duty for a state (Phase 3). */
+export function fetchDocQuote(
+  templateId: string,
+  opts: { state?: string; declaredValue?: number } = {},
+) {
+  return authFetch<DocQuote>('/documents/quote', {
+    method: 'POST',
+    body: JSON.stringify({ templateId, ...opts }),
+  });
+}
+
+export function checkoutDocument(
+  templateId: string,
+  input: Record<string, unknown>,
+  opts: { state?: string; declaredValue?: number } = {},
+) {
   return authFetch<DocCheckoutResponse>('/documents/checkout', {
     method: 'POST',
-    body: JSON.stringify({ templateId, input }),
+    body: JSON.stringify({ templateId, input, ...opts }),
   });
 }
 
@@ -219,3 +245,139 @@ export type DocumentCategory = DocCategory;
 export type DocumentTemplateItem = DocTemplateListItem;
 export const getDocumentCategories = fetchDocCategories;
 export const getDocumentTemplates = fetchDocTemplates;
+
+// ---- PDF (Phase 2) ----
+export async function downloadMyDocumentPdf(id: string, filename = 'document.pdf'): Promise<void> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  const res = await fetch(`${API_BASE}/documents/me/${id}/pdf`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) {
+    throw new Error(res.status === 403 ? 'PDF downloads are currently disabled' : 'Could not download the PDF');
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+export interface DocVerifyResult {
+  valid: boolean;
+  title?: string;
+  generatedAt?: string;
+  contentHash?: string;
+}
+export async function verifyDocument(id: string): Promise<DocVerifyResult> {
+  const res = await fetch(`${API_BASE}/documents/verify/${id}`);
+  if (!res.ok) return { valid: false };
+  return res.json();
+}
+
+// ---- Lawyer review (Phase 4) ----
+export interface ReviewOrder {
+  customerDocumentId: string;
+  orderId: string;
+  amount: number;
+  currency: string;
+  reviewFee: number;
+  razorpayKeyId: string | null;
+  title: string;
+}
+export function requestDocumentReview(id: string) {
+  return authFetch<ReviewOrder>(`/documents/me/${id}/request-review`, { method: 'POST' });
+}
+export function verifyReviewPayment(
+  id: string,
+  data: { razorpayOrderId: string; razorpayPaymentId: string; razorpaySignature: string },
+) {
+  return authFetch<{ id: string; reviewStatus: string }>(`/documents/me/${id}/review-payment`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export interface ReviewQueueItem {
+  id: string;
+  reviewStatus: string;
+  reviewFee: string | null;
+  createdAt: string;
+  lawyerId: string | null;
+  template: { title: string; category: { name: string } };
+}
+export function fetchReviewQueue() {
+  return authFetch<ReviewQueueItem[]>('/documents/reviews/queue');
+}
+export function claimReview(id: string) {
+  return authFetch<{ id: string; reviewStatus: string }>(`/documents/reviews/${id}/claim`, {
+    method: 'POST',
+  });
+}
+export function decideReview(
+  id: string,
+  decision: 'APPROVED' | 'REJECTED' | 'REVISION',
+  comment?: string,
+) {
+  return authFetch<{ id: string; reviewStatus: string; lawyerPayout?: number }>(
+    `/documents/reviews/${id}/decision`,
+    { method: 'POST', body: JSON.stringify({ decision, comment }) },
+  );
+}
+
+export interface ReviewEvent {
+  action: string;
+  comment: string | null;
+  createdAt: string;
+}
+export function fetchReviewTimeline(id: string) {
+  return authFetch<ReviewEvent[]>(`/documents/me/${id}/review`);
+}
+
+// ---- e-Sign / e-Stamp (Phase 5, vendor-agnostic) ----
+export interface ESignStart { id: string; provider: string; status: string; signingUrl: string | null }
+export interface ESignStatus { id: string; provider: string; status: string; signedDocumentUrl: string | null; updatedAt: string }
+export function startEsign(documentId: string) {
+  return authFetch<ESignStart>(`/documents/${documentId}/esign`, { method: 'POST' });
+}
+export function fetchEsignStatus(id: string) {
+  return authFetch<ESignStatus>(`/esign/${id}/status`);
+}
+/** Testing only (mock provider): simulate a signing outcome. */
+export function simulateEsign(id: string, outcome: 'signed' | 'rejected' | 'timeout' | 'failed') {
+  return authFetch<{ ok: boolean; status?: string }>(`/esign/${id}/simulate`, {
+    method: 'POST',
+    body: JSON.stringify({ outcome }),
+  });
+}
+
+export interface EStampStart { id: string; provider: string; status: string; amount: number }
+export interface EStampStatus {
+  id: string;
+  provider: string;
+  status: string;
+  stateCode: string;
+  amount: string;
+  certificateNumber: string | null;
+  certificateUrl: string | null;
+  updatedAt: string;
+}
+export function startEstamp(documentId: string, stateCode: string, amount?: number) {
+  return authFetch<EStampStart>(`/documents/${documentId}/estamp`, {
+    method: 'POST',
+    body: JSON.stringify({ stateCode, amount }),
+  });
+}
+export function fetchEstampStatus(id: string) {
+  return authFetch<EStampStatus>(`/estamp/${id}/status`);
+}
+/** Testing only (mock provider): simulate a stamping outcome. */
+export function simulateEstamp(id: string, outcome: 'stamped' | 'rejected' | 'timeout' | 'failed') {
+  return authFetch<{ ok: boolean; status?: string }>(`/estamp/${id}/simulate`, {
+    method: 'POST',
+    body: JSON.stringify({ outcome }),
+  });
+}

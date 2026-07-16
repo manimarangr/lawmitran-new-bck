@@ -76,6 +76,15 @@ services:
       backend: { condition: service_healthy }
     networks: [lawmitran]
 
+  gotenberg:
+    # Chromium-based HTML->PDF engine for the document marketplace (DOCS_PDF_ENGINE=gotenberg).
+    image: gotenberg/gotenberg:8
+    restart: unless-stopped
+    command:
+      - gotenberg
+      - --api-timeout=30s
+    networks: [lawmitran]
+
 volumes:
   pgdata:
   redis-data:

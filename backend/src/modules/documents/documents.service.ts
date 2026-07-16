@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { DocumentStatus, Prisma, TemplateStatus } from '@prisma/client';
@@ -11,6 +12,9 @@ import { paginate, resolvePagination } from '../../common/pagination';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SettingsService } from '../settings/settings.service';
 import { complete } from '../ai-intake/llm.client';
+import { assertFeature, DOC_FLAGS } from './feature-flags';
+import { PdfService } from '../../common/pdf/pdf.service';
+import { StampDutyService } from './stamp-duty.service';
 
 export interface TemplateField {
   name: string;
@@ -47,12 +51,16 @@ function fieldsOf(schemaJson: unknown): TemplateField[] {
 
 @Injectable()
 export class DocumentsService {
+  private readonly logger = new Logger(DocumentsService.name);
+
   constructor(
     private prisma: PrismaService,
     private razorpay: RazorpayService,
     private notify: NotifyService,
     private audit: AuditService,
     private settings: SettingsService,
+    private pdf: PdfService,
+    private stampDuty: StampDutyService,
   ) {}
 
   // ================= public =================
@@ -195,6 +203,44 @@ export class DocumentsService {
     }
   }
 
+  /** Price quote including any stamp duty for the chosen state. */
+  async quote(
+    idOrSlug: string,
+    opts: { state?: string; declaredValue?: number },
+  ) {
+    await assertFeature(this.settings, DOC_FLAGS.MARKETPLACE, 'Document marketplace', true);
+    const template = await this.prisma.documentTemplate.findFirst({
+      where: {
+        status: TemplateStatus.PUBLISHED,
+        OR: [{ id: idOrSlug }, { slug: idOrSlug }],
+      },
+      select: { title: true, price: true, requiresStamp: true, stampBasis: true },
+    });
+    if (!template) throw new NotFoundException('Document template not found');
+
+    const base = Number(template.price);
+    const d = await this.stampDuty.computeForTemplate(template, opts);
+    const total = base + d.duty;
+    const breakdown: { label: string; amount: number }[] = [
+      { label: template.title, amount: base },
+    ];
+    if (d.duty > 0) {
+      breakdown.push({
+        label: `Stamp duty${opts.state ? ` (${opts.state.toUpperCase()})` : ''}`,
+        amount: d.duty,
+      });
+    }
+    return {
+      base,
+      stampDuty: d.duty,
+      total,
+      currency: 'INR',
+      requiresStamp: template.requiresStamp,
+      stampNote: d.note ?? null,
+      breakdown,
+    };
+  }
+
   // ================= buyer =================
 
   private validateInput(schemaJson: unknown, input: Record<string, unknown>) {
@@ -208,20 +254,29 @@ export class DocumentsService {
   }
 
   /** Start checkout: stores the draft + answers and opens a Razorpay order. */
-  async checkout(userId: string, templateId: string, input: Record<string, unknown>) {
+  async checkout(
+    userId: string,
+    templateId: string,
+    input: Record<string, unknown>,
+    opts: { state?: string; declaredValue?: number } = {},
+  ) {
+    await assertFeature(this.settings, DOC_FLAGS.MARKETPLACE, 'Document marketplace', true);
     const template = await this.prisma.documentTemplate.findFirst({
       where: { id: templateId, status: TemplateStatus.PUBLISHED },
     });
     if (!template) throw new NotFoundException('Document template not found');
     this.validateInput(template.schemaJson, input);
 
-    const amountPaise = Math.round(Number(template.price) * 100);
+    const duty = (await this.stampDuty.computeForTemplate(template, opts)).duty;
+    const total = Number(template.price) + duty;
+    const amountPaise = Math.round(total * 100);
     const doc = await this.prisma.customerDocument.create({
       data: {
         userId,
         templateId: template.id,
         inputJson: (input ?? {}) as Prisma.InputJsonValue,
-        amount: template.price,
+        amount: total,
+        stampDuty: duty > 0 ? duty : null,
         status: DocumentStatus.DRAFT,
       },
     });
@@ -235,6 +290,7 @@ export class DocumentsService {
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
+      stampDuty: duty,
       razorpayKeyId: (await this.razorpay.getKeyId()) ?? null,
       title: template.title,
     };
@@ -293,6 +349,28 @@ export class DocumentsService {
       title: 'Your document is ready',
       body: `${doc.template.title} is ready to view and print from My Documents.`,
     });
+
+    // PDF generation is admin-gated (DOCS_PDF_ENABLED, default off). A failure
+    // here never fails the payment - the document stays PAID and can be
+    // (re)generated on download.
+    if (await this.settings.getBool(DOC_FLAGS.PDF, false)) {
+      try {
+        const { key } = await this.pdf.generate({
+          id: doc.id,
+          userId,
+          title: doc.template.title,
+          contentHtml,
+          version: doc.template.version,
+        });
+        await this.prisma.customerDocument.update({
+          where: { id: doc.id },
+          data: { pdfUrl: key, status: DocumentStatus.GENERATED },
+        });
+      } catch (err) {
+        this.logger.warn(`PDF generation failed for ${doc.id}: ${(err as Error).message}`);
+      }
+    }
+
     return updated;
   }
 
@@ -330,6 +408,59 @@ export class DocumentsService {
       return { ...doc, contentHtml: null };
     }
     return doc;
+  }
+
+  /** Buyer: stream the document PDF (generate on demand if missing). */
+  async getPdf(userId: string, id: string): Promise<{ buffer: Buffer; filename: string }> {
+    await assertFeature(this.settings, DOC_FLAGS.PDF, 'PDF downloads');
+    const doc = await this.prisma.customerDocument.findFirst({
+      where: { id, userId },
+      include: { template: { select: { title: true, version: true } } },
+    });
+    if (!doc) throw new NotFoundException('Document not found');
+    if (doc.status === DocumentStatus.DRAFT || !doc.contentHtml) {
+      throw new BadRequestException('This document is not paid yet');
+    }
+    let key = doc.pdfUrl;
+    if (!key) {
+      const gen = await this.pdf.generate({
+        id: doc.id,
+        userId,
+        title: doc.template.title,
+        contentHtml: doc.contentHtml,
+        version: doc.template.version,
+      });
+      key = gen.key;
+      await this.prisma.customerDocument.update({
+        where: { id: doc.id },
+        data: { pdfUrl: key, status: DocumentStatus.GENERATED },
+      });
+    }
+    const buffer = await this.pdf.fetchBytes(key);
+    const filename = `${doc.template.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.pdf`;
+    return { buffer, filename };
+  }
+
+  /** Public: authenticity check - recomputes the content hash. No content is returned. */
+  async verifyDocument(id: string) {
+    const doc = await this.prisma.customerDocument.findFirst({
+      where: { id },
+      select: {
+        status: true,
+        createdAt: true,
+        contentHtml: true,
+        template: { select: { title: true } },
+      },
+    });
+    if (!doc || doc.status === DocumentStatus.DRAFT || !doc.contentHtml) {
+      return { valid: false as const };
+    }
+    return {
+      valid: true as const,
+      title: doc.template.title,
+      generatedAt: doc.createdAt,
+      contentHash: this.pdf.hashContent(doc.contentHtml),
+    };
   }
 
   // ================= admin =================
@@ -541,5 +672,36 @@ export class DocumentsService {
       this.prisma.customerDocument.count({ where }),
     ]);
     return paginate(items, total, pg.page, pg.pageSize);
+  }
+
+  // ---- admin: stamp-duty rates (OPS) ----
+
+  adminListStampDuty() {
+    return this.stampDuty.adminList();
+  }
+
+  adminUpsertStampDuty(dto: {
+    state: string;
+    documentType: string;
+    calcType: string;
+    flatAmount?: number;
+    percent?: number;
+    minAmount?: number;
+    active?: boolean;
+  }) {
+    return this.stampDuty.adminUpsert(dto);
+  }
+
+  adminUpdateStampDuty(
+    id: string,
+    dto: Partial<{
+      calcType: string;
+      flatAmount: number | null;
+      percent: number | null;
+      minAmount: number | null;
+      active: boolean;
+    }>,
+  ) {
+    return this.stampDuty.adminUpdate(id, dto);
   }
 }
