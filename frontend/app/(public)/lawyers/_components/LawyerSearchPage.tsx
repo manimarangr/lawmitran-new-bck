@@ -58,11 +58,14 @@ export function LawyerSearchPage() {
 
   function heroSearch(e: React.FormEvent) {
     e.preventDefault();
-    setFilters({
+    const next = {
       ...filters,
       ...(heroArea ? { practiceArea: heroArea } : {}),
       ...(heroCity ? { city: heroCity } : {}),
-    });
+    };
+    // Locality belongs to a specific city — drop it when the city changes.
+    if (heroCity && heroCity !== filters.city) delete next.locality;
+    setFilters(next);
   }
 
   // ---------- MAP VIEW (secondary) ----------

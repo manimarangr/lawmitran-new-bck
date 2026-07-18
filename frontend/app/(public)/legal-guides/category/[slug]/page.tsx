@@ -3,13 +3,17 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SiteFooter from '@/components/site/SiteFooter';
 import Icon from '@/components/ui/Icon';
-import { CATEGORIES, categorySlugs, getCategory } from '@/lib/legal-guides/categories';
-import { guidesByCategory } from '@/lib/legal-guides/guides';
+import {
+  guideCategories,
+  getGuideCategory,
+  guideCardsByCategory,
+} from '@/lib/legal-guides/source';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
-export function generateStaticParams() {
-  return categorySlugs().map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  const cats = await guideCategories();
+  return cats.map((c) => ({ slug: c.slug }));
 }
 
 export async function generateMetadata({
@@ -18,24 +22,23 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const c = getCategory(slug);
+  const c = await getGuideCategory(slug);
   if (!c) return {};
   const url = `${SITE_URL}/legal-guides/category/${c.slug}`;
-  const empty = guidesByCategory(c.slug).length === 0;
+  const empty = (await guideCardsByCategory(c.slug)).length === 0;
   return {
     title: `${c.name} — Legal Guides | LawMitran`,
     description: c.description,
     alternates: { canonical: url },
-    // Thin/empty category pages are noindexed until they have content.
     robots: empty ? { index: false, follow: true } : undefined,
   };
 }
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const c = getCategory(slug);
+  const [c, allCats] = await Promise.all([getGuideCategory(slug), guideCategories()]);
   if (!c) notFound();
-  const guides = guidesByCategory(c.slug);
+  const guides = await guideCardsByCategory(c.slug);
   const url = `${SITE_URL}/legal-guides/category/${c.slug}`;
 
   const breadcrumbLd = {
@@ -102,7 +105,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         )}
 
         <div className="mt-10 flex flex-wrap gap-2">
-          {CATEGORIES.filter((x) => x.slug !== c.slug).map((x) => (
+          {allCats.filter((x) => x.slug !== c.slug).map((x) => (
             <Link
               key={x.slug}
               href={`/legal-guides/category/${x.slug}`}

@@ -37,6 +37,9 @@ export function LawyerCard({ lawyer }: { lawyer: LawyerListItem }) {
   const { setHoveredLawyerId, setLeadLawyerId } = useLawyerSearchStore();
   const areas = lawyer.practiceAreas.map((p) => p.practiceArea.name);
   const cityName = lawyer.city?.name;
+  const nearLabel = lawyer.nearLocality
+    ? `Near ${lawyer.nearLocality}${lawyer.localityKm != null ? ` (~${lawyer.localityKm} km)` : ''}`
+    : null;
   const stateName = lawyer.city?.district.state.name;
   const rating = lawyer.ratingAvg ? parseFloat(lawyer.ratingAvg) : 0;
   const verified = lawyer.verificationStatus === 'APPROVED';
@@ -82,6 +85,11 @@ export function LawyerCard({ lawyer }: { lawyer: LawyerListItem }) {
                 )}
                 <Icon name="briefcase" aria-hidden="true" className="mr-1" /> {lawyer.experienceYears} yrs
               </p>
+              {nearLabel && (
+                <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-gold">
+                  <Icon name="location-crosshairs" aria-hidden="true" /> {nearLabel}
+                </p>
+              )}
             </div>
             <div className="shrink-0 text-right">
               <div className="text-xs font-semibold text-amber-500">

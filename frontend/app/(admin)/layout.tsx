@@ -17,6 +17,7 @@ const NAV = [
   { href: '/admin/offers', label: 'Offers', icon: 'bolt' },
   { href: '/admin/practice-areas', label: 'Practice Areas', icon: 'gavel' },
   { href: '/admin/documents', label: 'Documents', icon: 'file-invoice' },
+  { href: '/admin/content', label: 'Legal Help Center', icon: 'circle-question' },
   { href: '/admin/queries', label: 'Client Queries', icon: 'inbox' },
   { href: '/admin/moderation', label: 'Moderation', icon: 'flag' },
   { href: '/admin/transactions', label: 'Transactions', icon: 'credit-card' },
@@ -25,6 +26,7 @@ const NAV = [
 
 // RBAC-lite: which nav entries each staff role sees (SUPER sees all).
 const NAV_SCOPES: Record<string, ('OPS' | 'FINANCE')[]> = {
+  '/admin/content': ['OPS'],
   '/admin/approvals': ['OPS'],
   '/admin/users': ['OPS'],
   '/admin/documents': ['OPS'],

@@ -167,6 +167,12 @@ export class UsersService {
 
   async uploadAvatar(userId: string, file?: Express.Multer.File) {
     if (!file) throw new BadRequestException('No image uploaded');
+    if (!file.mimetype?.startsWith('image/')) {
+      throw new BadRequestException('Profile picture must be an image (JPG/PNG/WebP)');
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      throw new BadRequestException('Photo is too large — maximum size is 2 MB');
+    }
     const avatarUrl = await this.storage.upload(file, 'avatars');
     await this.prisma.user.update({ where: { id: userId }, data: { avatarUrl } });
     return { avatarUrl };

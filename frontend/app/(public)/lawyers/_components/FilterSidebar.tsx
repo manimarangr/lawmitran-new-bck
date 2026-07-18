@@ -5,14 +5,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useLawyerSearchStore } from '@/stores/lawyerSearchStore';
-import CityInput from '@/components/ui/CityInput';
 import { detectCity, saveCity } from '@/lib/geo';
-import { PRACTICE_AREAS } from '@/lib/practice-areas';
+import { fetchLocalities, type LocalityRef } from '@/lib/api/lawyers';
 import type { SearchFilters } from '@/types/lawyer';
 
 const schema = z.object({
-  city: z.string().optional(),
-  practiceArea: z.string().optional(),
+  locality: z.string().optional(),
   language: z.string().optional(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
   ratingMin: z.string().optional(),
@@ -33,6 +31,23 @@ export function FilterSidebar({ variant = 'rail' }: { variant?: 'card' | 'rail' 
     defaultValues: filters as FormValues,
   });
 
+  // Metro-only locality list for the currently applied city. Empty for small
+  // cities, which hides the locality filter entirely.
+  const [localities, setLocalities] = useState<LocalityRef[]>([]);
+  useEffect(() => {
+    let alive = true;
+    if (!filters.city) {
+      setLocalities([]);
+      return;
+    }
+    fetchLocalities(filters.city).then((list) => {
+      if (alive) setLocalities(list);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [filters.city]);
+
   // Keep the form in sync when filters are seeded from URL params
   // (e.g. the homepage hero search: /lawyers?city=Chennai&practiceArea=...).
   useEffect(() => {
@@ -40,9 +55,11 @@ export function FilterSidebar({ variant = 'rail' }: { variant?: 'card' | 'rail' 
   }, [filters, reset]);
 
   function onSubmit(data: FormValues) {
+    // City & practice area live in the hero search card — preserve them here.
     const clean: SearchFilters = {};
-    if (data.city) clean.city = data.city;
-    if (data.practiceArea) clean.practiceArea = data.practiceArea;
+    if (filters.city) clean.city = filters.city;
+    if (filters.practiceArea) clean.practiceArea = filters.practiceArea;
+    if (filters.city && data.locality) clean.locality = data.locality;
     if (data.language) clean.language = data.language;
     if (data.gender) clean.gender = data.gender;
     if (data.ratingMin) clean.ratingMin = parseFloat(data.ratingMin);
@@ -88,30 +105,28 @@ export function FilterSidebar({ variant = 'rail' }: { variant?: 'card' | 'rail' 
           </button>
         </div>
 
-        <Field label="City">
-          <CityInput
-            {...register('city')}
-            placeholder="e.g. Chennai"
-            className={inputCls}
-          />
-          <button
-            type="button"
-            onClick={() => void useMyLocation()}
-            disabled={locating}
-            className="mt-1.5 text-xs font-semibold text-gold hover:underline disabled:opacity-60"
-          >
-            {locating ? 'Detecting your city…' : '📍 Use my location'}
-          </button>
-        </Field>
+        <button
+          type="button"
+          onClick={() => void useMyLocation()}
+          disabled={locating}
+          className="text-xs font-semibold text-gold hover:underline disabled:opacity-60"
+        >
+          {locating ? 'Detecting your city…' : '📍 Use my location'}
+        </button>
 
-        <Field label="Practice Area">
-          <select {...register('practiceArea')} className={inputCls}>
-            <option value="">All areas</option>
-            {PRACTICE_AREAS.map((a) => (
-              <option key={a} value={a}>{a}</option>
-            ))}
-          </select>
-        </Field>
+        {localities.length > 0 && (
+          <Field label="Locality">
+            <select {...register('locality')} className={inputCls}>
+              <option value="">Anywhere in {filters.city}</option>
+              {localities.map((l) => (
+                <option key={l.id} value={l.slug}>{l.name}</option>
+              ))}
+            </select>
+            <p className="mt-1 text-[11px] text-slate-400">
+              Lawyers nearest this locality are shown first.
+            </p>
+          </Field>
+        )}
 
         <Field label="Language">
           <select {...register('language')} className={inputCls}>

@@ -44,6 +44,13 @@ function LoginForm() {
   function finish(res: { role: string; accessToken?: string; refreshToken?: string }) {
     localStorage.setItem('accessToken', res.accessToken!);
     localStorage.setItem('refreshToken', res.refreshToken!);
+    // Return to the page they came from (e.g. a lawyer search) when a safe
+    // internal ?next= is present; otherwise land on the role dashboard.
+    const next = searchParams.get('next');
+    if (next && next.startsWith('/') && !next.startsWith('//')) {
+      router.push(next);
+      return;
+    }
     router.push(
       res.role === 'ADMIN'
         ? '/admin'

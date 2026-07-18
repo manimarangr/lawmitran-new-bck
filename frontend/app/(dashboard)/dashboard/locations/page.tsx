@@ -1,15 +1,17 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   addOffice,
   deleteOffice,
+  fetchLocalities,
   getMyLocations,
   setServiceAreas,
   updateOffice,
   uploadOfficePhotos,
+  type LocalityRef,
   type OfficeItem,
 } from '@/lib/api/lawyers';
 import CityInput from '@/components/ui/CityInput';
@@ -27,9 +29,27 @@ export default function LocationsPage() {
   const [officeAddress, setOfficeAddress] = useState('');
   const [officePincode, setOfficePincode] = useState('');
   const [officeLandmark, setOfficeLandmark] = useState('');
+  const [officeLocality, setOfficeLocality] = useState('');
+  const [localities, setLocalities] = useState<LocalityRef[]>([]);
 
   // service-area form
   const [areaCity, setAreaCity] = useState('');
+
+  // Metro-only: locality dropdown appears when the typed city has localities.
+  useEffect(() => {
+    let alive = true;
+    setOfficeLocality('');
+    if (officeCity.trim().length < 3) {
+      setLocalities([]);
+      return;
+    }
+    const t = setTimeout(() => {
+      fetchLocalities(officeCity.trim()).then((list) => {
+        if (alive) setLocalities(list);
+      });
+    }, 300);
+    return () => { alive = false; clearTimeout(t); };
+  }, [officeCity]);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['my-locations'] });
   const clearMsgs = () => { setError(''); setNotice(''); };
@@ -42,10 +62,11 @@ export default function LocationsPage() {
         addressLine: officeAddress || undefined,
         pincode: officePincode || undefined,
         landmark: officeLandmark || undefined,
+        localityId: officeLocality || undefined,
       }),
     onSuccess: () => {
       setOfficeCity(''); setOfficeLabel(''); setOfficeAddress('');
-      setOfficePincode(''); setOfficeLandmark('');
+      setOfficePincode(''); setOfficeLandmark(''); setOfficeLocality('');
       setNotice('Office added.');
       invalidate();
     },
@@ -215,6 +236,11 @@ export default function LocationsPage() {
                     aria-label={`Upload photos for ${o.label || 'office'} (max 3)`}
                     onChange={(e) => {
                       const files = Array.from(e.target.files ?? []).slice(0, 3);
+                      if (files.some((f) => f.size > 2 * 1024 * 1024)) {
+                        setError('Each office photo must be 2 MB or smaller.');
+                        e.target.value = '';
+                        return;
+                      }
                       if (files.length) { clearMsgs(); photosM.mutate({ id: o.id, files }); }
                       e.target.value = '';
                     }}
@@ -246,6 +272,24 @@ export default function LocationsPage() {
               className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:border-gold focus:outline-none"
             />
           </div>
+          {localities.length > 0 && (
+            <div>
+              <label htmlFor="office-locality" className="mb-1.5 block text-xs font-bold uppercase text-slate-500">
+                Locality <span className="font-medium normal-case text-slate-400">(helps clients nearby find you)</span>
+              </label>
+              <select
+                id="office-locality"
+                value={officeLocality}
+                onChange={(e) => setOfficeLocality(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:border-gold focus:outline-none"
+              >
+                <option value="">— select locality —</option>
+                {localities.map((l) => (
+                  <option key={l.id} value={l.id}>{l.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label htmlFor="office-label" className="mb-1.5 block text-xs font-bold uppercase text-slate-500">
               Label <span className="font-medium normal-case text-slate-400">(optional)</span>

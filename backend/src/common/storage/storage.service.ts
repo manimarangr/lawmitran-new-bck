@@ -1,16 +1,22 @@
-import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   CreateBucketCommand,
   GetObjectCommand,
   HeadBucketCommand,
+  PutBucketPolicyCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 
 @Injectable()
-export class StorageService {
+export class StorageService implements OnModuleInit {
   private readonly logger = new Logger(StorageService.name);
   private readonly client: S3Client;
   private readonly bucket: string;
@@ -32,6 +38,18 @@ export class StorageService {
     });
   }
 
+  /** Apply bucket + public-image policy at startup so images work before the
+   *  first upload. Non-fatal — storage may come up after the API in docker. */
+  async onModuleInit(): Promise<void> {
+    try {
+      await this.ensureBucket();
+    } catch {
+      this.logger.warn(
+        'Storage not reachable at startup — will retry on first upload',
+      );
+    }
+  }
+
   /** MinIO starts empty — create the bucket on first use so dev "just works". */
   private async ensureBucket(): Promise<void> {
     if (this.bucketReady) return;
@@ -49,6 +67,49 @@ export class StorageService {
           'Document storage is unavailable — check that MinIO is running and S3_* env vars are correct',
         );
       }
+    }
+    await this.ensurePublicImagePolicy();
+  }
+
+  /**
+   * Browsers load profile/office/avatar images directly from the bucket URL,
+   * so those prefixes need anonymous read. Sensitive prefixes (certificates,
+   * ID cards, property docs, generated documents) stay private — they are
+   * served only through authenticated backend proxies. Idempotent; failure is
+   * non-fatal (images just won't render until the policy is applied).
+   */
+  private policyApplied = false;
+  private async ensurePublicImagePolicy(): Promise<void> {
+    if (this.policyApplied) return;
+    const publicPrefixes = ['profiles/*', 'offices/*', 'avatars/*'];
+    const policy = {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Effect: 'Allow',
+          Principal: { AWS: ['*'] },
+          Action: ['s3:GetObject'],
+          Resource: publicPrefixes.map(
+            (p) => `arn:aws:s3:::${this.bucket}/${p}`,
+          ),
+        },
+      ],
+    };
+    try {
+      await this.client.send(
+        new PutBucketPolicyCommand({
+          Bucket: this.bucket,
+          Policy: JSON.stringify(policy),
+        }),
+      );
+      this.policyApplied = true;
+      this.logger.log(
+        'Public-read policy applied for image prefixes (profiles/, offices/, avatars/)',
+      );
+    } catch (err) {
+      this.logger.warn(
+        `Could not set public-read policy for image prefixes: ${(err as Error).message}`,
+      );
     }
   }
 

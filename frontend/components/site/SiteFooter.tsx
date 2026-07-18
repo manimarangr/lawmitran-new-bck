@@ -82,7 +82,6 @@ export default function SiteFooter() {
         </span>
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-slate-400">
           <a href="https://www.lawmitran.com" className="hover:text-gold">www.lawmitran.com</a>
-          <a href="tel:+917760545789" className="hover:text-gold">+91 77605 45789</a>
           <a href="mailto:support@lawmitran.com" className="hover:text-gold">support@lawmitran.com</a>
         </div>
       </div>

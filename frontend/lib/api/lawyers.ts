@@ -19,6 +19,7 @@ export interface CreateProfileInput {
   addressLine: string;
   pincode: string;
   landmark?: string;
+  localityId?: string;
   officeLabel?: string;
   latitude: number;
   longitude: number;
@@ -35,6 +36,46 @@ export interface LanguageRef {
   id: string;
   name: string;
   code: string;
+}
+
+export interface PracticeAreaRef {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface StateRef {
+  id: string;
+  name: string;
+  code: string;
+}
+
+export async function fetchPracticeAreas(): Promise<PracticeAreaRef[]> {
+  const res = await fetch(`${API_BASE}/lawyers/practice-areas`);
+  if (!res.ok) return [];
+  return res.json() as Promise<PracticeAreaRef[]>;
+}
+
+export async function fetchStates(): Promise<StateRef[]> {
+  const res = await fetch(`${API_BASE}/lawyers/states`);
+  if (!res.ok) return [];
+  return res.json() as Promise<StateRef[]>;
+}
+
+export interface LocalityRef {
+  id: string;
+  name: string;
+  slug: string;
+  lat: number;
+  lng: number;
+}
+
+/** Metro localities for a city — [] for non-metros (hide the locality UI). */
+export async function fetchLocalities(city: string): Promise<LocalityRef[]> {
+  if (!city?.trim()) return [];
+  const res = await fetch(`${API_BASE}/lawyers/localities?city=${encodeURIComponent(city)}`);
+  if (!res.ok) return [];
+  return res.json() as Promise<LocalityRef[]>;
 }
 
 export async function fetchCourts(): Promise<CourtRef[]> {
@@ -78,6 +119,7 @@ export function addOffice(data: {
   addressLine?: string;
   pincode?: string;
   landmark?: string;
+  localityId?: string;
   latitude?: number;
   longitude?: number;
 }) {
@@ -95,6 +137,7 @@ export function updateOffice(
     addressLine?: string;
     pincode?: string;
     landmark?: string;
+    localityId?: string;
     latitude?: number;
     longitude?: number;
     isPrimary?: boolean;
@@ -208,6 +251,7 @@ export async function createLawyerProfile(input: CreateProfileInput) {
   fd.append('addressLine', input.addressLine);
   fd.append('pincode', input.pincode);
   if (input.landmark) fd.append('landmark', input.landmark);
+  if (input.localityId) fd.append('localityId', input.localityId);
   if (input.officeLabel) fd.append('officeLabel', input.officeLabel);
   fd.append('latitude', String(input.latitude));
   fd.append('longitude', String(input.longitude));

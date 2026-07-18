@@ -21,6 +21,12 @@ export class SearchLawyersDto {
   @IsString()
   practiceArea?: string;
 
+  // Metro locality slug (e.g. "electronic-city"). Ranking boost, not a hard
+  // filter — lawyers near the locality centroid sort first.
+  @IsOptional()
+  @IsString()
+  locality?: string;
+
   @IsOptional()
   @IsUUID()
   courtId?: string;

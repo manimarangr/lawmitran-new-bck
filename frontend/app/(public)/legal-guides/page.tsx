@@ -2,8 +2,11 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteFooter from '@/components/site/SiteFooter';
 import Icon from '@/components/ui/Icon';
-import { CATEGORIES } from '@/lib/legal-guides/categories';
-import { GUIDES, guidesByCategory, latestGuides } from '@/lib/legal-guides/guides';
+import {
+  guideCategories,
+  allGuideCards,
+  latestGuideCards,
+} from '@/lib/legal-guides/source';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
@@ -14,13 +17,22 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/legal-guides` },
 };
 
-export default function LegalGuidesPage() {
-  const latest = latestGuides(6);
+export default async function LegalGuidesPage() {
+  const [categories, all, latest] = await Promise.all([
+    guideCategories(),
+    allGuideCards(),
+    latestGuideCards(6),
+  ]);
+  const counts = all.reduce<Record<string, number>>((acc, g) => {
+    acc[g.category] = (acc[g.category] ?? 0) + 1;
+    return acc;
+  }, {});
+
   const itemListLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: 'LawMitran Legal Guides',
-    itemListElement: GUIDES.map((g, i) => ({
+    itemListElement: all.map((g, i) => ({
       '@type': 'ListItem',
       position: i + 1,
       url: `${SITE_URL}/legal-guides/${g.slug}`,
@@ -52,8 +64,8 @@ export default function LegalGuidesPage() {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {CATEGORIES.map((c) => {
-            const count = guidesByCategory(c.slug).length;
+          {categories.map((c) => {
+            const count = counts[c.slug] ?? 0;
             return (
               <Link
                 key={c.slug}

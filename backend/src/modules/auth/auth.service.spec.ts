@@ -92,6 +92,9 @@ describe('AuthService', () => {
 
       await expect(
         service.register({
+          fullName: 'Test User',
+          acceptTerms: true,
+          acceptProcessing: true,
           email: 'a@b.com',
           mobile: '9999999999',
           password: 'password123',
@@ -120,6 +123,9 @@ describe('AuthService', () => {
       });
 
       const result = await service.register({
+        fullName: 'Test User',
+        acceptTerms: true,
+        acceptProcessing: true,
         email: 'a@b.com',
         mobile: '9999999999',
         password: 'password123',
@@ -156,6 +162,9 @@ describe('AuthService', () => {
       });
 
       const result = await service.register({
+        fullName: 'Test User',
+        acceptTerms: true,
+        acceptProcessing: true,
         email: 'lawyer@b.com',
         mobile: '9999999998',
         password: 'password123',
@@ -175,6 +184,9 @@ describe('AuthService', () => {
 
       await expect(
         service.register({
+          fullName: 'Test User',
+          acceptTerms: true,
+          acceptProcessing: true,
           email: 'taken@b.com',
           mobile: '9999999997',
           password: 'password123',

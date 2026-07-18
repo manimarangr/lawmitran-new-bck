@@ -104,9 +104,14 @@ export default function DashboardNav() {
               aria-haspopup="menu"
               aria-expanded={menuOpen}
               aria-label="Account menu"
-              className="hero-gradient flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-gold"
+              className="hero-gradient flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-sm font-bold text-gold ring-2 ring-gold/40"
             >
-              {initials}
+              {me?.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={me.avatarUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                initials
+              )}
             </button>
             {menuOpen && (
               <div

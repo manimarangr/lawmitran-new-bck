@@ -22,6 +22,7 @@
     "seed": "ts-node prisma/seed.ts",
     "seed:demo": "ts-node prisma/seed-demo.ts",
     "seed:documents": "ts-node prisma/seed-documents.ts",
+    "seed:content": "ts-node prisma/seed-content.ts",
     "seed:stamp-duty": "ts-node prisma/seed-stamp-duty.ts"
   },
   "prisma": {

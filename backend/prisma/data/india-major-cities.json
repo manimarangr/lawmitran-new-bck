@@ -1,234 +1,794 @@
 {
- "cities": [
-  {
-   "name": "Bengaluru",
-   "district": "Bengaluru Urban",
-   "stateCode": "KA"
-  },
-  {
-   "name": "Kochi",
-   "district": "Ernakulam",
-   "stateCode": "KL"
-  },
-  {
-   "name": "Noida",
-   "district": "Gautam Buddha Nagar",
-   "stateCode": "UP"
-  },
-  {
-   "name": "Greater Noida",
-   "district": "Gautam Buddha Nagar",
-   "stateCode": "UP"
-  },
-  {
-   "name": "Navi Mumbai",
-   "district": "Thane",
-   "stateCode": "MH"
-  },
-  {
-   "name": "Kanpur",
-   "district": "Kanpur Nagar",
-   "stateCode": "UP"
-  },
-  {
-   "name": "Panaji",
-   "district": "North Goa",
-   "stateCode": "GA"
-  },
-  {
-   "name": "Margao",
-   "district": "South Goa",
-   "stateCode": "GA"
-  },
-  {
-   "name": "Vasco da Gama",
-   "district": "South Goa",
-   "stateCode": "GA"
-  },
-  {
-   "name": "Bhubaneswar",
-   "district": "Khordha",
-   "stateCode": "OD"
-  },
-  {
-   "name": "Rourkela",
-   "district": "Sundargarh",
-   "stateCode": "OD"
-  },
-  {
-   "name": "Guwahati",
-   "district": "Kamrup Metropolitan",
-   "stateCode": "AS"
-  },
-  {
-   "name": "Jamshedpur",
-   "district": "East Singhbhum",
-   "stateCode": "JH"
-  },
-  {
-   "name": "Mangaluru",
-   "district": "Dakshina Kannada",
-   "stateCode": "KA"
-  },
-  {
-   "name": "Hubballi",
-   "district": "Dharwad",
-   "stateCode": "KA"
-  },
-  {
-   "name": "Vijayawada",
-   "district": "Krishna",
-   "stateCode": "AP"
-  },
-  {
-   "name": "Tirupati",
-   "district": "Chittoor",
-   "stateCode": "AP"
-  },
-  {
-   "name": "Siliguri",
-   "district": "Darjeeling",
-   "stateCode": "WB"
-  },
-  {
-   "name": "Durgapur",
-   "district": "Paschim Bardhaman",
-   "stateCode": "WB"
-  },
-  {
-   "name": "Asansol",
-   "district": "Paschim Bardhaman",
-   "stateCode": "WB"
-  },
-  {
-   "name": "Kharagpur",
-   "district": "Paschim Medinipur",
-   "stateCode": "WB"
-  },
-  {
-   "name": "Mohali",
-   "district": "Sahibzada Ajit Singh Nagar",
-   "stateCode": "PB"
-  },
-  {
-   "name": "Udhagamandalam",
-   "district": "Nilgiris",
-   "stateCode": "TN"
-  },
-  {
-   "name": "Kavaratti",
-   "district": "Lakshadweep",
-   "stateCode": "LD"
-  },
-  {
-   "name": "Silvassa",
-   "district": "Dadra & Nagar Haveli",
-   "stateCode": "DN"
-  },
-  {
-   "name": "Port Blair",
-   "district": "South Andaman",
-   "stateCode": "AN"
-  },
-  {
-   "name": "Itanagar",
-   "district": "Papum Pare",
-   "stateCode": "AR"
-  },
-  {
-   "name": "Shillong",
-   "district": "East Khasi Hills",
-   "stateCode": "ML"
-  },
-  {
-   "name": "Imphal",
-   "district": "Imphal West",
-   "stateCode": "MN"
-  },
-  {
-   "name": "Agartala",
-   "district": "West Tripura",
-   "stateCode": "TR"
-  },
-  {
-   "name": "Gandhidham",
-   "district": "Kachchh",
-   "stateCode": "GJ"
-  },
-  {
-   "name": "Bhuj",
-   "district": "Kachchh",
-   "stateCode": "GJ"
-  },
-  {
-   "name": "Secunderabad",
-   "district": "Hyderabad",
-   "stateCode": "TS"
-  },
-  {
-   "name": "Haldwani",
-   "district": "Nainital",
-   "stateCode": "UK"
-  },
-  {
-   "name": "Rishikesh",
-   "district": "Dehradun",
-   "stateCode": "UK"
-  },
-  {
-   "name": "Roorkee",
-   "district": "Haridwar",
-   "stateCode": "UK"
-  },
-  {
-   "name": "Aurangabad",
-   "district": "Chhatrapati Sambhajinagar",
-   "stateCode": "MH"
-  },
-  {
-   "name": "Delhi",
-   "district": "New Delhi",
-   "stateCode": "DL"
-  },
-  {
-   "name": "Mumbai",
-   "district": "Mumbai City",
-   "stateCode": "MH"
-  },
-  {
-   "name": "Kalyan",
-   "district": "Thane",
-   "stateCode": "MH"
-  },
-  {
-   "name": "Vapi",
-   "district": "Valsad",
-   "stateCode": "GJ"
-  },
-  {
-   "name": "Anantapuramu",
-   "district": "Anantapur",
-   "stateCode": "AP"
-  },
-  {
-   "name": "Cherthala",
-   "district": "Alappuzha",
-   "stateCode": "KL"
-  },
-  {
-   "name": "Tirur",
-   "district": "Malappuram",
-   "stateCode": "KL"
-  },
-  {
-   "name": "Manali",
-   "district": "Kullu",
-   "stateCode": "HP"
-  },
-  {
-   "name": "Dharamshala",
-   "district": "Kangra",
-   "stateCode": "HP"
-  }
- ]
+  "cities": [
+    {
+      "name": "Bengaluru",
+      "district": "Bengaluru Urban",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Kochi",
+      "district": "Ernakulam",
+      "stateCode": "KL"
+    },
+    {
+      "name": "Noida",
+      "district": "Gautam Buddha Nagar",
+      "stateCode": "UP"
+    },
+    {
+      "name": "Greater Noida",
+      "district": "Gautam Buddha Nagar",
+      "stateCode": "UP"
+    },
+    {
+      "name": "Navi Mumbai",
+      "district": "Thane",
+      "stateCode": "MH"
+    },
+    {
+      "name": "Kanpur",
+      "district": "Kanpur Nagar",
+      "stateCode": "UP"
+    },
+    {
+      "name": "Panaji",
+      "district": "North Goa",
+      "stateCode": "GA"
+    },
+    {
+      "name": "Margao",
+      "district": "South Goa",
+      "stateCode": "GA"
+    },
+    {
+      "name": "Vasco da Gama",
+      "district": "South Goa",
+      "stateCode": "GA"
+    },
+    {
+      "name": "Bhubaneswar",
+      "district": "Khordha",
+      "stateCode": "OD"
+    },
+    {
+      "name": "Rourkela",
+      "district": "Sundargarh",
+      "stateCode": "OD"
+    },
+    {
+      "name": "Guwahati",
+      "district": "Kamrup Metropolitan",
+      "stateCode": "AS"
+    },
+    {
+      "name": "Jamshedpur",
+      "district": "East Singhbhum",
+      "stateCode": "JH"
+    },
+    {
+      "name": "Mangaluru",
+      "district": "Dakshina Kannada",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Hubballi",
+      "district": "Dharwad",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Vijayawada",
+      "district": "Krishna",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Tirupati",
+      "district": "Chittoor",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Siliguri",
+      "district": "Darjeeling",
+      "stateCode": "WB"
+    },
+    {
+      "name": "Durgapur",
+      "district": "Paschim Bardhaman",
+      "stateCode": "WB"
+    },
+    {
+      "name": "Asansol",
+      "district": "Paschim Bardhaman",
+      "stateCode": "WB"
+    },
+    {
+      "name": "Kharagpur",
+      "district": "Paschim Medinipur",
+      "stateCode": "WB"
+    },
+    {
+      "name": "Mohali",
+      "district": "Sahibzada Ajit Singh Nagar",
+      "stateCode": "PB"
+    },
+    {
+      "name": "Udhagamandalam",
+      "district": "Nilgiris",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Kavaratti",
+      "district": "Lakshadweep",
+      "stateCode": "LD"
+    },
+    {
+      "name": "Silvassa",
+      "district": "Dadra & Nagar Haveli",
+      "stateCode": "DN"
+    },
+    {
+      "name": "Port Blair",
+      "district": "South Andaman",
+      "stateCode": "AN"
+    },
+    {
+      "name": "Itanagar",
+      "district": "Papum Pare",
+      "stateCode": "AR"
+    },
+    {
+      "name": "Shillong",
+      "district": "East Khasi Hills",
+      "stateCode": "ML"
+    },
+    {
+      "name": "Imphal",
+      "district": "Imphal West",
+      "stateCode": "MN"
+    },
+    {
+      "name": "Agartala",
+      "district": "West Tripura",
+      "stateCode": "TR"
+    },
+    {
+      "name": "Gandhidham",
+      "district": "Kachchh",
+      "stateCode": "GJ"
+    },
+    {
+      "name": "Bhuj",
+      "district": "Kachchh",
+      "stateCode": "GJ"
+    },
+    {
+      "name": "Secunderabad",
+      "district": "Hyderabad",
+      "stateCode": "TS"
+    },
+    {
+      "name": "Haldwani",
+      "district": "Nainital",
+      "stateCode": "UK"
+    },
+    {
+      "name": "Rishikesh",
+      "district": "Dehradun",
+      "stateCode": "UK"
+    },
+    {
+      "name": "Roorkee",
+      "district": "Haridwar",
+      "stateCode": "UK"
+    },
+    {
+      "name": "Aurangabad",
+      "district": "Chhatrapati Sambhajinagar",
+      "stateCode": "MH"
+    },
+    {
+      "name": "Delhi",
+      "district": "New Delhi",
+      "stateCode": "DL"
+    },
+    {
+      "name": "Mumbai",
+      "district": "Mumbai City",
+      "stateCode": "MH"
+    },
+    {
+      "name": "Kalyan",
+      "district": "Thane",
+      "stateCode": "MH"
+    },
+    {
+      "name": "Vapi",
+      "district": "Valsad",
+      "stateCode": "GJ"
+    },
+    {
+      "name": "Anantapuramu",
+      "district": "Anantapur",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Cherthala",
+      "district": "Alappuzha",
+      "stateCode": "KL"
+    },
+    {
+      "name": "Tirur",
+      "district": "Malappuram",
+      "stateCode": "KL"
+    },
+    {
+      "name": "Manali",
+      "district": "Kullu",
+      "stateCode": "HP"
+    },
+    {
+      "name": "Dharamshala",
+      "district": "Kangra",
+      "stateCode": "HP"
+    },
+    {
+      "name": "Hosur",
+      "district": "Krishnagiri",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Rajahmundry",
+      "district": "East Godavari",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Bhilai",
+      "district": "Durg",
+      "stateCode": "CG"
+    },
+    {
+      "name": "Ooty",
+      "district": "Nilgiris",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Kodaikanal",
+      "district": "Dindigul",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Pollachi",
+      "district": "Coimbatore",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Kumbakonam",
+      "district": "Thanjavur",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Palani",
+      "district": "Dindigul",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Rajapalayam",
+      "district": "Virudhunagar",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Sivakasi",
+      "district": "Virudhunagar",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Neyveli",
+      "district": "Cuddalore",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Arakkonam",
+      "district": "Ranipet",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Karaikudi",
+      "district": "Sivaganga",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Mettupalayam",
+      "district": "Coimbatore",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Gobichettipalayam",
+      "district": "Erode",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Tiruchengode",
+      "district": "Namakkal",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Udumalaipettai",
+      "district": "Tiruppur",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Kolar Gold Fields",
+      "district": "Kolar",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Channapatna",
+      "district": "Ramanagara",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Sirsi",
+      "district": "Uttara Kannada",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Karwar",
+      "district": "Uttara Kannada",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Bhadravati",
+      "district": "Shivamogga",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Hosapete",
+      "district": "Ballari",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Gangavati",
+      "district": "Koppal",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Ranebennur",
+      "district": "Haveri",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Nanjangud",
+      "district": "Mysuru",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Manipal",
+      "district": "Udupi",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Puttur",
+      "district": "Dakshina Kannada",
+      "stateCode": "KA"
+    },
+    {
+      "name": "Aluva",
+      "district": "Ernakulam",
+      "stateCode": "KL"
+    },
+    {
+      "name": "Guruvayur",
+      "district": "Thrissur",
+      "stateCode": "KL"
+    },
+    {
+      "name": "Changanassery",
+      "district": "Kottayam",
+      "stateCode": "KL"
+    },
+    {
+      "name": "Kayamkulam",
+      "district": "Alappuzha",
+      "stateCode": "KL"
+    },
+    {
+      "name": "Perinthalmanna",
+      "district": "Malappuram",
+      "stateCode": "KL"
+    },
+    {
+      "name": "Thalassery",
+      "district": "Kannur",
+      "stateCode": "KL"
+    },
+    {
+      "name": "Kanhangad",
+      "district": "Kasaragod",
+      "stateCode": "KL"
+    },
+    {
+      "name": "Muvattupuzha",
+      "district": "Ernakulam",
+      "stateCode": "KL"
+    },
+    {
+      "name": "Kottakkal",
+      "district": "Malappuram",
+      "stateCode": "KL"
+    },
+    {
+      "name": "Kakinada",
+      "district": "East Godavari",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Eluru",
+      "district": "West Godavari",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Ongole",
+      "district": "Prakasam",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Nandyal",
+      "district": "Kurnool",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Machilipatnam",
+      "district": "Krishna",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Tenali",
+      "district": "Guntur",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Hindupur",
+      "district": "Anantapur",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Bhimavaram",
+      "district": "West Godavari",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Tadepalligudem",
+      "district": "West Godavari",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Guntakal",
+      "district": "Anantapur",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Proddatur",
+      "district": "YSR Kadapa",
+      "stateCode": "AP"
+    },
+    {
+      "name": "Kothagudem",
+      "district": "Bhadradri Kothagudem",
+      "stateCode": "TS"
+    },
+    {
+      "name": "Miryalaguda",
+      "district": "Nalgonda",
+      "stateCode": "TS"
+    },
+    {
+      "name": "Ichalkaranji",
+      "district": "Kolhapur",
+      "stateCode": "MH"
+    },
+    {
+      "name": "Malegaon",
+      "district": "Nashik",
+      "stateCode": "MH"
+    },
+    {
+      "name": "Bhiwandi",
+      "district": "Thane",
+      "stateCode": "MH"
+    },
+    {
+      "name": "Panvel",
+      "district": "Raigad",
+      "stateCode": "MH"
+    },
+    {
+      "name": "Pandharpur",
+      "district": "Solapur",
+      "stateCode": "MH"
+    },
+    {
+      "name": "Shirdi",
+      "district": "Ahmednagar",
+      "stateCode": "MH"
+    },
+    {
+      "name": "Baramati",
+      "district": "Pune",
+      "stateCode": "MH"
+    },
+    {
+      "name": "Lonavala",
+      "district": "Pune",
+      "stateCode": "MH"
+    },
+    {
+      "name": "Barshi",
+      "district": "Solapur",
+      "stateCode": "MH"
+    },
+    {
+      "name": "Ankleshwar",
+      "district": "Bharuch",
+      "stateCode": "GJ"
+    },
+    {
+      "name": "Veraval",
+      "district": "Gir Somnath",
+      "stateCode": "GJ"
+    },
+    {
+      "name": "Godhra",
+      "district": "Panchmahal (Godhra)",
+      "stateCode": "GJ"
+    },
+    {
+      "name": "Palanpur",
+      "district": "Banaskantha (Palanpur)",
+      "stateCode": "GJ"
+    },
+    {
+      "name": "Jetpur",
+      "district": "Rajkot",
+      "stateCode": "GJ"
+    },
+    {
+      "name": "Pushkar",
+      "district": "Ajmer",
+      "stateCode": "RJ"
+    },
+    {
+      "name": "Beawar",
+      "district": "Ajmer",
+      "stateCode": "RJ"
+    },
+    {
+      "name": "Kishangarh",
+      "district": "Ajmer",
+      "stateCode": "RJ"
+    },
+    {
+      "name": "Mount Abu",
+      "district": "Sirohi",
+      "stateCode": "RJ"
+    },
+    {
+      "name": "Bhiwadi",
+      "district": "Alwar",
+      "stateCode": "RJ"
+    },
+    {
+      "name": "Vrindavan",
+      "district": "Mathura",
+      "stateCode": "UP"
+    },
+    {
+      "name": "Khurja",
+      "district": "Bulandshahr",
+      "stateCode": "UP"
+    },
+    {
+      "name": "Modinagar",
+      "district": "Ghaziabad",
+      "stateCode": "UP"
+    },
+    {
+      "name": "Ayodhya",
+      "district": "Ayodhya",
+      "stateCode": "UP"
+    },
+    {
+      "name": "Pithampur",
+      "district": "Dhar",
+      "stateCode": "MP"
+    },
+    {
+      "name": "Nagda",
+      "district": "Ujjain",
+      "stateCode": "MP"
+    },
+    {
+      "name": "Hajipur",
+      "district": "Vaishali",
+      "stateCode": "BR"
+    },
+    {
+      "name": "Bihar Sharif",
+      "district": "Nalanda",
+      "stateCode": "BR"
+    },
+    {
+      "name": "Sasaram",
+      "district": "Rohtas",
+      "stateCode": "BR"
+    },
+    {
+      "name": "Dehri",
+      "district": "Rohtas",
+      "stateCode": "BR"
+    },
+    {
+      "name": "Bettiah",
+      "district": "West Champaran",
+      "stateCode": "BR"
+    },
+    {
+      "name": "Motihari",
+      "district": "East Champaran (Motihari)",
+      "stateCode": "BR"
+    },
+    {
+      "name": "Haldia",
+      "district": "Purba Medinipur",
+      "stateCode": "WB"
+    },
+    {
+      "name": "Serampore",
+      "district": "Hooghly",
+      "stateCode": "WB"
+    },
+    {
+      "name": "Chandannagar",
+      "district": "Hooghly",
+      "stateCode": "WB"
+    },
+    {
+      "name": "Phagwara",
+      "district": "Kapurthala",
+      "stateCode": "PB"
+    },
+    {
+      "name": "Rajpura",
+      "district": "Patiala",
+      "stateCode": "PB"
+    },
+    {
+      "name": "Khanna",
+      "district": "Ludhiana",
+      "stateCode": "PB"
+    },
+    {
+      "name": "Abohar",
+      "district": "Fazilka",
+      "stateCode": "PB"
+    },
+    {
+      "name": "Batala",
+      "district": "Gurdaspur",
+      "stateCode": "PB"
+    },
+    {
+      "name": "Manesar",
+      "district": "Gurugram",
+      "stateCode": "HR"
+    },
+    {
+      "name": "Bahadurgarh",
+      "district": "Jhajjar",
+      "stateCode": "HR"
+    },
+    {
+      "name": "Hansi",
+      "district": "Hisar",
+      "stateCode": "HR"
+    },
+    {
+      "name": "Brahmapur",
+      "district": "Ganjam",
+      "stateCode": "OD"
+    },
+    {
+      "name": "Bokaro Steel City",
+      "district": "Bokaro",
+      "stateCode": "JH"
+    },
+    {
+      "name": "Ambikapur",
+      "district": "Surguja",
+      "stateCode": "CG"
+    },
+    {
+      "name": "Silchar",
+      "district": "Cachar",
+      "stateCode": "AS"
+    },
+    {
+      "name": "Tezpur",
+      "district": "Sonitpur",
+      "stateCode": "AS"
+    },
+    {
+      "name": "Digboi",
+      "district": "Tinsukia",
+      "stateCode": "AS"
+    },
+    {
+      "name": "Duliajan",
+      "district": "Dibrugarh",
+      "stateCode": "AS"
+    },
+    {
+      "name": "Kashipur",
+      "district": "Udham Singh Nagar",
+      "stateCode": "UK"
+    },
+    {
+      "name": "Rudrapur",
+      "district": "Udham Singh Nagar",
+      "stateCode": "UK"
+    },
+    {
+      "name": "Mussoorie",
+      "district": "Dehradun",
+      "stateCode": "UK"
+    },
+    {
+      "name": "Palampur",
+      "district": "Kangra",
+      "stateCode": "HP"
+    },
+    {
+      "name": "Baddi",
+      "district": "Solan",
+      "stateCode": "HP"
+    },
+    {
+      "name": "Parwanoo",
+      "district": "Solan",
+      "stateCode": "HP"
+    },
+    {
+      "name": "Katra",
+      "district": "Reasi",
+      "stateCode": "JK"
+    },
+    {
+      "name": "Sopore",
+      "district": "Baramulla",
+      "stateCode": "JK"
+    },
+    {
+      "name": "Mapusa",
+      "district": "North Goa",
+      "stateCode": "GA"
+    },
+    {
+      "name": "Ponda",
+      "district": "North Goa",
+      "stateCode": "GA"
+    },
+    {
+      "name": "Ambur",
+      "district": "Tirupathur",
+      "stateCode": "TN"
+    },
+    {
+      "name": "Itarsi",
+      "district": "Narmadapuram",
+      "stateCode": "MP"
+    },
+    {
+      "name": "Paradip",
+      "district": "Jagatsinghapur",
+      "stateCode": "OD"
+    }
+  ]
 }

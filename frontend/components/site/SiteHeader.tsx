@@ -14,7 +14,6 @@ const LINKS = [
   { href: '/legal-documents', label: 'Legal Documents' },
   { href: '/legal-guides', label: 'Legal Guides' },
   { href: '/#how', label: 'How it Works' },
-  { href: '/signup?role=lawyer', label: 'For Lawyers' },
 ];
 
 interface Me {

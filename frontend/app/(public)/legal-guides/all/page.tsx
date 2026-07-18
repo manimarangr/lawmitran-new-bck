@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteFooter from '@/components/site/SiteFooter';
 import Icon from '@/components/ui/Icon';
-import { CATEGORIES } from '@/lib/legal-guides/categories';
-import { guidesByCategory } from '@/lib/legal-guides/guides';
+import { guideCategories, allGuideCards } from '@/lib/legal-guides/source';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
@@ -14,7 +13,9 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/legal-guides/all` },
 };
 
-export default function AllGuidesPage() {
+export default async function AllGuidesPage() {
+  const [categories, all] = await Promise.all([guideCategories(), allGuideCards()]);
+
   return (
     <div>
       <div className="mx-auto max-w-4xl px-6 py-10">
@@ -26,8 +27,8 @@ export default function AllGuidesPage() {
         <h1 className="text-2xl font-extrabold text-navy md:text-3xl">All Legal Guides</h1>
         <p className="mt-1 text-sm text-slate-500">Browse every guide by topic.</p>
 
-        {CATEGORIES.map((c) => {
-          const guides = guidesByCategory(c.slug);
+        {categories.map((c) => {
+          const guides = all.filter((g) => g.category === c.slug);
           if (guides.length === 0) return null;
           return (
             <section key={c.slug} className="mt-8">
