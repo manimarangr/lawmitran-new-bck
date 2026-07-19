@@ -13,7 +13,11 @@ export const revalidate = 3600;
 async function getOfficer(): Promise<{ name: string | null; email: string }> {
   try {
     const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
-    const res = await fetch(`${base}/contact/grievance`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${base}/contact/grievance`, {
+      next: { revalidate: 3600 },
+      // Build-time safety: a black-holed API must not stall prerendering.
+      signal: AbortSignal.timeout(6000),
+    });
     if (res.ok) return (await res.json()) as { name: string | null; email: string };
   } catch {
     /* backend down — fall through to defaults */
