@@ -58,11 +58,14 @@ export function LawyerSearchPage() {
 
   function heroSearch(e: React.FormEvent) {
     e.preventDefault();
-    setFilters({
+    const next = {
       ...filters,
       ...(heroArea ? { practiceArea: heroArea } : {}),
       ...(heroCity ? { city: heroCity } : {}),
-    });
+    };
+    // Locality belongs to a specific city — drop it when the city changes.
+    if (heroCity && heroCity !== filters.city) delete next.locality;
+    setFilters(next);
   }
 
   // ---------- MAP VIEW (secondary) ----------
@@ -98,14 +101,14 @@ export function LawyerSearchPage() {
   // ---------- LIST VIEW (default, sample-ui style) ----------
   return (
     <main id="main">
-      {/* dark hero with search card */}
-      <header className="hero-gradient py-10 text-white">
+      {/* light hero with search card */}
+      <header className="hero-light py-10">
         <div className="mx-auto max-w-6xl px-6">
-          <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-300">
+          <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-400">
             <Link href="/" className="hover:text-gold">Home</Link> <span className="mx-1">/</span> Find Lawyers
           </nav>
-          <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl">Find a Verified Lawyer</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-300">
+          <h1 className="text-3xl font-extrabold tracking-tight text-navy md:text-4xl">Find a Verified Lawyer</h1>
+          <p className="mt-2 max-w-2xl text-sm text-slate-500">
             Search Bar Council–verified advocates by practice area, city, and language. Submit a
             requirement and the lawyer reaches out to you.
           </p>

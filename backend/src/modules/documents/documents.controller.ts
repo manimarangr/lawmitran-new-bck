@@ -123,8 +123,9 @@ export class DocumentsController {
     });
   }
 
+  @Public()
   @Post('quote')
-  @ApiOperation({ summary: 'Price quote incl. stamp duty for a state' })
+  @ApiOperation({ summary: 'Price quote incl. stamp duty for a state (public)' })
   quote(@Body() dto: QuoteDto) {
     return this.documentsService.quote(dto.templateId, {
       state: dto.state,

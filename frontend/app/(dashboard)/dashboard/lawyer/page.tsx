@@ -14,6 +14,7 @@ import { ReportModal } from '@/components/ReportModal';
 import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
 import type { Lead, LeadStatus, RevealedContact } from '@/types/lead';
+import { createDiaryCaseFromLead } from '@/lib/api/diary';
 
 const badge: Record<LeadStatus, string> = {
   NEW: 'bg-blue-50 text-blue-600',
@@ -46,6 +47,13 @@ export default function LawyerDashboardPage() {
     mutationFn: (id: string) => revealContact(id),
     onSuccess: (data) => setRevealed((r) => ({ ...r, [data.leadId]: data })),
   });
+  const caseM = useMutation({
+    mutationFn: (id: string) => createDiaryCaseFromLead(id),
+    onSuccess: (c) => {
+      window.location.href = `/dashboard/diary/cases/${c.id}`;
+    },
+  });
+
   const statusM = useMutation({
     mutationFn: ({ id, status }: { id: string; status: LeadStatus }) =>
       updateLeadStatus(id, status),
@@ -222,9 +230,18 @@ export default function LawyerDashboardPage() {
           <div className="space-y-4">
             {!leadsQ.isLoading && visible.length === 0 && (
               <div className="rounded-2xl border border-dashed border-gray-200 p-10 text-center text-sm text-slate-400">
-                {tab === 'all'
-                  ? "No leads yet — they'll appear here once clients reach out."
-                  : `No ${tab.toLowerCase()} leads.`}
+                {tab === 'all' ? (
+                  <>
+                    No leads yet — they&apos;ll appear here once clients reach out. Meanwhile, bring
+                    your existing practice into your{' '}
+                    <Link href="/dashboard/diary" className="font-semibold text-gold hover:underline">
+                      Case Diary
+                    </Link>{' '}
+                    — cases, clients, and hearing dates in one place.
+                  </>
+                ) : (
+                  `No ${tab.toLowerCase()} leads.`
+                )}
               </div>
             )}
 
@@ -283,6 +300,17 @@ export default function LawyerDashboardPage() {
                         className="rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
                       >
                         Mark as closed
+                      </button>
+                    )}
+                    {(lead.status === 'CONTACTED' || lead.status === 'CLOSED') && (
+                      <button
+                        onClick={() => caseM.mutate(lead.id)}
+                        disabled={caseM.isPending}
+                        title="Open this client in your Case Diary — client details are filled in automatically"
+                        className="rounded-xl border border-gold px-4 py-2 text-sm font-bold text-navy transition hover:bg-gold disabled:opacity-60"
+                      >
+                        <Icon name="folder-open" aria-hidden="true" className="mr-1" />
+                        {caseM.isPending ? 'Creating…' : 'Create case'}
                       </button>
                     )}
                     {contact && (

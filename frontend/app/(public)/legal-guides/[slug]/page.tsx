@@ -4,18 +4,18 @@ import { notFound } from 'next/navigation';
 import SiteFooter from '@/components/site/SiteFooter';
 import Icon from '@/components/ui/Icon';
 import {
-  getGuide,
-  guideSlugs,
+  getGuideView,
+  allGuideSlugs,
   GUIDE_DISCLAIMER,
   GUIDE_AUTHOR,
-  GUIDE_REVIEWER,
-} from '@/lib/legal-guides/guides';
+} from '@/lib/legal-guides/source';
 import { getCategory } from '@/lib/legal-guides/categories';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
-export function generateStaticParams() {
-  return guideSlugs().map((slug) => ({ slug }));
+export async function generateStaticParams() {
+  const slugs = await allGuideSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -24,7 +24,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const g = getGuide(slug);
+  const g = await getGuideView(slug);
   if (!g) return {};
   const url = `${SITE_URL}/legal-guides/${g.slug}`;
   return {
@@ -61,12 +61,14 @@ function Bullets({ items }: { items: string[] }) {
 
 export default async function GuidePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const g = getGuide(slug);
+  const g = await getGuideView(slug);
   if (!g) notFound();
 
   const url = `${SITE_URL}/legal-guides/${g.slug}`;
   const catName = getCategory(g.category)?.name ?? g.category;
-  const articleLd = {
+  const reviewed = g.reviewState === 'LEGALLY_REVIEWED';
+
+  const articleLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: g.title,
@@ -76,7 +78,6 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
     inLanguage: 'en-IN',
     mainEntityOfPage: url,
     author: { '@type': 'Person', name: GUIDE_AUTHOR.name, url: `${SITE_URL}${GUIDE_AUTHOR.url}` },
-    editor: { '@type': 'Person', name: GUIDE_REVIEWER.name, jobTitle: GUIDE_REVIEWER.title },
     publisher: {
       '@type': 'Organization',
       name: 'LawMitran',
@@ -84,6 +85,16 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
       logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.svg` },
     },
   };
+  // Only claim an editorial reviewer in structured data once a real advocate
+  // has actually reviewed the piece — never imply a review that hasn't happened.
+  if (reviewed) {
+    articleLd.editor = {
+      '@type': 'Person',
+      name: g.reviewer.name,
+      jobTitle: g.reviewer.designation ?? 'Advocate',
+    };
+  }
+
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -106,7 +117,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
 
   return (
     <div>
-      <article className="mx-auto max-w-3xl px-6 py-10">
+      <article className="mx-auto max-w-4xl px-6 py-10">
         <nav aria-label="Breadcrumb" className="mb-4 text-xs text-slate-400">
           <Link href="/" className="hover:text-gold">Home</Link> /{' '}
           <Link href="/legal-guides" className="hover:text-gold">Legal Guides</Link> /{' '}
@@ -127,10 +138,20 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
             By <span className="font-semibold text-slate-500">{GUIDE_AUTHOR.name}</span>
           </span>
           <span aria-hidden="true">·</span>
-          <span>
-            Reviewed by{' '}
-            <span className="font-semibold text-slate-500">{GUIDE_REVIEWER.name}</span>
-          </span>
+          {reviewed ? (
+            <span>
+              Reviewed by{' '}
+              <span className="font-semibold text-slate-500">
+                {g.reviewer.name}
+                {g.reviewer.designation ? `, ${g.reviewer.designation}` : ''}
+              </span>
+            </span>
+          ) : (
+            <span>
+              Review status:{' '}
+              <span className="font-semibold text-slate-500">Pending Legal Review</span>
+            </span>
+          )}
           <span aria-hidden="true">·</span>
           <span>Published {g.published}</span>
           <span aria-hidden="true">·</span>

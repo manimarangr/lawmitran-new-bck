@@ -12,12 +12,15 @@ import { useRouter } from 'next/navigation';
 import { getToken } from '@/lib/api/client';
 import {
   checkoutDocument,
+  fetchDocQuote,
   prefillDocument,
   previewDocument,
   verifyDocumentPayment,
+  type DocQuote,
   type DocTemplate,
   type TemplateField,
 } from '@/lib/api/documents';
+import { fetchStates, type StateRef } from '@/lib/api/lawyers';
 import Icon from '@/components/ui/Icon';
 
 interface RzpResponse {
@@ -52,12 +55,34 @@ export default function DocumentWizard({ template }: { template: DocTemplate }) 
   const router = useRouter();
   const fields: TemplateField[] = template.schemaJson?.fields ?? [];
   const [values, setValues] = useState<Record<string, string>>({});
-  const [preview, setPreview] = useState<{ previewText: string; truncated: boolean } | null>(null);
+  const [preview, setPreview] = useState<{
+    previewText: string;
+    previewHtml?: string;
+    truncated: boolean;
+  } | null>(null);
   const [error, setError] = useState('');
   const [paying, setPaying] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
   const [restored, setRestored] = useState(false);
   const [step, setStep] = useState(0);
+  const [states, setStates] = useState<StateRef[]>([]);
+  const [quote, setQuote] = useState<DocQuote | null>(null);
+
+  const hasStateField = fields.some((f) => f.type === 'state');
+  useEffect(() => {
+    if (!hasStateField) return;
+    fetchStates().then(setStates).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasStateField]);
+
+  // Resolve the chosen state's code (quotes/stamp duty use codes; the document
+  // text uses the full name the user picked).
+  const stateFieldName = fields.find((f) => f.type === 'state')?.name;
+  const chosenStateCode = stateFieldName
+    ? states.find((st) => st.name === values[stateFieldName])?.code
+    : undefined;
+  const stampField = fields.find((f) => f.stampValue && values[f.name]);
+  const declaredValue = stampField ? Number(values[stampField.name]) || undefined : undefined;
 
   // ---- sections: fields sharing a `section` become wizard steps ----
   const sections: { name: string; fields: TemplateField[] }[] = [];
@@ -145,8 +170,33 @@ export default function DocumentWizard({ template }: { template: DocTemplate }) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values, template.id]);
 
+  // Live price quote (base + state stamp duty) — public endpoint, so it works
+  // before sign-in. Refreshes when the state or declared value changes.
+  useEffect(() => {
+    if (!template.requiresStamp) return;
+    if (!chosenStateCode) {
+      setQuote(null);
+      return;
+    }
+    const t = setTimeout(() => {
+      fetchDocQuote(template.id, { state: chosenStateCode, declaredValue })
+        .then(setQuote)
+        .catch(() => setQuote(null));
+    }, 400);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chosenStateCode, declaredValue, template.id, template.requiresStamp]);
+
   function validate(list: TemplateField[] = fields): boolean {
     for (const f of list) {
+      // Checkbox clauses are opt-in by nature — only block when explicitly required.
+      if (f.type === 'checkbox') {
+        if (f.required === true && values[f.name] !== 'true') {
+          setError(`Please confirm "${f.label}"`);
+          return false;
+        }
+        continue;
+      }
       if (f.required !== false && !String(values[f.name] ?? '').trim()) {
         setError(`Please fill "${f.label}"`);
         return false;
@@ -170,7 +220,10 @@ export default function DocumentWizard({ template }: { template: DocTemplate }) 
     setPaying(true);
     setError('');
     try {
-      const order = await checkoutDocument(template.id, values);
+      const order = await checkoutDocument(template.id, values, {
+        state: chosenStateCode,
+        declaredValue,
+      });
 
       // Dev mode: no Razorpay keys → placeholder order; verify directly.
       if (order.orderId.startsWith('order_dev_')) {
@@ -219,9 +272,9 @@ export default function DocumentWizard({ template }: { template: DocTemplate }) 
   }
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-2">
+    <div className="grid items-start gap-6 lg:grid-cols-12">
       {/* form */}
-      <section aria-label="Guided form" className="rounded-2xl border border-gray-200/60 bg-white p-6 shadow-sm">
+      <section aria-label="Guided form" className="rounded-2xl border border-gray-200/60 bg-white p-6 shadow-sm lg:col-span-5">
         {stepped ? (
           <nav aria-label="Form steps" className="mb-4 flex flex-wrap gap-1.5">
             {sections.map((s, i) => (
@@ -267,13 +320,53 @@ export default function DocumentWizard({ template }: { template: DocTemplate }) 
               placeholder: f.placeholder,
               className: inputClass,
             };
-            const chipSelect = f.type === 'select' && (f.options?.length ?? 0) > 0 && (f.options?.length ?? 0) <= 4;
+            const chipSelect =
+              (f.type === 'toggle' && (f.options?.length ?? 0) > 0) ||
+              (f.type === 'select' && (f.options?.length ?? 0) > 0 && (f.options?.length ?? 0) <= 4);
             return (
               <div key={f.name}>
-                <label htmlFor={id} className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">
-                  {f.label} {f.required !== false && <span className="text-rose-500">*</span>}
-                </label>
-                {f.type === 'textarea' ? (
+                {f.type !== 'checkbox' && (
+                  <label htmlFor={id} className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                    {f.label} {f.required !== false && <span className="text-rose-500">*</span>}
+                  </label>
+                )}
+                {f.type === 'state' ? (
+                  <select
+                    {...common}
+                    onChange={(e) => set(f.name, e.target.value)}
+                    className={`${inputClass} bg-white`}
+                  >
+                    <option value="">Select your state</option>
+                    {states.map((st) => (
+                      <option key={st.id} value={st.name}>{st.name}</option>
+                    ))}
+                  </select>
+                ) : f.type === 'checkbox' ? (
+                  <button
+                    type="button"
+                    id={id}
+                    role="checkbox"
+                    aria-checked={values[f.name] === 'true'}
+                    onClick={() => set(f.name, values[f.name] === 'true' ? '' : 'true')}
+                    className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition ${
+                      values[f.name] === 'true'
+                        ? 'border-gold bg-amber-50/60 text-navy'
+                        : 'border-gray-200 text-slate-600 hover:border-gray-300'
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border text-[11px] ${
+                        values[f.name] === 'true'
+                          ? 'border-gold bg-gold text-navy'
+                          : 'border-gray-300 bg-white text-transparent'
+                      }`}
+                    >
+                      <Icon name="check" />
+                    </span>
+                    {f.placeholder || f.label}
+                  </button>
+                ) : f.type === 'textarea' ? (
                   <textarea {...common} rows={3} onChange={(e) => set(f.name, e.target.value)} className={`${inputClass} resize-none`} />
                 ) : chipSelect ? (
                   <div id={id} role="radiogroup" aria-label={f.label} className="flex flex-wrap gap-2">
@@ -312,6 +405,33 @@ export default function DocumentWizard({ template }: { template: DocTemplate }) 
           })}
         </div>
 
+        {template.requiresStamp && (
+          <div className="mt-5 rounded-xl border border-line bg-bg-soft px-4 py-3 text-sm">
+            {quote ? (
+              <>
+                {quote.breakdown.map((b) => (
+                  <p key={b.label} className="flex justify-between text-slate-600">
+                    <span>{b.label}</span>
+                    <span>₹{b.amount.toLocaleString('en-IN')}</span>
+                  </p>
+                ))}
+                <p className="mt-1 flex justify-between border-t border-line pt-1 font-bold text-navy">
+                  <span>Total payable</span>
+                  <span>₹{quote.total.toLocaleString('en-IN')}</span>
+                </p>
+                {quote.stampNote && (
+                  <p className="mt-1 text-xs text-slate-400">{quote.stampNote}</p>
+                )}
+              </>
+            ) : (
+              <p className="text-slate-500">
+                <Icon name="circle-info" aria-hidden="true" className="mr-1 text-gold" />
+                Select your state to see the exact price including stamp duty.
+              </p>
+            )}
+          </div>
+        )}
+
         {error && <p role="alert" className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
 
         <div className="mt-5 flex flex-wrap gap-2">
@@ -336,7 +456,9 @@ export default function DocumentWizard({ template }: { template: DocTemplate }) 
               disabled={paying}
               className="rounded-xl bg-gold px-5 py-2.5 text-sm font-bold text-navy hover:bg-[#b58f3f] disabled:opacity-60"
             >
-              {paying ? 'Starting checkout…' : `Pay ₹${Number(template.price).toLocaleString('en-IN')} & download`}
+              {paying
+                ? 'Starting checkout…'
+                : `Pay ₹${Number(quote?.total ?? template.price).toLocaleString('en-IN')} & download`}
             </button>
           )}
         </div>
@@ -346,8 +468,8 @@ export default function DocumentWizard({ template }: { template: DocTemplate }) 
         </p>
       </section>
 
-      {/* preview */}
-      <section aria-label="Document preview" className="relative rounded-2xl border border-gray-200/60 bg-white p-6 shadow-sm">
+      {/* preview — sticky so it stays visible while filling the form */}
+      <section aria-label="Document preview" className="relative rounded-2xl border border-gray-200/60 bg-white p-6 shadow-sm lg:sticky lg:top-24 lg:col-span-7">
         <h2 className="mb-4 text-sm font-extrabold uppercase tracking-wide text-navy">
           Live preview
           <span className="ml-2 rounded-full bg-bg-soft px-2 py-0.5 text-[10px] font-bold normal-case tracking-normal text-slate-400">
@@ -356,9 +478,19 @@ export default function DocumentWizard({ template }: { template: DocTemplate }) 
         </h2>
         {preview ? (
           <div className="relative overflow-hidden">
-            <pre className="max-h-[480px] overflow-y-auto whitespace-pre-wrap break-words font-serif text-sm leading-relaxed text-slate-700">
-              {preview.previewText}
-            </pre>
+            {preview.previewHtml ? (
+              <div className="max-h-[640px] overflow-y-auto rounded-xl border border-gray-200 bg-[#fdfcf8] px-6 py-6 shadow-inner">
+                <div
+                  className="whitespace-pre-wrap break-words font-serif text-[13px] leading-relaxed text-slate-700 [&_strong]:font-bold [&_strong]:text-navy [&_.doc-blank]:tracking-[0.2em] [&_.doc-blank]:text-slate-300 first-line:block first-line:text-center first-line:font-bold first-line:tracking-wide first-line:text-navy"
+                  // Server-rendered: user values are HTML-escaped by the template engine.
+                  dangerouslySetInnerHTML={{ __html: preview.previewHtml }}
+                />
+              </div>
+            ) : (
+              <pre className="max-h-[480px] overflow-y-auto whitespace-pre-wrap break-words font-serif text-sm leading-relaxed text-slate-700">
+                {preview.previewText}
+              </pre>
+            )}
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <span className="-rotate-30 select-none text-4xl font-extrabold uppercase tracking-widest text-navy/10">
                 LawMitran preview

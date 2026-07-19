@@ -72,6 +72,20 @@ export class LawyersController {
   }
 
   @Public()
+  @Get('states')
+  @ApiOperation({ summary: 'State/UT reference list (public)' })
+  listStates() {
+    return this.lawyersService.listStates();
+  }
+
+  @Public()
+  @Get('localities')
+  @ApiOperation({ summary: 'Metro localities for a city (public) — ?city=Bengaluru' })
+  listLocalities(@Query('city') city: string) {
+    return this.lawyersService.listLocalities(city);
+  }
+
+  @Public()
   @Get('cities')
   @ApiOperation({
     summary: 'City autocomplete (public) — ?q=beng → Bengaluru, Karnataka',

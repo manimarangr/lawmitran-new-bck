@@ -26,6 +26,8 @@ import { ESignModule } from './common/esign/esign.module';
 import { EStampModule } from './common/estamp/estamp.module';
 import { PropertyModule } from './modules/property/property.module';
 import { ContactModule } from './modules/contact/contact.module';
+import { ContentModule } from './modules/content/content.module';
+import { DiaryModule } from './modules/diary/diary.module';
 
 @Module({
   imports: [
@@ -47,6 +49,8 @@ import { ContactModule } from './modules/contact/contact.module';
     SeoModule,
     ContactModule,
     PropertyModule,
+    ContentModule,
+    DiaryModule,
     ESignModule,
     EStampModule,
   ],

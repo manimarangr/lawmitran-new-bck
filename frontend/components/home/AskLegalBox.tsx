@@ -318,7 +318,7 @@ export default function AskLegalBox() {
   ) : null;
 
   return (
-    <div className="mx-auto max-w-[780px] text-left">
+    <div className="mx-auto max-w-[60rem] text-left">
       {/* single card — question on top, clarify/result expands inside */}
       <div className="rounded-2xl bg-white p-2 shadow-xl">
         <label htmlFor="ask-box" className="sr-only">Describe your legal issue</label>
@@ -342,11 +342,11 @@ export default function AskLegalBox() {
                 onClick={() => setCatOpen((v) => !v)}
                 aria-haspopup="menu"
                 aria-expanded={catOpen}
-                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11.5px] font-semibold transition ${
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.71875rem] font-semibold transition ${
                   category ? 'border-gold bg-amber-50/70 text-navy' : 'border-gray-200 bg-bg-soft text-slate-600 hover:border-gold'
                 }`}
               >
-                <Icon name="sliders" aria-hidden="true" className="text-[10px]" />
+                <Icon name="sliders" aria-hidden="true" className="text-[0.625rem]" />
                 <span className="max-w-[130px] truncate">{category ? category.label : 'Category: Auto'}</span>
                 {category && (
                   <span
@@ -364,7 +364,7 @@ export default function AskLegalBox() {
                   <button
                     role="menuitem"
                     onClick={() => { setCategory(null); setCatOpen(false); }}
-                    className="block w-full rounded-lg px-3 py-2 text-left text-[12.5px] font-semibold text-slate-400 hover:bg-bg-soft"
+                    className="block w-full rounded-lg px-3 py-2 text-left text-[0.78125rem] font-semibold text-slate-400 hover:bg-bg-soft"
                   >
                     Auto-detect (recommended)
                   </button>
@@ -373,7 +373,7 @@ export default function AskLegalBox() {
                       key={c.topicKey + c.label}
                       role="menuitem"
                       onClick={() => { setCategory(c); setCatOpen(false); reset(); }}
-                      className="block w-full rounded-lg px-3 py-2 text-left text-[12.5px] font-semibold text-slate-700 hover:bg-bg-soft hover:text-navy"
+                      className="block w-full rounded-lg px-3 py-2 text-left text-[0.78125rem] font-semibold text-slate-700 hover:bg-bg-soft hover:text-navy"
                     >
                       {c.label}
                     </button>
@@ -381,7 +381,7 @@ export default function AskLegalBox() {
                 </div>
               )}
             </div>
-            <p className="hidden text-[11px] text-slate-400 md:block">
+            <p className="hidden text-[0.6875rem] text-slate-400 md:block">
               <Icon name="lock" aria-hidden="true" className="mr-1" /> Free &amp; anonymous
             </p>
           </div>
@@ -409,7 +409,7 @@ export default function AskLegalBox() {
                     key={o.label}
                     onClick={() => pick(o)}
                     disabled={busy}
-                    className="rounded-full border border-gray-200 px-3.5 py-1.5 text-[13px] font-semibold text-slate-700 transition hover:border-gold hover:text-navy disabled:opacity-50"
+                    className="rounded-full border border-gray-200 px-3.5 py-1.5 text-[0.8125rem] font-semibold text-slate-700 transition hover:border-gold hover:text-navy disabled:opacity-50"
                   >
                     {o.label}
                   </button>
@@ -428,8 +428,8 @@ export default function AskLegalBox() {
                 <Icon name="circle-question" aria-hidden="true" className="mr-1.5 text-gold" />
                 That doesn’t look like a legal question
               </p>
-              <p className="mt-2 text-[13px] leading-relaxed text-slate-600">{notLegal}</p>
-              <p className="mt-3 text-[11px] font-bold uppercase tracking-wide text-slate-400">
+              <p className="mt-2 text-[0.8125rem] leading-relaxed text-slate-600">{notLegal}</p>
+              <p className="mt-3 text-[0.6875rem] font-bold uppercase tracking-wide text-slate-400">
                 Try asking something like
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -438,7 +438,7 @@ export default function AskLegalBox() {
                     key={s}
                     onClick={() => { setQuestion(s); setNotLegal(null); void submit(s); }}
                     disabled={busy}
-                    className="rounded-full border border-gray-200 px-3.5 py-1.5 text-[13px] font-semibold text-slate-700 transition hover:border-gold hover:text-navy disabled:opacity-50"
+                    className="rounded-full border border-gray-200 px-3.5 py-1.5 text-[0.8125rem] font-semibold text-slate-700 transition hover:border-gold hover:text-navy disabled:opacity-50"
                   >
                     {s}
                   </button>
@@ -458,12 +458,12 @@ export default function AskLegalBox() {
                   <Icon name="circle-question" aria-hidden="true" className="mr-1.5 text-gold" />
                   {interview.question}
                 </p>
-                <span className="shrink-0 rounded-full bg-bg-soft px-2.5 py-0.5 text-[10px] font-bold text-slate-400">
+                <span className="shrink-0 rounded-full bg-bg-soft px-2.5 py-0.5 text-[0.625rem] font-bold text-slate-400">
                   {Math.min(transcript.length + 1, 3)} / 3
                 </span>
               </div>
               {transcript.length > 0 && (
-                <p className="mt-1.5 text-[11px] text-slate-400">
+                <p className="mt-1.5 text-[0.6875rem] text-slate-400">
                   {transcript.map((t) => t.split(' → ')[1]).join(' · ')}
                 </p>
               )}
@@ -473,13 +473,13 @@ export default function AskLegalBox() {
                     key={o}
                     onClick={() => pickInterview(o)}
                     disabled={busy}
-                    className="rounded-full border border-gray-200 px-3.5 py-1.5 text-[13px] font-semibold text-slate-700 transition hover:border-gold hover:text-navy disabled:opacity-50"
+                    className="rounded-full border border-gray-200 px-3.5 py-1.5 text-[0.8125rem] font-semibold text-slate-700 transition hover:border-gold hover:text-navy disabled:opacity-50"
                   >
                     {o}
                   </button>
                 ))}
               </div>
-              {busy && <p role="status" className="mt-2 text-[11px] text-slate-400">Thinking…</p>}
+              {busy && <p role="status" className="mt-2 text-[0.6875rem] text-slate-400">Thinking…</p>}
             </section>
           </>
         )}
@@ -492,14 +492,14 @@ export default function AskLegalBox() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-bold text-navy">{route.title}</p>
                 {route.practiceArea && (
-                  <span className="rounded-full bg-bg-soft px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-navy">
+                  <span className="rounded-full bg-bg-soft px-3 py-1 text-[0.6875rem] font-bold uppercase tracking-wide text-navy">
                     {route.practiceArea}
                   </span>
                 )}
               </div>
 
               {route.urgentNote && (
-                <p className="mt-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[13px] font-semibold text-amber-700">
+                <p className="mt-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[0.8125rem] font-semibold text-amber-700">
                   <Icon name="triangle-exclamation" aria-hidden="true" className="mr-1.5" />
                   {route.urgentNote}
                 </p>
@@ -511,9 +511,9 @@ export default function AskLegalBox() {
                   {guidance ? (
                     <>
                       <div className="flex items-center gap-2">
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Your guidance summary</p>
+                        <p className="text-[0.6875rem] font-bold uppercase tracking-wider text-slate-400">Your guidance summary</p>
                         {guidance.aiUsed && (
-                          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-600" title="Personalized by AI from lawyer-reviewed content">
+                          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[0.625rem] font-bold uppercase text-amber-600" title="Personalized by AI from lawyer-reviewed content">
                             AI-assisted
                           </span>
                         )}
@@ -522,7 +522,7 @@ export default function AskLegalBox() {
                       <ol className="mt-3 space-y-2">
                         {guidance.steps.map((s, i) => (
                           <li key={i} className="flex gap-3 text-sm text-slate-700">
-                            <span aria-hidden="true" className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-navy text-[10px] font-bold text-gold">
+                            <span aria-hidden="true" className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-navy text-[0.625rem] font-bold text-gold">
                               {i + 1}
                             </span>
                             {s}
@@ -542,7 +542,7 @@ export default function AskLegalBox() {
               {routeActions}
 
               {quotaHit && (
-                <p className="mt-3.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-800">
+                <p className="mt-3.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[0.8125rem] text-amber-800">
                   <Icon name="lock" aria-hidden="true" className="mr-1" />
                   You&apos;ve used your <b>3 free guidance summaries</b> for today —{' '}
                   <Link href="/signup" className="font-bold underline">create a free account</Link> or{' '}
@@ -550,7 +550,7 @@ export default function AskLegalBox() {
                 </p>
               )}
 
-              <p className="mt-4 border-t border-gray-100 pt-3 text-[11px] leading-relaxed text-slate-400">
+              <p className="mt-4 border-t border-gray-100 pt-3 text-[0.6875rem] leading-relaxed text-slate-400">
                 {route.disclaimer}
               </p>
             </section>
@@ -565,7 +565,7 @@ export default function AskLegalBox() {
             <button
               key={s}
               onClick={() => { setQuestion(s); void submit(s); }}
-              className="rounded-full border border-white/20 px-3 py-1 text-[11px] font-medium text-[#c7d0e4] transition hover:border-gold hover:text-gold"
+              className="rounded-full border border-navy bg-navy px-3 py-1 text-[0.6875rem] font-medium text-white transition hover:border-gold hover:bg-navy-2 hover:text-gold"
             >
               {s}
             </button>

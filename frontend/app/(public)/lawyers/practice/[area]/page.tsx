@@ -59,15 +59,15 @@ export default async function PracticeHubPage({ params }: Props) {
     <main id="main">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
-      <header className="hero-gradient py-10 text-white">
+      <header className="hero-light py-10">
         <div className="mx-auto max-w-6xl px-6">
-          <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-300">
+          <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-400">
             <Link href="/" className="hover:text-gold">Home</Link> /{' '}
             <Link href="/lawyers" className="hover:text-gold">Lawyers</Link> /{' '}
             <span>{areaName}</span>
           </nav>
-          <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl">{areaName} Lawyers in India</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-300">
+          <h1 className="text-3xl font-extrabold tracking-tight text-navy md:text-4xl">{areaName} Lawyers in India</h1>
+          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-500">
             Bar Council–verified {areaName.toLowerCase()} advocates across India. Pick your city,
             compare experience and client ratings, and submit your requirement free — the lawyer
             contacts you directly.

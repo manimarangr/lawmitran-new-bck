@@ -43,11 +43,11 @@ export default function MyDocumentPage() {
       </div>
 
       {dlErr && (
-        <p role="alert" className="mb-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{dlErr}</p>
+        <p role="alert" className="mb-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 print:hidden">{dlErr}</p>
       )}
       {q.isLoading && <p role="status" className="text-sm text-slate-400">Loading…</p>}
       {q.isError && (
-        <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{(q.error as Error).message}</p>
+        <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700 print:hidden">{(q.error as Error).message}</p>
       )}
 
       {doc && !paid && (

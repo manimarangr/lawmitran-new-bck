@@ -10,6 +10,8 @@ export interface CitySuggestion {
   name: string;
   state: string;
   stateCode: string;
+  /** true for the curated metro list shown before the user types */
+  popular?: boolean;
 }
 
 /** Set an input's value so React/react-hook-form onChange handlers fire too. */
@@ -36,6 +38,9 @@ export default function CityInput(
   const wrapRef = useRef<HTMLDivElement>(null);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abort = useRef<AbortController | null>(null);
+  // choose() sets the input value programmatically, which fires a synthetic
+  // input event — suppress that one so the dropdown doesn't reopen.
+  const suppressNextInput = useRef(false);
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -49,36 +54,55 @@ export default function CityInput(
     };
   }, []);
 
+  async function fetchCities(q: string) {
+    abort.current?.abort();
+    abort.current = new AbortController();
+    try {
+      const res = await fetch(
+        `${API_BASE}/lawyers/cities?q=${encodeURIComponent(q)}`,
+        { signal: abort.current.signal },
+      );
+      if (res.ok) {
+        const list = (await res.json()) as CitySuggestion[];
+        setOptions(list);
+        setOpen(list.length > 0);
+        setActive(-1);
+      }
+    } catch {
+      /* aborted or backend offline — keep quiet */
+    }
+  }
+
   function onInput(e: React.FormEvent<HTMLInputElement>) {
+    if (suppressNextInput.current) {
+      suppressNextInput.current = false;
+      return;
+    }
     const q = e.currentTarget.value;
     if (debounce.current) clearTimeout(debounce.current);
     if (q.trim().length < 2) {
-      setOptions([]);
-      setOpen(false);
+      // Back to the browse list (popular metros + alphabetical) instead of hiding.
+      debounce.current = setTimeout(() => void fetchCities(''), 150);
       return;
     }
-    debounce.current = setTimeout(async () => {
-      abort.current?.abort();
-      abort.current = new AbortController();
-      try {
-        const res = await fetch(
-          `${API_BASE}/lawyers/cities?q=${encodeURIComponent(q)}`,
-          { signal: abort.current.signal },
-        );
-        if (res.ok) {
-          const list = (await res.json()) as CitySuggestion[];
-          setOptions(list);
-          setOpen(list.length > 0);
-          setActive(-1);
-        }
-      } catch {
-        /* aborted or backend offline — keep quiet */
-      }
-    }, 200);
+    debounce.current = setTimeout(() => void fetchCities(q), 200);
+  }
+
+  // LawRato-style: clicking the empty field shows popular cities immediately.
+  function onFocus(e: React.FocusEvent<HTMLInputElement>) {
+    if (options.length > 0) {
+      setOpen(true);
+      return;
+    }
+    if (e.currentTarget.value.trim().length < 2) void fetchCities('');
   }
 
   function choose(city: CitySuggestion) {
+    if (debounce.current) clearTimeout(debounce.current);
+    abort.current?.abort();
+    suppressNextInput.current = true;
     if (inputRef.current) setNativeValue(inputRef.current, city.name);
+    setOptions([]);
     setOpen(false);
     setActive(-1);
   }
@@ -118,7 +142,7 @@ export default function CityInput(
         className={className}
         onInput={onInput}
         onKeyDown={onKeyDown}
-        onFocus={() => options.length > 0 && setOpen(true)}
+        onFocus={onFocus}
         autoComplete="off"
         role="combobox"
         aria-expanded={open}
@@ -133,23 +157,34 @@ export default function CityInput(
           className="absolute left-0 right-0 top-full z-[60] mt-1 max-h-64 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 text-left shadow-xl"
         >
           {options.map((c, i) => (
-            <li
-              key={c.id}
-              role="option"
-              aria-selected={i === active}
-              // mousedown (not click) so it fires before the input loses focus
-              onMouseDown={(e) => {
-                e.preventDefault();
-                choose(c);
-              }}
-              onMouseEnter={() => setActive(i)}
-              className={`cursor-pointer px-3.5 py-2 text-sm ${
-                i === active ? 'bg-bg-soft text-navy' : 'text-slate-700'
-              }`}
-            >
-              <Icon name="location-dot" aria-hidden="true" className="mr-1.5 text-gold" />
-              <span className="font-semibold">{c.name}</span>
-              <span className="text-slate-400">, {c.state}</span>
+            <li key={c.id}>
+              {i === 0 && c.popular && (
+                <p className="px-3.5 pb-1 pt-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                  Popular cities
+                </p>
+              )}
+              {i > 0 && !c.popular && options[i - 1]?.popular && (
+                <p className="border-t border-gray-100 px-3.5 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                  More cities
+                </p>
+              )}
+              <div
+                role="option"
+                aria-selected={i === active}
+                // mousedown (not click) so it fires before the input loses focus
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  choose(c);
+                }}
+                onMouseEnter={() => setActive(i)}
+                className={`cursor-pointer px-3.5 py-2 text-sm ${
+                  i === active ? 'bg-bg-soft text-navy' : 'text-slate-700'
+                }`}
+              >
+                <Icon name="location-dot" aria-hidden="true" className="mr-1.5 text-gold" />
+                <span className="font-semibold">{c.name}</span>
+                <span className="text-slate-400">, {c.state}</span>
+              </div>
             </li>
           ))}
         </ul>

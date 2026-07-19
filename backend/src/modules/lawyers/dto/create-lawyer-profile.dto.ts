@@ -83,6 +83,10 @@ export class CreateLawyerProfileDto {
 
   @IsOptional()
   @IsString()
+  localityId?: string;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(80)
   officeLabel?: string;
 

@@ -5,7 +5,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Gender, Prisma, Role, VerificationStatus } from '@prisma/client';
+import { Gender, Prisma, Role, VerificationStatus,
+  SubscriptionStatus,
+} from '@prisma/client';
 import { paginate, resolvePagination } from '../../common/pagination';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../common/mail/mail.service';
@@ -56,6 +58,7 @@ const PUBLIC_SELECT = {
       addressLine: true,
       isPrimary: true,
       city: { select: { id: true, name: true } },
+      locality: { select: { id: true, name: true, slug: true } },
     },
     orderBy: { isPrimary: 'desc' as const },
   },
@@ -123,6 +126,9 @@ export class LawyersService {
     if (!photoFile.mimetype?.startsWith('image/')) {
       throw new BadRequestException('Profile photo must be an image (JPG/PNG/WebP)');
     }
+    if (photoFile.size > 2 * 1024 * 1024) {
+      throw new BadRequestException('Profile photo is too large — maximum size is 2 MB');
+    }
     const profileImageUrl = await this.storage.upload(photoFile, 'profiles');
 
     // trialEndDate is non-nullable but the trial only actually starts once an
@@ -134,6 +140,7 @@ export class LawyersService {
     // docs/28: the profile is never geo-empty — the city must resolve.
     const city = await this.findCityByName(dto.city);
 
+    this.assertBioClean(dto.bio);
     const lawyer = await this.prisma.lawyer.create({
       data: {
         userId,
@@ -203,6 +210,7 @@ export class LawyersService {
     }
 
     // docs/28 rule 4: never geo-empty — primary office + one service area from the chosen city.
+    const officeLocalityId = await this.validLocalityId(dto.localityId, city.id);
     await this.prisma.$transaction([
       this.prisma.lawyerOffice.create({
         data: {
@@ -212,6 +220,7 @@ export class LawyersService {
           addressLine: dto.addressLine,
           pincode: dto.pincode,
           landmark: dto.landmark ?? null,
+          localityId: officeLocalityId,
           latitude: dto.latitude,
           longitude: dto.longitude,
           isPrimary: true,
@@ -277,6 +286,7 @@ export class LawyersService {
   }
 
   async updateOwnProfile(userId: string, dto: UpdateLawyerProfileDto) {
+    this.assertBioClean(dto.bio);
     const lawyer = await this.prisma.lawyer.findUnique({ where: { userId } });
     if (!lawyer) {
       throw new NotFoundException('Lawyer profile not found');
@@ -367,7 +377,7 @@ export class LawyersService {
 
   async search(query: SearchLawyersDto) {
     const {
-      city, practiceArea, courtId,
+      city, practiceArea, courtId, locality, subscribed,
       experienceMin, experienceMax,
       language, gender, ratingMin, sort,
       swLat, swLng, neLat, neLng,
@@ -379,12 +389,64 @@ export class LawyersService {
       experienceMin, experienceMax,
       language, gender, ratingMin,
       swLat, swLng, neLat, neLng,
+      subscribed: subscribed === '1' || subscribed === 'true',
     });
 
     const orderBy: Prisma.LawyerOrderByWithRelationInput =
       sort === 'rating' ? { ratingAvg: 'desc' }
       : sort === 'experience' ? { experienceYears: 'desc' }
       : { createdAt: 'desc' };
+
+    // Locality = ranking boost, never a hard filter (a thin marketplace would
+    // return zero results). Lawyers whose office is tagged with the locality
+    // or whose pin is nearest its centroid sort first; the rest of the city
+    // follows. In-memory sort over a capped set — fine at current scale.
+    if (locality && city) {
+      const loc = await this.prisma.locality.findFirst({
+        where: {
+          slug: locality,
+          city: { name: { equals: city, mode: 'insensitive' } },
+        },
+      });
+      if (loc) {
+        const all = await this.prisma.lawyer.findMany({
+          where,
+          select: PUBLIC_SELECT,
+          orderBy,
+          take: 200,
+        });
+        const dist = (lat?: number | null, lng?: number | null) => {
+          if (lat == null || lng == null) return Number.MAX_SAFE_INTEGER;
+          const R = 6371;
+          const dLat = ((lat - loc.lat) * Math.PI) / 180;
+          const dLng = ((lng - loc.lng) * Math.PI) / 180;
+          const a =
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos((loc.lat * Math.PI) / 180) *
+              Math.cos((lat * Math.PI) / 180) *
+              Math.sin(dLng / 2) ** 2;
+          return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        };
+        const scored = all
+          .map((l) => {
+            const tagged = l.offices.some((o) => o.locality?.slug === locality);
+            return { l, tagged, km: dist(l.latitude, l.longitude) };
+          })
+          .sort((a, b) => {
+            if (a.tagged !== b.tagged) return a.tagged ? -1 : 1;
+            return a.km - b.km;
+          });
+        const total = scored.length;
+        const items = scored
+          .slice((page - 1) * limit, page * limit)
+          .map((x) => ({
+            ...x.l,
+            nearLocality: x.tagged || x.km <= 7 ? loc.name : null,
+            localityKm: x.km === Number.MAX_SAFE_INTEGER ? null : Math.round(x.km * 10) / 10,
+          }));
+        return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
+      }
+    }
 
     const [items, total] = await Promise.all([
       this.prisma.lawyer.findMany({
@@ -435,6 +497,7 @@ export class LawyersService {
     swLng?: number;
     neLat?: number;
     neLng?: number;
+      subscribed?: boolean;
   }): Prisma.LawyerWhereInput {
     const {
       city, practiceArea, courtId,
@@ -445,6 +508,13 @@ export class LawyersService {
 
     return {
       verificationStatus: VerificationStatus.APPROVED,
+      ...(params.subscribed
+        ? {
+            subscriptionStatus: {
+              in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIAL],
+            },
+          }
+        : {}),
       ...(city
         ? {
             OR: [
@@ -563,11 +633,117 @@ export class LawyersService {
    * Public city autocomplete: prefix matches rank before substring matches.
    * Powers the city fields on the homepage hero and search filters.
    */
+  // Common colloquial / legacy names -> official seeded city names, so a user
+  // typing "trichy" or "bangalore" still finds the city.
+  private static readonly CITY_ALIASES: Record<string, string> = {
+    trichy: 'Tiruchirappalli',
+    tirupur: 'Tiruppur',
+    bangalore: 'Bengaluru',
+    bombay: 'Mumbai',
+    madras: 'Chennai',
+    calcutta: 'Kolkata',
+    gurgaon: 'Gurugram',
+    vizag: 'Visakhapatnam',
+    trivandrum: 'Thiruvananthapuram',
+    pondicherry: 'Puducherry',
+    pondy: 'Puducherry',
+    cochin: 'Kochi',
+    mysore: 'Mysuru',
+    mangalore: 'Mangaluru',
+    baroda: 'Vadodara',
+    allahabad: 'Prayagraj',
+    banaras: 'Varanasi',
+    benares: 'Varanasi',
+    belgaum: 'Belagavi',
+    hubli: 'Hubballi',
+    hospet: 'Hosapete',
+    kgf: 'Kolar Gold Fields',
+    berhampur: 'Brahmapur',
+    panjim: 'Panaji',
+    udhagamandalam: 'Ooty',
+  };
+
+  // Metros surfaced first when the input is focused but still empty.
+  private static readonly POPULAR_CITIES = [
+    'Chennai',
+    'Bengaluru',
+    'Mumbai',
+    'Delhi',
+    'Kolkata',
+    'Hyderabad',
+    'Pune',
+    'Ahmedabad',
+  ];
+
+  // Empty query -> popular metros first, then more cities alphabetically
+  // (LawRato-style "click to browse"). Non-empty -> alias-aware search.
+  // State reference list (public) — canonical source for content state-applicability.
+  listStates() {
+    return this.prisma.state.findMany({
+      select: { id: true, name: true, code: true },
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  // Metro locality reference list for a city (public). Empty for non-metros —
+  // the frontend hides the locality filter when this returns [].
+  async listLocalities(cityName: string) {
+    if (!cityName?.trim()) return [];
+    const city = await this.prisma.city.findFirst({
+      where: { name: { equals: cityName.trim(), mode: 'insensitive' } },
+      select: { id: true },
+    });
+    if (!city) return [];
+    return this.prisma.locality.findMany({
+      where: { cityId: city.id },
+      select: { id: true, name: true, slug: true, lat: true, lng: true },
+      orderBy: { name: 'asc' },
+    });
+  }
+
   async suggestCities(q: string, limit = 10) {
     const query = (q ?? '').trim();
-    if (query.length < 2) return [];
+    if (query.length < 2) {
+      const select = {
+        id: true,
+        name: true,
+        district: { select: { name: true, state: { select: { name: true, code: true } } } },
+      } as const;
+      const popular = await this.prisma.city.findMany({
+        where: { name: { in: LawyersService.POPULAR_CITIES } },
+        select,
+      });
+      const order = LawyersService.POPULAR_CITIES;
+      popular.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
+      const rest = await this.prisma.city.findMany({
+        where: { name: { notIn: LawyersService.POPULAR_CITIES } },
+        select,
+        orderBy: { name: 'asc' },
+        take: Math.max(limit * 2 - popular.length, 0),
+      });
+      return [...popular, ...rest].map((c) => ({
+        id: c.id,
+        name: c.name,
+        state: c.district.state.name,
+        stateCode: c.district.state.code,
+        popular: order.includes(c.name),
+      }));
+    }
+    // Alias-aware: match the typed text OR any official name whose alias
+    // starts with the typed text ("tri" -> Trichy -> Tiruchirappalli).
+    const lowerQ = query.toLowerCase();
+    const aliasTargets = Object.entries(LawyersService.CITY_ALIASES)
+      .filter(([alias]) => alias.startsWith(lowerQ))
+      .map(([, official]) => official);
     const cities = await this.prisma.city.findMany({
-      where: { name: { contains: query, mode: 'insensitive' } },
+      where: aliasTargets.length
+        ? {
+            OR: [
+              { name: { contains: query, mode: 'insensitive' } },
+              { name: { in: aliasTargets } },
+            ],
+          }
+        : { name: { contains: query, mode: 'insensitive' } },
       take: limit * 2,
       select: {
         id: true,
@@ -635,6 +811,9 @@ export class LawyersService {
       if (!ph.mimetype?.startsWith('image/')) {
         throw new BadRequestException('Office photos must be images (JPG/PNG/WebP)');
       }
+      if (ph.size > 2 * 1024 * 1024) {
+        throw new BadRequestException('Each office photo must be 2 MB or smaller');
+      }
     }
     const urls: string[] = [];
     for (const ph of photos.slice(0, 3)) {
@@ -693,6 +872,29 @@ export class LawyersService {
     return city;
   }
 
+  // Bios are public marketing surface — links invite spam/SEO abuse and look
+  // broken on cards. Reject any URL-ish content outright.
+  private assertBioClean(bio?: string | null) {
+    if (bio && /(https?:\/\/|www\.)/i.test(bio)) {
+      throw new BadRequestException(
+        'Links are not allowed in the bio — describe your practice in plain words',
+      );
+    }
+  }
+
+  // Locality must belong to the office city; anything else is dropped quietly.
+  private async validLocalityId(
+    localityId: string | undefined,
+    cityId: string,
+  ): Promise<string | null> {
+    if (!localityId) return null;
+    const loc = await this.prisma.locality.findFirst({
+      where: { id: localityId, cityId },
+      select: { id: true },
+    });
+    return loc ? loc.id : null;
+  }
+
   async addOffice(
     userId: string,
     dto: {
@@ -701,12 +903,14 @@ export class LawyersService {
       addressLine?: string;
       pincode?: string;
       landmark?: string;
+      localityId?: string;
       latitude?: number;
       longitude?: number;
     },
   ) {
     const lawyer = await this.getLawyerByUserId(userId);
     const city = await this.findCityByName(dto.city);
+    const localityId = await this.validLocalityId(dto.localityId, city.id);
     const count = await this.prisma.lawyerOffice.count({ where: { lawyerId: lawyer.id } });
     return this.prisma.lawyerOffice.create({
       data: {
@@ -716,6 +920,7 @@ export class LawyersService {
         addressLine: dto.addressLine ?? null,
         pincode: dto.pincode ?? null,
         landmark: dto.landmark ?? null,
+        localityId,
         latitude: dto.latitude ?? null,
         longitude: dto.longitude ?? null,
         isPrimary: count === 0, // first office is automatically primary
@@ -733,6 +938,7 @@ export class LawyersService {
       addressLine?: string;
       pincode?: string;
       landmark?: string;
+      localityId?: string;
       latitude?: number;
       longitude?: number;
       isPrimary?: boolean;
@@ -746,9 +952,15 @@ export class LawyersService {
 
     const city = dto.city ? await this.findCityByName(dto.city) : null;
 
+    const localityId =
+      dto.localityId !== undefined
+        ? await this.validLocalityId(dto.localityId, city ? city.id : office.cityId)
+        : undefined;
+
     const updated = await this.prisma.lawyerOffice.update({
       where: { id: office.id },
       data: {
+        ...(localityId !== undefined ? { localityId } : {}),
         ...(city ? { cityId: city.id } : {}),
         ...(dto.label !== undefined ? { label: dto.label } : {}),
         ...(dto.addressLine !== undefined ? { addressLine: dto.addressLine } : {}),
@@ -1203,6 +1415,9 @@ export class LawyersService {
     if (!photo.mimetype?.startsWith('image/')) {
       throw new BadRequestException('Profile photo must be an image (JPG/PNG/WebP)');
     }
+    if (photo.size > 2 * 1024 * 1024) {
+      throw new BadRequestException('Photo is too large — maximum size is 2 MB');
+    }
     const profileImageUrl = await this.storage.upload(photo, 'profiles');
     return this.prisma.lawyer.update({
       where: { id: lawyer.id },
@@ -1233,6 +1448,9 @@ export class LawyersService {
     const certificateImageUrl = certFile
       ? await this.storage.upload(certFile, 'certificates')
       : lawyer.certificateImageUrl;
+    if (photoFile && photoFile.size > 2 * 1024 * 1024) {
+      throw new BadRequestException('Profile photo is too large — maximum size is 2 MB');
+    }
     const profileImageUrl = photoFile
       ? await this.storage.upload(photoFile, 'profiles')
       : undefined;

@@ -223,19 +223,19 @@ export default function FaqPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 
       {/* hero */}
-      <header className="hero-gradient py-12 text-white">
-        <div className="mx-auto max-w-3xl px-6">
-          <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-300">
+      <header className="hero-light py-12">
+        <div className="mx-auto max-w-4xl px-6">
+          <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-400">
             <Link href="/" className="hover:text-gold">Home</Link> <span className="mx-1">/</span> FAQ
           </nav>
-          <h1 className="text-3xl font-extrabold tracking-tight">Frequently Asked Questions</h1>
-          <p className="mt-2 text-sm text-slate-300">
+          <h1 className="text-3xl font-extrabold tracking-tight text-navy">Frequently Asked Questions</h1>
+          <p className="mt-2 text-sm text-slate-500">
             Payments, subscriptions, finding a lawyer, verification, documents, and privacy — answered.
           </p>
         </div>
       </header>
 
-      <div className="mx-auto max-w-3xl px-6 py-10">
+      <div className="mx-auto max-w-4xl px-6 py-10">
         {/* category quick links */}
         <nav aria-label="FAQ categories" className="mb-10 flex flex-wrap gap-2">
           {CATEGORIES.map((c) => (

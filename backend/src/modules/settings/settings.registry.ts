@@ -59,6 +59,7 @@ export const SETTINGS_REGISTRY: SettingDef[] = [
   { key: 'AI_MODEL', group: 'ai', label: 'Model', type: 'text', placeholder: 'gpt-4o-mini / gemini-flash-latest' },
   // security & compliance
   { key: 'ADMIN_2FA_ENABLED', group: 'security', label: 'Require email OTP on admin logins', type: 'toggle', help: 'Until SMTP is live the code appears in the backend console.' },
+  { key: 'GOOGLE_CLIENT_ID', group: 'security', label: 'Google OAuth Client ID', type: 'text', placeholder: '1234-abc.apps.googleusercontent.com', help: 'Enables "Continue with Google" on login/signup. Create a Web client in Google Cloud Console.' },
   { key: 'GRIEVANCE_OFFICER_NAME', group: 'security', label: 'Grievance officer name', type: 'text' },
   { key: 'GRIEVANCE_OFFICER_EMAIL', group: 'security', label: 'Grievance officer email', type: 'text', placeholder: 'grievance@lawmitran.com' },
   // billing

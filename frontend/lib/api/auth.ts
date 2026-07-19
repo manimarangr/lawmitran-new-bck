@@ -87,3 +87,19 @@ export function resetPassword(token: string, password: string) {
     body: JSON.stringify({ token, password }),
   });
 }
+
+export type GoogleAuthResult =
+  | { newUser: true; email: string; fullName: string }
+  | { newUser: false; role: Role; accessToken: string; refreshToken: string };
+
+/** "Continue with Google" — sends the GIS ID token for server-side verification. */
+export async function googleAuth(credential: string): Promise<GoogleAuthResult> {
+  const res = await fetch(`${API_BASE}/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ credential }),
+  });
+  const body = (await res.json().catch(() => ({}))) as GoogleAuthResult & { message?: string };
+  if (!res.ok) throw new Error((body as { message?: string }).message ?? 'Google sign-in failed');
+  return body;
+}

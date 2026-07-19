@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { login, loginTwoFa } from '@/lib/api/auth';
 import Icon from '@/components/ui/Icon';
 import Captcha, { type CaptchaHandle } from '@/components/ui/Captcha';
+import GoogleSignIn from '@/components/auth/GoogleSignIn';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -44,6 +45,13 @@ function LoginForm() {
   function finish(res: { role: string; accessToken?: string; refreshToken?: string }) {
     localStorage.setItem('accessToken', res.accessToken!);
     localStorage.setItem('refreshToken', res.refreshToken!);
+    // Return to the page they came from (e.g. a lawyer search) when a safe
+    // internal ?next= is present; otherwise land on the role dashboard.
+    const next = searchParams.get('next');
+    if (next && next.startsWith('/') && !next.startsWith('//')) {
+      router.push(next);
+      return;
+    }
     router.push(
       res.role === 'ADMIN'
         ? '/admin'
@@ -225,6 +233,8 @@ function LoginForm() {
           {isSubmitting ? 'Signing in...' : 'Sign in'}
         </button>
       </form>
+
+      <GoogleSignIn />
 
       <p className="mt-8 text-center text-sm text-slate-500">
         New to LawMitran?{' '}

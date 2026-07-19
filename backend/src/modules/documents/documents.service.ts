@@ -10,6 +10,7 @@ import { NotifyService } from '../../common/notify/notify.service';
 import { RazorpayService } from '../../common/payments/razorpay.service';
 import { paginate, resolvePagination } from '../../common/pagination';
 import { PrismaService } from '../../prisma/prisma.service';
+import { renderTemplate } from '../../common/templates/template-engine';
 import { SettingsService } from '../settings/settings.service';
 import { complete } from '../ai-intake/llm.client';
 import { assertFeature, DOC_FLAGS } from './feature-flags';
@@ -19,29 +20,18 @@ import { StampDutyService } from './stamp-duty.service';
 export interface TemplateField {
   name: string;
   label: string;
-  type?: 'text' | 'textarea' | 'date' | 'number' | 'select';
+  type?: 'text' | 'textarea' | 'date' | 'number' | 'select' | 'toggle' | 'checkbox' | 'state';
   options?: string[];
   required?: boolean;
   placeholder?: string;
   help?: string;
 }
 
-const PREVIEW_CHARS = 700;
+const PREVIEW_CHARS = 1600; // enough to feel like a real draft, never the full document
 
-function escapeHtml(v: string): string {
-  return v
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
-/** Mustache-lite: {{fieldName}} → escaped answer; blanks render as ruled lines. */
+// Conditional template engine ({{var}}, {{#if}}, {{#eq}}) — see common/templates.
 function renderBody(body: string, input: Record<string, unknown>): string {
-  return body.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_m, key: string) => {
-    const v = input[key];
-    if (v === undefined || v === null || String(v).trim() === '') return '__________';
-    return escapeHtml(String(v));
-  });
+  return renderTemplate(body, input, { escapeHtml: true });
 }
 
 function fieldsOf(schemaJson: unknown): TemplateField[] {
@@ -123,6 +113,7 @@ export class DocumentsService {
         version: true,
         requiresStamp: true,
         stampBasis: true,
+        videoUrl: true,
         schemaJson: true,
         category: { select: { name: true, slug: true } },
       },
@@ -141,11 +132,21 @@ export class DocumentsService {
       select: { bodyTemplate: true, title: true },
     });
     if (!template) throw new NotFoundException('Document template not found');
-    const full = renderBody(template.bodyTemplate, input ?? {});
+    const full = renderTemplate(template.bodyTemplate, input ?? {}, {
+      escapeHtml: false,
+    });
+    // HTML variant for the live preview: filled values bold, blanks dotted.
+    const fullHtml = renderTemplate(template.bodyTemplate, input ?? {}, {
+      escapeHtml: true,
+      wrapValue: (v) => `<strong>${v}</strong>`,
+      wrapBlank: () =>
+        '<span class="doc-blank">\u2026\u2026\u2026\u2026\u2026\u2026</span>',
+    });
     const truncated = full.length > PREVIEW_CHARS;
     return {
       title: template.title,
       previewText: truncated ? `${full.slice(0, PREVIEW_CHARS)}…` : full,
+      previewHtml: truncated ? `${fullHtml.slice(0, PREVIEW_CHARS * 2)}…` : fullHtml,
       truncated,
     };
   }
@@ -245,7 +246,9 @@ export class DocumentsService {
 
   private validateInput(schemaJson: unknown, input: Record<string, unknown>) {
     for (const f of fieldsOf(schemaJson)) {
-      const required = f.required !== false; // fields are required by default
+      // Checkbox clauses are opt-in by nature — only required when explicit.
+      const required =
+        f.type === 'checkbox' ? f.required === true : f.required !== false;
       const v = input?.[f.name];
       if (required && (v === undefined || v === null || String(v).trim() === '')) {
         throw new BadRequestException(`Please fill "${f.label}"`);
@@ -554,6 +557,7 @@ export class DocumentsService {
     language?: string;
     requiresStamp?: boolean;
     stampBasis?: string;
+    videoUrl?: string;
     schemaJson: unknown;
     bodyTemplate: string;
   }) {
@@ -567,6 +571,7 @@ export class DocumentsService {
         language: dto.language ?? 'en',
         requiresStamp: dto.requiresStamp ?? false,
         stampBasis: dto.stampBasis ?? null,
+        videoUrl: dto.videoUrl ?? null,
         schemaJson: (dto.schemaJson ?? { fields: [] }) as Prisma.InputJsonValue,
         bodyTemplate: dto.bodyTemplate,
         status: TemplateStatus.DRAFT,
@@ -590,6 +595,7 @@ export class DocumentsService {
       language: string;
       requiresStamp: boolean;
       stampBasis: string | null;
+      videoUrl: string | null;
       schemaJson: unknown;
       bodyTemplate: string;
     }>,
@@ -615,6 +621,7 @@ export class DocumentsService {
         ...(dto.language ? { language: dto.language } : {}),
         ...(dto.requiresStamp !== undefined ? { requiresStamp: dto.requiresStamp } : {}),
         ...(dto.stampBasis !== undefined ? { stampBasis: dto.stampBasis } : {}),
+        ...(dto.videoUrl !== undefined ? { videoUrl: dto.videoUrl } : {}),
         ...(dto.schemaJson !== undefined
           ? { schemaJson: dto.schemaJson as Prisma.InputJsonValue }
           : {}),

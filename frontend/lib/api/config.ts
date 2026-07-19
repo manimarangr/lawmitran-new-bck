@@ -5,9 +5,16 @@ export interface PublicConfig {
     enabled: boolean;
     siteKey: string | null;
   };
+  google?: {
+    enabled: boolean;
+    clientId: string | null;
+  };
 }
 
-const DISABLED: PublicConfig = { recaptcha: { enabled: false, siteKey: null } };
+const DISABLED: PublicConfig = {
+  recaptcha: { enabled: false, siteKey: null },
+  google: { enabled: false, clientId: null },
+};
 
 /** Public runtime config (reCAPTCHA site key, etc). Fails open to "disabled". */
 export async function getPublicConfig(): Promise<PublicConfig> {

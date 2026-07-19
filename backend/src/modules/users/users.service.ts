@@ -167,6 +167,12 @@ export class UsersService {
 
   async uploadAvatar(userId: string, file?: Express.Multer.File) {
     if (!file) throw new BadRequestException('No image uploaded');
+    if (!file.mimetype?.startsWith('image/')) {
+      throw new BadRequestException('Profile picture must be an image (JPG/PNG/WebP)');
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      throw new BadRequestException('Photo is too large — maximum size is 2 MB');
+    }
     const avatarUrl = await this.storage.upload(file, 'avatars');
     await this.prisma.user.update({ where: { id: userId }, data: { avatarUrl } });
     return { avatarUrl };
@@ -325,6 +331,7 @@ export class UsersService {
       trialsEndingSoon,
       newLeads7d,
       revenue,
+      docRevenue,
     ] = await this.prisma.$transaction([
       this.prisma.lawyer.count({
         where: {
@@ -359,6 +366,14 @@ export class UsersService {
         _sum: { amount: true },
         where: { status: PaymentStatus.PAID, createdAt: { gte: monthStart } },
       }),
+      // Document marketplace revenue: purchases that completed payment this month.
+      this.prisma.customerDocument.aggregate({
+        _sum: { amount: true },
+        where: {
+          status: { in: ['PAID', 'DELIVERED'] as never[] },
+          updatedAt: { gte: monthStart },
+        },
+      }),
     ]);
 
     return {
@@ -371,7 +386,10 @@ export class UsersService {
       activeSubscriptions,
       trialsEndingSoon,
       newLeads7d,
-      revenueThisMonth: revenue._sum.amount ?? 0,
+      revenueThisMonth:
+        Number(revenue._sum.amount ?? 0) + Number(docRevenue._sum.amount ?? 0),
+      subscriptionRevenueThisMonth: revenue._sum.amount ?? 0,
+      documentRevenueThisMonth: docRevenue._sum.amount ?? 0,
     };
   }
 

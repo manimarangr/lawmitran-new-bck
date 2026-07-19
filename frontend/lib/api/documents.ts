@@ -8,7 +8,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 export interface TemplateField {
   name: string;
   label: string;
-  type?: 'text' | 'textarea' | 'date' | 'number' | 'select';
+  type?: 'text' | 'textarea' | 'date' | 'number' | 'select' | 'toggle' | 'checkbox' | 'state';
+  /** This numeric answer is the declared value used for stamp-duty calculation. */
+  stampValue?: boolean;
   options?: string[];
   required?: boolean;
   placeholder?: string;
@@ -40,6 +42,7 @@ export interface DocTemplateListItem {
 
 export interface DocTemplate extends DocTemplateListItem {
   version: number;
+  videoUrl?: string | null;
   schemaJson: { fields?: TemplateField[] } | null;
 }
 
@@ -85,7 +88,7 @@ export async function previewDocument(idOrSlug: string, input: Record<string, un
     const body = (await res.json().catch(() => ({}))) as { message?: string };
     throw new Error(body?.message ?? 'Preview failed');
   }
-  return res.json() as Promise<{ title: string; previewText: string; truncated: boolean }>;
+  return res.json() as Promise<{ title: string; previewText: string; previewHtml?: string; truncated: boolean }>;
 }
 
 /** AI prefill from the user's own description (returns {} when AI is off). */
@@ -192,6 +195,7 @@ export interface AdminDocTemplateFull {
   requiresStamp: boolean;
   stampBasis: string | null;
   schemaJson: { fields?: TemplateField[] } | null;
+  videoUrl?: string | null;
   bodyTemplate: string;
   category: { id: string; name: string };
 }
@@ -214,6 +218,7 @@ export interface TemplateInput {
   language?: string;
   requiresStamp?: boolean;
   stampBasis?: string;
+  videoUrl?: string;
   schemaJson: { fields: TemplateField[] };
   bodyTemplate: string;
 }

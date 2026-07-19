@@ -15,7 +15,7 @@ import AdminPageHeader from '@/components/site/AdminPageHeader';
 import Icon from '@/components/ui/Icon';
 
 const inputClass = 'w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm focus:border-gold focus:outline-none';
-const FIELD_TYPES = ['text', 'textarea', 'date', 'number', 'select'] as const;
+const FIELD_TYPES = ['text', 'textarea', 'date', 'number', 'select', 'toggle', 'checkbox', 'state'] as const;
 
 export default function AdminTemplateEditorPage() {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +29,7 @@ export default function AdminTemplateEditorPage() {
   const [keywords, setKeywords] = useState('');
   const [requiresStamp, setRequiresStamp] = useState(false);
   const [stampBasis, setStampBasis] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
   const [fields, setFields] = useState<TemplateField[]>([]);
   const [body, setBody] = useState('');
   const [loaded, setLoaded] = useState(false);
@@ -46,6 +47,7 @@ export default function AdminTemplateEditorPage() {
     setKeywords(t.keywords.join(', '));
     setRequiresStamp(t.requiresStamp);
     setStampBasis(t.stampBasis ?? '');
+    setVideoUrl((t as { videoUrl?: string | null }).videoUrl ?? '');
     setFields(t.schemaJson?.fields ?? []);
     setBody(t.bodyTemplate);
   }, [q.data, loaded]);
@@ -59,6 +61,7 @@ export default function AdminTemplateEditorPage() {
         keywords: keywords.split(',').map((k) => k.trim()).filter(Boolean),
         requiresStamp,
         stampBasis: stampBasis.trim() || undefined,
+        videoUrl: videoUrl.trim() || undefined,
         schemaJson: { fields },
         bodyTemplate: body,
       }),
@@ -150,6 +153,20 @@ export default function AdminTemplateEditorPage() {
                 </div>
               </section>
 
+              {/* how-to video */}
+              <section className="rounded-2xl border border-gray-200/60 bg-white p-6 shadow-sm">
+                <label htmlFor="tpl-video" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                  How-to video URL <span className="font-medium normal-case text-slate-400">(optional — YouTube link, shown above the guided form)</span>
+                </label>
+                <input
+                  id="tpl-video"
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  className={inputClass}
+                />
+              </section>
+
               {/* form builder */}
               <section className="rounded-2xl border border-gray-200/60 bg-white p-6 shadow-sm">
                 <div className="mb-4 flex items-center justify-between">
@@ -183,7 +200,7 @@ export default function AdminTemplateEditorPage() {
                           placeholder="Section (e.g. Landlord) — groups fields into steps"
                           className={inputClass}
                         />
-                        {f.type === 'select' && (
+                        {(f.type === 'select' || f.type === 'toggle') && (
                           <input
                             aria-label={`Field ${i + 1} options`}
                             value={(f.options ?? []).join(', ')}

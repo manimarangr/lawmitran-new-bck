@@ -24,7 +24,7 @@ async function getOfficer(): Promise<{ name: string | null; email: string }> {
 export default async function GrievancePage() {
   const officer = await getOfficer();
   return (
-    <div className="mx-auto max-w-3xl px-6 py-12">
+    <div className="mx-auto max-w-4xl px-6 py-12">
       <h1 className="text-3xl font-extrabold text-navy">Grievance Redressal</h1>
       <p className="mt-2 text-sm text-slate-500">
         Published in compliance with the Information Technology (Intermediary Guidelines and

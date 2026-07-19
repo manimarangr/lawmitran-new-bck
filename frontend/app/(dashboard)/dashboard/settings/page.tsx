@@ -44,6 +44,7 @@ export default function SettingsPage() {
 
   // avatar
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState('');
   const avatarM = useMutation({ mutationFn: (f: File) => uploadAvatar(f) });
 
   // delete
@@ -73,14 +74,24 @@ export default function SettingsPage() {
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0];
+                e.target.value = '';
                 if (!f) return;
+                if (f.size > 2 * 1024 * 1024) {
+                  setAvatarError('Photo is too large — maximum size is 2 MB.');
+                  return;
+                }
+                setAvatarError('');
                 setAvatarPreview(URL.createObjectURL(f));
                 avatarM.mutate(f);
               }}
             />
           </label>
         </div>
-        <Notice ok={avatarM.isSuccess} msg={avatarM.isSuccess ? 'Photo updated.' : avatarM.isError ? 'Upload failed.' : ''} />
+        {avatarError && (
+          <p role="alert" className="mt-3 text-sm font-semibold text-rose-600">{avatarError}</p>
+        )}
+        <p className="mt-2 text-xs text-slate-400">JPG/PNG/WebP, up to 2 MB.</p>
+        <Notice ok={avatarM.isSuccess} msg={avatarM.isSuccess ? 'Photo updated.' : avatarM.isError ? ((avatarM.error as Error)?.message ?? 'Upload failed.') : ''} />
       </section>
 
       {/* password */}

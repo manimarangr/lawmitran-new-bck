@@ -42,7 +42,10 @@ export function LeadModal({
   // Submitting a requirement needs a signed-in client.
   useEffect(() => {
     if (!getToken()) {
-      router.push('/login');
+      const next = encodeURIComponent(
+        window.location.pathname + window.location.search,
+      );
+      router.push(`/login?next=${next}`);
     }
   }, [router]);
 

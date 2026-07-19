@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useCallback, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { register as registerUser, type Role } from '@/lib/api/auth';
 import Icon from '@/components/ui/Icon';
 import Captcha, { type CaptchaHandle } from '@/components/ui/Captcha';
+import GoogleSignIn, { GOOGLE_PREFILL_EVENT, GOOGLE_PREFILL_KEY } from '@/components/auth/GoogleSignIn';
 
 const schema = z.object({
   fullName: z.string().min(2, 'Enter your full name'),
@@ -42,8 +43,28 @@ function SignupForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+  // Google-verified identity → prefill name/email; user still completes
+  // mobile (OTP-verified), password, and the DPDP consents.
+  const [googlePrefilled, setGooglePrefilled] = useState(false);
+  useEffect(() => {
+    function applyPrefill() {
+      try {
+        const raw = sessionStorage.getItem(GOOGLE_PREFILL_KEY);
+        if (!raw) return;
+        const g = JSON.parse(raw) as { email?: string; fullName?: string };
+        if (g.fullName) setValue('fullName', g.fullName, { shouldValidate: true });
+        if (g.email) setValue('email', g.email, { shouldValidate: true });
+        setGooglePrefilled(true);
+      } catch { /* ignore */ }
+    }
+    applyPrefill();
+    window.addEventListener(GOOGLE_PREFILL_EVENT, applyPrefill);
+    return () => window.removeEventListener(GOOGLE_PREFILL_EVENT, applyPrefill);
+  }, [setValue]);
 
   async function onSubmit(data: FormValues) {
     setError('');
@@ -111,6 +132,12 @@ function SignupForm() {
           );
         })}
       </div>
+
+      {googlePrefilled && (
+        <p role="status" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-xs text-amber-700">
+          Google verified your name &amp; email — add your mobile and a password to finish.
+        </p>
+      )}
 
       {error && (
         <p role="alert" className="mb-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
@@ -315,6 +342,8 @@ function SignupForm() {
           {isSubmitting ? 'Creating...' : 'Create account'}
         </button>
       </form>
+
+      <GoogleSignIn />
 
       <p className="mt-8 text-center text-sm text-slate-500">
         Already have an account?{' '}

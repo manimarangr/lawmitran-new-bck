@@ -99,6 +99,7 @@ async function main() {
   );
 
   await seedLocations();
+  await seedLocalities();
   await seedPracticeAreas();
   await seedCourts();
   await seedLanguages();
@@ -359,6 +360,41 @@ async function seedLocations() {
   console.log(
     `Seeded ${states.length} states/UTs, all districts, and ~${cityCount} cities.`,
   );
+}
+
+/**
+ * Metro localities (Electronic City, Tambaram, Andheri...) with centroid
+ * coordinates — locality filter on lawyer search + future SEO landings.
+ * Idempotent (upsert by cityId+slug). Metro-only by design.
+ */
+async function seedLocalities() {
+  const dataDir = path.join(__dirname, 'data');
+  const { localities } = JSON.parse(
+    fs.readFileSync(path.join(dataDir, 'india-metro-localities.json'), 'utf8'),
+  ) as { localities: Record<string, Array<[string, number, number]>> };
+
+  let count = 0;
+  for (const [cityName, list] of Object.entries(localities)) {
+    const city = await prisma.city.findFirst({ where: { name: cityName } });
+    if (!city) {
+      console.warn(`Seed: metro city "${cityName}" not found — run seedLocations first`);
+      continue;
+    }
+    for (const [name, lat, lng] of list) {
+      const slug = name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-');
+      await prisma.locality.upsert({
+        where: { cityId_slug: { cityId: city.id, slug } },
+        create: { cityId: city.id, name, slug, lat, lng },
+        update: { name, lat, lng },
+      });
+      count++;
+    }
+  }
+  console.log(`Seeded ${count} metro localities.`);
 }
 
 /**

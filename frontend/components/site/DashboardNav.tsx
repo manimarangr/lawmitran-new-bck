@@ -7,10 +7,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { clearSession } from '@/lib/api/client';
 import { getMe, listNotifications } from '@/lib/api/users';
+import { getMyProfile } from '@/lib/api/lawyers';
 import Icon from '@/components/ui/Icon';
 
 const LAWYER_LINKS = [
   { href: '/dashboard/lawyer', label: 'Leads' },
+  { href: '/dashboard/diary', label: 'Case Diary' },
   { href: '/onboarding', label: 'My Profile' },
   { href: '/dashboard/plan', label: 'Subscription' },
 ];
@@ -36,6 +38,14 @@ export default function DashboardNav() {
   });
   const unread = notifications?.filter((n) => !n.readAt).length ?? 0;
 
+  // Lawyers get a "view my public profile" shortcut once approved (slug exists).
+  const { data: myLawyerProfile } = useQuery({
+    queryKey: ['my-lawyer-profile-nav'],
+    queryFn: getMyProfile,
+    enabled: me?.role === 'LAWYER',
+    staleTime: 300_000,
+  });
+
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
@@ -60,7 +70,7 @@ export default function DashboardNav() {
   const initials = (me?.email ?? 'U')[0].toUpperCase();
 
   return (
-    <nav aria-label="Dashboard" className="sticky top-0 z-40 border-b border-gray-100 bg-white shadow-sm">
+    <nav aria-label="Dashboard" className="sticky top-0 z-40 border-b border-gray-100 bg-white shadow-sm print:hidden">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center" aria-label="LawMitran home">
           <Image src="/logo.svg" alt="LawMitran" width={135} height={32} className="h-8 w-auto" priority />
@@ -104,9 +114,14 @@ export default function DashboardNav() {
               aria-haspopup="menu"
               aria-expanded={menuOpen}
               aria-label="Account menu"
-              className="hero-gradient flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-gold"
+              className="hero-gradient flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-sm font-bold text-gold ring-2 ring-gold/40"
             >
-              {initials}
+              {me?.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={me.avatarUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                initials
+              )}
             </button>
             {menuOpen && (
               <div
@@ -114,7 +129,12 @@ export default function DashboardNav() {
                 className="absolute right-0 z-50 mt-2 w-52 rounded-xl border border-gray-100 bg-white py-2 shadow-lg"
               >
                 <div className="border-b border-gray-100 px-4 py-2">
-                  <p className="truncate text-sm font-bold text-slate-800">{me?.email ?? '—'}</p>
+                  {me?.fullName && (
+                    <p className="truncate text-sm font-bold text-slate-800">{me.fullName}</p>
+                  )}
+                  <p className={`truncate ${me?.fullName ? 'text-xs text-slate-500' : 'text-sm font-bold text-slate-800'}`}>
+                    {me?.email ?? '—'}
+                  </p>
                   <p className="text-[11px] capitalize text-slate-400">{me?.role.toLowerCase() ?? ''}</p>
                 </div>
                 {links.map((l) => (
@@ -128,6 +148,30 @@ export default function DashboardNav() {
                     {l.label}
                   </Link>
                 ))}
+                {me?.role === 'LAWYER' && myLawyerProfile?.slug && (
+                  <Link
+                    href={`/lawyer/${myLawyerProfile.slug}`}
+                    target="_blank"
+                    role="menuitem"
+                    className="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <Icon name="up-right-from-square" className="mr-2 w-4 text-slate-400" /> View my public profile
+                  </Link>
+                )}
+                <Link
+                  href="/dashboard/notifications"
+                  role="menuitem"
+                  className="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <Icon name="bell" className="mr-2 w-4 text-slate-400" /> Notifications
+                  {unread > 0 && (
+                    <span className="ml-2 rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                      {unread}
+                    </span>
+                  )}
+                </Link>
                 <Link
                   href="/dashboard/settings"
                   role="menuitem"

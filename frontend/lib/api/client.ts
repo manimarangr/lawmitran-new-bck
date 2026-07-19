@@ -70,7 +70,13 @@ export async function authFetch<T>(path: string, init?: RequestInit): Promise<T>
 
   if (res.status === 401) {
     clearSession();
-    if (typeof window !== 'undefined') window.location.href = '/login';
+    if (typeof window !== 'undefined') {
+      // Send them back to where they were after signing in.
+      const next = encodeURIComponent(
+        window.location.pathname + window.location.search,
+      );
+      window.location.href = `/login?next=${next}`;
+    }
     throw new Error('Session expired — please sign in again');
   }
 

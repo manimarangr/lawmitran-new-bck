@@ -53,7 +53,7 @@ export default function AdminDashboardPage() {
         { label: 'Pending reviews', value: d.pendingLawyers, icon: 'user-check', href: '/admin/approvals', tone: d.pendingLawyers > 0 ? 'text-amber-600' : 'text-slate-800', hint: 'Lawyers waiting for approval' },
         { label: 'Awaiting onboarding', value: d.awaitingOnboarding, icon: 'id-badge', href: '/admin/approvals', tone: 'text-slate-800', hint: 'Signed up, no profile yet' },
         { label: 'Failed payments (30d)', value: d.failedPayments30d, icon: 'credit-card', href: '/admin/transactions', tone: d.failedPayments30d > 0 ? 'text-rose-600' : 'text-slate-800', hint: 'Reconcile from Transactions' },
-        { label: 'Revenue this month', value: inr(d.revenueThisMonth), icon: 'chart-line', href: '/admin/transactions', tone: 'text-green-700', hint: 'Paid subscriptions' },
+        { label: 'Revenue this month', value: inr(d.revenueThisMonth), icon: 'chart-line', href: '/admin/transactions', tone: 'text-green-700', hint: `Subs ${inr(d.subscriptionRevenueThisMonth ?? 0)} · Docs ${inr(d.documentRevenueThisMonth ?? 0)}` },
         { label: 'Open client queries', value: d.openQueries, icon: 'inbox', href: '/admin/queries', tone: d.openQueries > 0 ? 'text-amber-600' : 'text-slate-800' },
         { label: 'Open reports', value: d.openReports, icon: 'flag', href: '/admin/moderation', tone: d.openReports > 0 ? 'text-rose-600' : 'text-slate-800', hint: 'Moderation queue' },
         { label: 'Active subscriptions', value: d.activeSubscriptions, icon: 'tags', href: '/admin/transactions', tone: 'text-slate-800' },

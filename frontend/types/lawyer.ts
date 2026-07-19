@@ -35,6 +35,10 @@ export interface LawyerListItem {
     practiceArea: { id: string; name: string; slug: string };
     proficiency: number | null;
   }[];
+  /** Set when a locality filter is active — locality name if this lawyer is tagged/near it. */
+  nearLocality?: string | null;
+  /** Distance (km) from the selected locality centroid; null if no office pin. */
+  localityKm?: number | null;
   /** Present on GET /lawyers/me/profile — latest review outcome. */
   verifications?: { status: string; comments: string | null; reviewedAt: string | null }[];
   languages: { language: { id: string; name: string; code: string } }[];
@@ -52,6 +56,7 @@ export interface LawyerListItem {
     longitude?: number | null;
     isPrimary: boolean;
     city: { id: string; name: string };
+    locality?: { id: string; name: string; slug: string } | null;
   }[];
   serviceAreas?: { city: { id: string; name: string } }[];
 }
@@ -69,6 +74,9 @@ export interface LawyerMarker {
 
 export interface SearchFilters {
   city?: string;
+  locality?: string;
+  /** '1' -> only lawyers who can receive leads (subscription active/trial). */
+  subscribed?: string;
   practiceArea?: string;
   courtId?: string;
   experienceMin?: number;

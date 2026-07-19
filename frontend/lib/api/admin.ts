@@ -292,6 +292,8 @@ export interface AdminOverview {
   trialsEndingSoon: number;
   newLeads7d: number;
   revenueThisMonth: string | number;
+  subscriptionRevenueThisMonth?: string | number;
+  documentRevenueThisMonth?: string | number;
 }
 
 export function fetchAdminOverview() {

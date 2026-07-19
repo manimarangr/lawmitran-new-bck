@@ -57,20 +57,20 @@ export default function ContactPage() {
 
   return (
     <main id="main">
-      <header className="hero-gradient py-12 text-white">
-        <div className="mx-auto max-w-3xl px-6">
-          <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-300">
+      <header className="hero-light py-12">
+        <div className="mx-auto max-w-4xl px-6">
+          <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-400">
             <Link href="/" className="hover:text-gold">Home</Link> <span className="mx-1">/</span> Contact us
           </nav>
-          <h1 className="text-3xl font-extrabold tracking-tight">Contact us</h1>
-          <p className="mt-2 text-sm text-slate-300">
+          <h1 className="text-3xl font-extrabold tracking-tight text-navy">Contact us</h1>
+          <p className="mt-2 text-sm text-slate-500">
             Payment problems, ID card upload trouble, or anything else — tell us and our team will
             get back to you within 2 business days.
           </p>
         </div>
       </header>
 
-      <div className="mx-auto max-w-3xl px-6 py-10">
+      <div className="mx-auto max-w-4xl px-6 py-10">
         {sent ? (
           <div className="rounded-2xl border border-gray-200/60 bg-white p-10 text-center shadow-sm">
             <div

@@ -4,7 +4,7 @@
   /* LawMitran brand tokens (from sample-ui) */
   --navy: #0b192c;
   --navy-2: #1e3e62;
-  --gold: #c9a24b;
+  --gold: #d4a017;
   --gold-soft: #e7d6a8;
   --ink: #1f2733;
   --muted: #5b6678;
@@ -40,4 +40,7 @@ body {
 /* Shared brand helpers (ported from sample-ui) */
 .hero-gradient {
   background: linear-gradient(135deg, #0b192c 0%, #1e3e62 100%);
+}
+.hero-light {
+  background: linear-gradient(180deg, #eef3fa, #ffffff 96%);
 }

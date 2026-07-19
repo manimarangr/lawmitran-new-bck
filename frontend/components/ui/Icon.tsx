@@ -15,6 +15,13 @@ const PATHS: Record<string, React.ReactNode> = {
   star: <path d="m12 3 2.7 5.8 6.3.7-4.7 4.3 1.3 6.2L12 16.9 6.4 20l1.3-6.2L3 9.5l6.3-.7L12 3z" />,
   "star-fill": <path fill="currentColor" stroke="none" d="m12 3 2.7 5.8 6.3.7-4.7 4.3 1.3 6.2L12 16.9 6.4 20l1.3-6.2L3 9.5l6.3-.7L12 3z" />,
   check: <path d="m5 13 4 4L19 7" />,
+  print: (
+    <>
+      <path d="M7 8V4h10v4" />
+      <rect x="4" y="8" width="16" height="8" rx="2" />
+      <path d="M7 13h10v7H7z" />
+    </>
+  ),
   "circle-check": (
     <>
       <circle cx="12" cy="12" r="9" />

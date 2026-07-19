@@ -118,6 +118,11 @@ export class AdminTemplateDto {
   @MaxLength(300)
   stampBasis?: string;
 
+  @IsOptional()
+  @IsString()
+  @MaxLength(400)
+  videoUrl?: string;
+
   @IsObject()
   schemaJson: Record<string, unknown>;
 
@@ -160,6 +165,11 @@ export class AdminUpdateTemplateDto {
   @IsString()
   @MaxLength(300)
   stampBasis?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(400)
+  videoUrl?: string;
 
   @IsOptional()
   @IsObject()

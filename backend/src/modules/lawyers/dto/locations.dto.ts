@@ -43,6 +43,11 @@ export class CreateOfficeDto {
   @MaxLength(120)
   landmark?: string;
 
+  @ApiPropertyOptional({ description: 'Metro locality id (from GET /lawyers/localities)' })
+  @IsOptional()
+  @IsString()
+  localityId?: string;
+
   @ApiPropertyOptional({ example: 12.9716 })
   @IsOptional()
   @Type(() => Number)

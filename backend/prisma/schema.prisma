@@ -246,6 +246,10 @@ model Lawyer {
   serviceAreas  LawyerServiceArea[]
 
   @@index([cityId, verificationStatus])
+  diaryClients   DiaryClient[]
+  diaryCases     DiaryCase[]
+  diaryReminders DiaryReminder[]
+  diaryActivity  DiaryActivity[]
 }
 
 model Verification {
@@ -452,6 +456,7 @@ model City {
   lawyers      Lawyer[]
   offices      LawyerOffice[]
   serviceAreas LawyerServiceArea[]
+  localities   Locality[]
 
   @@unique([districtId, name])
   @@index([name])
@@ -469,6 +474,8 @@ model LawyerOffice {
   city        City    @relation(fields: [cityId], references: [id])
   pincode     String? // 6-digit Indian PIN
   landmark    String?
+  localityId  String? // metro locality tag (optional; see Locality)
+  locality    Locality? @relation(fields: [localityId], references: [id])
   latitude    Float?
   longitude   Float?
   isPrimary   Boolean  @default(false)
@@ -637,6 +644,7 @@ model DocumentTemplate {
   status        TemplateStatus     @default(DRAFT)
   version       Int                @default(1)
   language      String             @default("en")
+  videoUrl      String? // how-to explainer (YouTube URL preferred; VideoObject SEO)
   active        Boolean            @default(true)
   documents     CustomerDocument[]
   createdAt     DateTime           @default(now())
@@ -850,3 +858,336 @@ model LandingContent {
 }
 
 
+
+// ─────────────────────────────────────────────────────────────
+// Content Management System (CMS)
+// Generic, admin-managed content store that replaces the static
+// frontend legal-guides files. One polymorphic ContentItem model
+// serves every content type; adding a new type is an enum value,
+// not a new table. See docs/cms/README.md.
+// ─────────────────────────────────────────────────────────────
+
+enum ContentType {
+  GUIDE // Legal awareness / how-to guides
+  NEWS // Legal news updates
+  JUDGMENT // Judgment / case-law summaries
+  NOTIFICATION // Government notifications & circulars
+  FAQ // Standalone FAQ entries
+}
+
+enum ContentStatus {
+  DRAFT // being written
+  IN_REVIEW // submitted for legal review
+  PUBLISHED // live (visible when publishedAt <= now)
+  ARCHIVED // retired, kept for history / SEO redirects
+}
+
+// Independent of the editorial workflow: tracks the *legal* review
+// signal shown to readers (E-E-A-T). Defaults to "pending" so we never
+// imply a review that has not happened.
+enum ContentReviewState {
+  PENDING_LEGAL_REVIEW // no advocate assigned yet -> "Reviewer: To Be Assigned"
+  IN_LEGAL_REVIEW // an advocate is reviewing
+  LEGALLY_REVIEWED // reviewed & signed off by the assigned reviewer
+}
+
+// A subject-matter reviewer (advocate) for E-E-A-T credibility.
+// `lawyerId` is a soft reference to a verified Lawyer on the platform so a
+// verified lawyer can later be promoted to a reviewer without a schema change.
+model Reviewer {
+  id               String        @id @default(uuid())
+  name             String
+  designation      String? // e.g. "Advocate, High Court of Karnataka"
+  barCouncilNumber String? // e.g. "KAR/1234/2015"
+  practiceAreas    String[] // e.g. ["property", "family"]
+  biography        String?
+  photoUrl         String?
+  lawyerId         String?       @unique // soft link to a verified Lawyer (no hard FK by design)
+  active           Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  contents         ContentItem[]
+
+  @@index([active])
+}
+
+// Admin-managed taxonomy, scoped per content type so "family-law" can exist
+// for GUIDE and independently for JUDGMENT without collisions.
+model ContentCategory {
+  id          String      @id @default(uuid())
+  type        ContentType
+  slug        String
+  name        String
+  description String?
+  icon        String? // Icon component name (frontend inline SVG set)
+  sortOrder   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([type, slug])
+  @@index([type])
+}
+
+// The single polymorphic content record.
+model ContentItem {
+  id     String        @id @default(uuid())
+  type   ContentType
+  status ContentStatus @default(DRAFT)
+  slug   String        @unique
+  title  String
+  excerpt String? // short summary / list teaser
+
+  // Rendered body. `bodyHtml` is the generic render target; `sections`
+  // holds the structured per-type payload (e.g. the 12-section guide
+  // shape, judgment {court, citation}, notification {authority, number}).
+  bodyHtml String  @default("")
+  sections Json? // structured, type-specific content
+  faqs     Json? // [{ q, a }] — powers FAQPage JSON-LD
+
+  // SEO
+  seoTitle         String?
+  metaDescription  String?
+  canonicalUrl     String?
+  ogImageUrl       String?
+  featuredImageUrl String?
+  jsonLd           Json? // optional hand-authored JSON-LD override
+
+  // Taxonomy & relations
+  categorySlug       String? // -> ContentCategory(type, slug)
+  tags               String[]
+  practiceAreas      String[]
+  states             String[] // state applicability (e.g. ["KA","MH"]; empty = all-India)
+  relatedDocumentIds String[] // DocumentTemplate ids (marketplace cross-sell)
+  relatedLawyerIds   String[] // Lawyer ids (surface verified lawyers)
+
+  // Editorial / review
+  authorName  String? @default("LawMitran Legal Content Team")
+  reviewerId  String?
+  reviewer    Reviewer?          @relation(fields: [reviewerId], references: [id])
+  reviewState ContentReviewState @default(PENDING_LEGAL_REVIEW)
+
+  // Publishing. A PUBLISHED item with a future publishedAt is effectively
+  // scheduled: public queries filter on publishedAt <= now().
+  publishedAt DateTime?
+  createdById String?
+  updatedById String?
+  readMinutes Int?
+
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  revisions ContentRevision[]
+
+  @@index([type, status])
+  @@index([status, publishedAt])
+  @@index([type, categorySlug])
+}
+
+// Append-only revision history: a full JSON snapshot is written before every
+// update so any prior version can be inspected or restored.
+model ContentRevision {
+  id        String      @id @default(uuid())
+  contentId String
+  content   ContentItem @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  editorId  String?
+  note      String?
+  snapshot  Json
+  createdAt DateTime    @default(now())
+
+  @@index([contentId, createdAt])
+}
+
+// Metro locality (Electronic City, Tambaram, Andheri...). Seeded only for big
+// cities; powers the locality filter (ranking boost by centroid distance) on
+// lawyer search, office tagging, and future locality SEO landing pages.
+model Locality {
+  id      String         @id @default(uuid())
+  cityId  String
+  city    City           @relation(fields: [cityId], references: [id])
+  name    String
+  slug    String
+  lat     Float
+  lng     Float
+  offices LawyerOffice[]
+
+  @@unique([cityId, slug])
+  @@index([cityId])
+}
+
+
+// ─────────────────────────────────────────────────────────────
+// Lawyer Case Diary (premium practice-management module)
+// Personal to each lawyer — every row is lawyer-scoped and soft-deleted
+// (deletedAt) rather than removed. Hearings/activities are append-only.
+// Court/practice-area use the platform masters via soft references.
+// ─────────────────────────────────────────────────────────────
+
+enum DiaryCaseStatus {
+  NEW
+  CONSULTATION
+  NOTICE_SENT
+  CASE_FILED
+  EVIDENCE
+  ARGUMENTS
+  JUDGMENT_RESERVED
+  DISPOSED
+  CLOSED
+  ARCHIVED
+}
+
+enum DiaryPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum DiaryReminderType {
+  HEARING
+  FOLLOW_UP
+  DOCUMENT
+  PAYMENT
+  CUSTOM
+}
+
+enum DiaryDocCategory {
+  PETITION
+  EVIDENCE
+  COURT_ORDER
+  IDENTITY
+  PHOTO
+  MISC
+}
+
+// A lawyer's client book. One client ↔ many cases; leadId links back to the
+// marketplace lead this client came from (soft ref — Lead rows are platform data).
+model DiaryClient {
+  id        String      @id @default(uuid())
+  lawyerId  String
+  lawyer    Lawyer      @relation(fields: [lawyerId], references: [id])
+  name      String
+  mobile    String?
+  email     String?
+  address   String?
+  notes     String?
+  leadId    String? // source marketplace lead (soft reference)
+  cases     DiaryCase[]
+  deletedAt DateTime?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([lawyerId, deletedAt])
+}
+
+model DiaryCase {
+  id               String          @id @default(uuid())
+  lawyerId         String
+  lawyer           Lawyer          @relation(fields: [lawyerId], references: [id])
+  clientId         String
+  client           DiaryClient     @relation(fields: [clientId], references: [id])
+  title            String
+  caseNumber       String?
+  courtName        String? // free text; courts master used as autocomplete
+  courtHall        String?
+  judgeName        String?
+  practiceAreaSlug String? // -> PracticeArea master
+  caseType         String?
+  oppositeParty    String?
+  status           DiaryCaseStatus @default(NEW)
+  stage            String?
+  priority         DiaryPriority   @default(MEDIUM)
+  description      String?
+  dateFiled        DateTime?
+  nextHearingAt    DateTime? // kept in sync from the latest hearing entry
+  remarks          String?
+  lawyerNotes      String?
+  leadId           String? // source marketplace lead (soft reference)
+  hearings         DiaryHearing[]
+  notes            DiaryNote[]
+  reminders        DiaryReminder[]
+  documents        DiaryDocument[]
+  activities       DiaryActivity[]
+  deletedAt        DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([lawyerId, status, deletedAt])
+  @@index([lawyerId, nextHearingAt])
+}
+
+// Append-only hearing timeline (never overwritten; corrections are new notes).
+model DiaryHearing {
+  id            String    @id @default(uuid())
+  caseId        String
+  case          DiaryCase @relation(fields: [caseId], references: [id])
+  date          DateTime
+  courtNumber   String?
+  judgeName     String?
+  purpose       String?
+  outcome       String?
+  nextHearingAt DateTime?
+  notes         String?
+  orderCopyUrl  String?
+  createdAt     DateTime  @default(now())
+
+  @@index([caseId, date])
+}
+
+model DiaryNote {
+  id        String    @id @default(uuid())
+  caseId    String
+  case      DiaryCase @relation(fields: [caseId], references: [id])
+  title     String
+  content   String
+  pinned    Boolean   @default(false)
+  private   Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([caseId, pinned])
+}
+
+model DiaryReminder {
+  id        String            @id @default(uuid())
+  lawyerId  String
+  lawyer    Lawyer            @relation(fields: [lawyerId], references: [id])
+  caseId    String?
+  case      DiaryCase?        @relation(fields: [caseId], references: [id])
+  type      DiaryReminderType @default(CUSTOM)
+  dueAt     DateTime
+  notes     String?
+  done      Boolean           @default(false)
+  deletedAt DateTime?
+  createdAt DateTime          @default(now())
+
+  @@index([lawyerId, done, dueAt])
+}
+
+model DiaryDocument {
+  id        String           @id @default(uuid())
+  caseId    String
+  case      DiaryCase        @relation(fields: [caseId], references: [id])
+  category  DiaryDocCategory @default(MISC)
+  name      String
+  fileKey   String // private object-storage key (backend-proxied download)
+  mimeType  String?
+  size      Int?
+  deletedAt DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([caseId, category])
+}
+
+// Append-only activity feed ("Case created", "Hearing added", "Status → EVIDENCE").
+model DiaryActivity {
+  id        String     @id @default(uuid())
+  lawyerId  String
+  lawyer    Lawyer     @relation(fields: [lawyerId], references: [id])
+  caseId    String?
+  case      DiaryCase? @relation(fields: [caseId], references: [id])
+  action    String
+  summary   String
+  createdAt DateTime   @default(now())
+
+  @@index([lawyerId, createdAt])
+}

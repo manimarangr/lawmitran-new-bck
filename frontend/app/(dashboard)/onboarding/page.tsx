@@ -7,11 +7,13 @@ import Link from 'next/link';
 import {
   createLawyerProfile,
   fetchCourts,
+  fetchLocalities,
   fetchLanguages,
   getMyProfile,
   updateMyProfile,
   updateOffice,
   updateProfilePhoto,
+  type LocalityRef,
 } from '@/lib/api/lawyers';
 import { getPracticeAreas } from '@/lib/api/seo';
 import CityInput from '@/components/ui/CityInput';
@@ -117,6 +119,8 @@ export default function LawyerOnboardingPage() {
   const [pincode, setPincode] = useState('');
   const [landmark, setLandmark] = useState('');
   const [point, setPoint] = useState<OfficePoint | null>(null);
+  const [locality, setLocality] = useState('');
+  const [localities, setLocalities] = useState<LocalityRef[]>([]);
   const [error, setError] = useState('');
 
   const areasQ = useQuery({ queryKey: ['practice-areas'], queryFn: getPracticeAreas, staleTime: 300_000 });
@@ -126,6 +130,25 @@ export default function LawyerOnboardingPage() {
   const areaOptions = areasQ.data?.map((a) => a.name) ?? FALLBACK_AREAS;
   const courtOptions = courtsQ.data?.length ? courtsQ.data.map((c) => c.name) : FALLBACK_COURTS;
   const langOptions = langsQ.data?.map((l) => l.name) ?? ['English', 'Hindi', 'Kannada', 'Tamil', 'Telugu'];
+
+  // Metro-only locality options for the chosen practice city.
+  useEffect(() => {
+    let alive = true;
+    if (city.trim().length < 3) {
+      setLocalities([]);
+      return;
+    }
+    const t = setTimeout(() => {
+      fetchLocalities(city.trim()).then((list) => {
+        if (alive) {
+          setLocalities(list);
+          if (!list.some((l) => l.id === locality)) setLocality('');
+        }
+      });
+    }, 300);
+    return () => { alive = false; clearTimeout(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [city]);
 
   useEffect(() => {
     if (!photo) {
@@ -156,6 +179,7 @@ export default function LawyerOnboardingPage() {
       setAddressLine(office.addressLine ?? '');
       setPincode(office.pincode ?? '');
       setLandmark(office.landmark ?? '');
+      setLocality(office.locality?.id ?? '');
       if (office.latitude != null && office.longitude != null) {
         setPoint({ lat: office.latitude, lng: office.longitude });
       }
@@ -191,6 +215,7 @@ export default function LawyerOnboardingPage() {
             addressLine: addressLine.trim() || undefined,
             pincode: pincode.trim() || undefined,
             landmark: landmark.trim() || undefined,
+            localityId: locality || undefined,
             latitude: point?.lat,
             longitude: point?.lng,
           });
@@ -212,6 +237,7 @@ export default function LawyerOnboardingPage() {
         addressLine: addressLine.trim(),
         pincode: pincode.trim(),
         landmark: landmark.trim() || undefined,
+        localityId: locality || undefined,
         officeLabel: officeLabel.trim() || undefined,
         latitude: point!.lat,
         longitude: point!.lng,
@@ -291,10 +317,16 @@ export default function LawyerOnboardingPage() {
               aria-label={editing ? 'Replace profile photo' : 'Upload profile photo (required)'}
               onChange={(e) => {
                 const f = e.target.files?.[0] ?? null;
+                if (f && f.size > 2 * 1024 * 1024) {
+                  setError('Photo is too large — maximum size is 2 MB.');
+                  e.target.value = '';
+                  return;
+                }
                 if (editing) {
                   if (f) { setError(''); photoM.mutate(f); }
                   e.target.value = '';
                 } else {
+                  setError('');
                   setPhoto(f);
                 }
               }}
@@ -417,6 +449,25 @@ export default function LawyerOnboardingPage() {
             <input id="ob-landmark" value={landmark} onChange={(e) => setLandmark(e.target.value)} className={inputClass} placeholder="Opp. Metro station" />
           </div>
         </div>
+
+        {localities.length > 0 && (
+          <div>
+            <label htmlFor="ob-locality" className={labelClass}>
+              Locality <span className="font-medium normal-case text-slate-400">(optional — helps nearby clients find you)</span>
+            </label>
+            <select
+              id="ob-locality"
+              value={locality}
+              onChange={(e) => setLocality(e.target.value)}
+              className={inputClass}
+            >
+              <option value="">— select locality —</option>
+              {localities.map((l) => (
+                <option key={l.id} value={l.id}>{l.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <OfficeMapPicker value={point} onChange={setPoint} searchHint={city || undefined} />
       </div>

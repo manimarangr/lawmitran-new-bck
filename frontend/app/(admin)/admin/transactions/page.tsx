@@ -8,6 +8,7 @@ import {
   markPaymentPaid,
   type AdminPayment,
 } from '@/lib/api/admin';
+import { fetchAdminDocOrders, type AdminDocOrder } from '@/lib/api/documents';
 import AdminPageHeader from '@/components/site/AdminPageHeader';
 import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
@@ -35,12 +36,23 @@ export default function AdminTransactionsPage() {
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
 
+  const [source, setSource] = useState<'SUBS' | 'DOCS'>('SUBS');
+
   const q = useQuery({
     queryKey: ['admin-payments', tab, qv, page],
     queryFn: () => fetchAdminPayments(tab, qv || undefined, page),
     placeholderData: keepPreviousData,
+    enabled: source === 'SUBS',
   });
   const rows = q.data?.items ?? [];
+
+  const docsQ = useQuery({
+    queryKey: ['admin-doc-orders-tx', page],
+    queryFn: () => fetchAdminDocOrders(page),
+    placeholderData: keepPreviousData,
+    enabled: source === 'DOCS',
+  });
+  const docRows: AdminDocOrder[] = docsQ.data?.items ?? [];
 
   const m = useMutation({
     mutationFn: ({ id, note }: { id: string; note?: string }) => markPaymentPaid(id, note),
@@ -58,7 +70,7 @@ export default function AdminTransactionsPage() {
     <div>
       <AdminPageHeader
         title="Transactions"
-        subtitle="Every subscription payment — spot failed or stuck orders and reconcile them"
+        subtitle="All revenue in one place — subscription payments and document purchases"
         right={
           tab === 'FAILED' && (q.data?.total ?? 0) > 0 ? (
             <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-600">
@@ -69,6 +81,83 @@ export default function AdminTransactionsPage() {
       />
 
       <div className="p-6">
+        <div role="tablist" aria-label="Revenue source" className="mb-4 flex gap-1 text-sm font-semibold">
+          {([['SUBS', 'Subscriptions'], ['DOCS', 'Documents']] as const).map(([k, label]) => (
+            <button
+              key={k}
+              role="tab"
+              aria-selected={source === k}
+              onClick={() => { setSource(k); setPage(1); }}
+              className={`rounded-xl px-4 py-1.5 ${source === k ? 'bg-navy text-white' : 'text-slate-500 hover:bg-slate-100'}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {source === 'DOCS' ? (
+          <div className="overflow-hidden rounded-2xl border border-gray-200/60 bg-white shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+                  <tr>
+                    <th className="px-5 py-3 text-left font-bold">Date</th>
+                    <th className="px-5 py-3 text-left font-bold">Buyer</th>
+                    <th className="px-5 py-3 text-left font-bold">Document</th>
+                    <th className="px-5 py-3 text-right font-bold">Amount</th>
+                    <th className="px-5 py-3 text-left font-bold">Payment ID</th>
+                    <th className="px-5 py-3 text-left font-bold">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {docRows.map((o) => (
+                    <tr key={o.id} className="border-t border-gray-50">
+                      <td className="px-5 py-3 text-slate-500">{new Date(o.createdAt).toLocaleDateString()}</td>
+                      <td className="px-5 py-3">
+                        <p className="font-semibold text-navy">{o.user.fullName ?? '—'}</p>
+                        <p className="text-xs text-slate-400">{o.user.email}</p>
+                      </td>
+                      <td className="px-5 py-3 text-slate-600">{o.template.title}</td>
+                      <td className="px-5 py-3 text-right font-semibold text-navy">
+                        {o.amount ? inr(o.amount) : '—'}
+                      </td>
+                      <td className="px-5 py-3 font-mono text-xs text-slate-400">{o.paymentId ?? '—'}</td>
+                      <td className="px-5 py-3">
+                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          o.status === 'PAID' || o.status === 'DELIVERED'
+                            ? 'bg-green-50 text-green-700'
+                            : o.status === 'GENERATED'
+                              ? 'bg-amber-50 text-amber-700'
+                              : 'bg-slate-100 text-slate-500'
+                        }`}>
+                          {o.status === 'GENERATED' ? 'PAYMENT PENDING' : o.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {docRows.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="px-5 py-10 text-center text-sm text-slate-400">
+                        {docsQ.isLoading ? 'Loading…' : 'No document purchases yet.'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            {docsQ.data && (
+              <Pagination
+                page={docsQ.data.page}
+                totalPages={docsQ.data.totalPages}
+                total={docsQ.data.total}
+                pageSize={docsQ.data.pageSize}
+                onPageChange={setPage}
+                label="purchase"
+              />
+            )}
+          </div>
+        ) : (
+        <>
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <div className="relative flex-1 sm:max-w-xs">
             <Icon name="magnifying-glass" aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400" />
@@ -187,6 +276,8 @@ export default function AdminTransactionsPage() {
             />
           )}
         </div>
+        </>
+        )}
       </div>
 
       {/* reconcile modal */}
