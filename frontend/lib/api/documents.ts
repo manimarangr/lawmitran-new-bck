@@ -3,6 +3,16 @@ import type { Paginated } from '@/types/pagination';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
+/**
+ * Build-time safety: server-side fetches get a hard timeout so a slow or
+ * unreachable API fails fast (and the caller's fallback kicks in) instead of
+ * hanging Next.js static generation until its 60s export budget expires.
+ */
+const SERVER_FETCH_TIMEOUT_MS = 6000;
+function withTimeout(init?: RequestInit): RequestInit {
+  return { ...init, signal: AbortSignal.timeout(SERVER_FETCH_TIMEOUT_MS) };
+}
+
 // ---- types ----
 
 export interface TemplateField {
@@ -60,20 +70,20 @@ export interface MyDocument {
 // ---- public ----
 
 export async function fetchDocCategories(): Promise<DocCategory[]> {
-  const res = await fetch(`${API_BASE}/documents/categories`, { next: { revalidate: 300 } });
+  const res = await fetch(`${API_BASE}/documents/categories`, withTimeout({ next: { revalidate: 300 } }));
   if (!res.ok) throw new Error('Failed to load categories');
   return res.json() as Promise<DocCategory[]>;
 }
 
 export async function fetchDocTemplates(category?: string): Promise<DocTemplateListItem[]> {
   const qs = category ? `?category=${encodeURIComponent(category)}` : '';
-  const res = await fetch(`${API_BASE}/documents/templates${qs}`, { next: { revalidate: 300 } });
+  const res = await fetch(`${API_BASE}/documents/templates${qs}`, withTimeout({ next: { revalidate: 300 } }));
   if (!res.ok) throw new Error('Failed to load templates');
   return res.json() as Promise<DocTemplateListItem[]>;
 }
 
 export async function fetchDocTemplate(idOrSlug: string): Promise<DocTemplate | null> {
-  const res = await fetch(`${API_BASE}/documents/templates/${idOrSlug}`, { next: { revalidate: 300 } });
+  const res = await fetch(`${API_BASE}/documents/templates/${idOrSlug}`, withTimeout({ next: { revalidate: 300 } }));
   if (!res.ok) return null;
   return res.json() as Promise<DocTemplate>;
 }
