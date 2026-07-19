@@ -426,6 +426,71 @@ export class AuthService {
     return { success: true };
   }
 
+  /**
+   * "Continue with Google" (Google Identity Services ID token).
+   * Existing account with a verified mobile -> instant sign-in (admins excluded —
+   * they must use password + 2FA). Unknown email -> the frontend prefills signup
+   * so the user still completes mobile OTP + DPDP consents (no schema shortcut).
+   * Token verification is done server-side against Google's tokeninfo endpoint —
+   * no extra dependency; aud/iss/email_verified are all checked.
+   */
+  async googleAuth(credential: string) {
+    const clientId = await this.settings.get('GOOGLE_CLIENT_ID');
+    if (!clientId) {
+      throw new BadRequestException('Google sign-in is not enabled');
+    }
+    let info: {
+      aud?: string;
+      iss?: string;
+      email?: string;
+      email_verified?: string | boolean;
+      name?: string;
+    };
+    try {
+      const res = await fetch(
+        `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`,
+      );
+      if (!res.ok) throw new Error(`tokeninfo ${res.status}`);
+      info = (await res.json()) as typeof info;
+    } catch {
+      throw new UnauthorizedException('Google sign-in could not be verified');
+    }
+    const issOk =
+      info.iss === 'accounts.google.com' || info.iss === 'https://accounts.google.com';
+    const emailVerified =
+      info.email_verified === true || info.email_verified === 'true';
+    if (info.aud !== clientId || !issOk || !info.email || !emailVerified) {
+      throw new UnauthorizedException('Google sign-in could not be verified');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { email: info.email } });
+    if (!user) {
+      // New to LawMitran — hand back the verified identity for signup prefill.
+      return {
+        newUser: true as const,
+        email: info.email,
+        fullName: info.name ?? '',
+      };
+    }
+    if (user.role === Role.ADMIN) {
+      throw new ForbiddenException('Admin accounts must sign in with password');
+    }
+    if (!user.mobileVerified) {
+      throw new ForbiddenException(
+        'Please verify your mobile number to finish signing up',
+      );
+    }
+    if (!user.emailVerified) {
+      // Google just proved ownership of this email.
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true },
+      });
+    }
+    const tokens = await this.issueTokens(user.id, user.role, false);
+    return { newUser: false as const, role: user.role, ...tokens };
+  }
+
   private async issueTokens(userId: string, role: string, rememberMe: boolean) {
     const payload = { sub: userId, role };
     const accessToken: string = this.jwt.sign(payload, {

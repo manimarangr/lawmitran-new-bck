@@ -16,10 +16,11 @@ export class PublicConfigController {
   @Get()
   @ApiOperation({ summary: 'Public runtime config for the web/mobile clients' })
   async get() {
-    const [enabled, siteKey] = await Promise.all([
+    const [enabled, siteKey, googleClientId] = await Promise.all([
       // Matches RecaptchaService.verify() default (enabled unless explicitly off).
       this.settings.getBool('RECAPTCHA_ENABLED', true),
       this.settings.get('RECAPTCHA_SITE_KEY'),
+      this.settings.get('GOOGLE_CLIENT_ID'),
     ]);
 
     return {
@@ -27,6 +28,10 @@ export class PublicConfigController {
         // Only ask the client to render the widget when a site key exists.
         enabled: enabled && !!siteKey,
         siteKey: siteKey ?? null,
+      },
+      google: {
+        enabled: !!googleClientId,
+        clientId: googleClientId ?? null,
       },
     };
   }

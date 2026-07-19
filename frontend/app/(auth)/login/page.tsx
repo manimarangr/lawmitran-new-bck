@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { login, loginTwoFa } from '@/lib/api/auth';
 import Icon from '@/components/ui/Icon';
 import Captcha, { type CaptchaHandle } from '@/components/ui/Captcha';
+import GoogleSignIn from '@/components/auth/GoogleSignIn';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -232,6 +233,8 @@ function LoginForm() {
           {isSubmitting ? 'Signing in...' : 'Sign in'}
         </button>
       </form>
+
+      <GoogleSignIn />
 
       <p className="mt-8 text-center text-sm text-slate-500">
         New to LawMitran?{' '}

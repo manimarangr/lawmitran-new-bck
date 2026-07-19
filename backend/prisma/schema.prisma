@@ -246,6 +246,10 @@ model Lawyer {
   serviceAreas  LawyerServiceArea[]
 
   @@index([cityId, verificationStatus])
+  diaryClients   DiaryClient[]
+  diaryCases     DiaryCase[]
+  diaryReminders DiaryReminder[]
+  diaryActivity  DiaryActivity[]
 }
 
 model Verification {
@@ -1007,4 +1011,183 @@ model Locality {
 
   @@unique([cityId, slug])
   @@index([cityId])
+}
+
+
+// ─────────────────────────────────────────────────────────────
+// Lawyer Case Diary (premium practice-management module)
+// Personal to each lawyer — every row is lawyer-scoped and soft-deleted
+// (deletedAt) rather than removed. Hearings/activities are append-only.
+// Court/practice-area use the platform masters via soft references.
+// ─────────────────────────────────────────────────────────────
+
+enum DiaryCaseStatus {
+  NEW
+  CONSULTATION
+  NOTICE_SENT
+  CASE_FILED
+  EVIDENCE
+  ARGUMENTS
+  JUDGMENT_RESERVED
+  DISPOSED
+  CLOSED
+  ARCHIVED
+}
+
+enum DiaryPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum DiaryReminderType {
+  HEARING
+  FOLLOW_UP
+  DOCUMENT
+  PAYMENT
+  CUSTOM
+}
+
+enum DiaryDocCategory {
+  PETITION
+  EVIDENCE
+  COURT_ORDER
+  IDENTITY
+  PHOTO
+  MISC
+}
+
+// A lawyer's client book. One client ↔ many cases; leadId links back to the
+// marketplace lead this client came from (soft ref — Lead rows are platform data).
+model DiaryClient {
+  id        String      @id @default(uuid())
+  lawyerId  String
+  lawyer    Lawyer      @relation(fields: [lawyerId], references: [id])
+  name      String
+  mobile    String?
+  email     String?
+  address   String?
+  notes     String?
+  leadId    String? // source marketplace lead (soft reference)
+  cases     DiaryCase[]
+  deletedAt DateTime?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([lawyerId, deletedAt])
+}
+
+model DiaryCase {
+  id               String          @id @default(uuid())
+  lawyerId         String
+  lawyer           Lawyer          @relation(fields: [lawyerId], references: [id])
+  clientId         String
+  client           DiaryClient     @relation(fields: [clientId], references: [id])
+  title            String
+  caseNumber       String?
+  courtName        String? // free text; courts master used as autocomplete
+  courtHall        String?
+  judgeName        String?
+  practiceAreaSlug String? // -> PracticeArea master
+  caseType         String?
+  oppositeParty    String?
+  status           DiaryCaseStatus @default(NEW)
+  stage            String?
+  priority         DiaryPriority   @default(MEDIUM)
+  description      String?
+  dateFiled        DateTime?
+  nextHearingAt    DateTime? // kept in sync from the latest hearing entry
+  remarks          String?
+  lawyerNotes      String?
+  leadId           String? // source marketplace lead (soft reference)
+  hearings         DiaryHearing[]
+  notes            DiaryNote[]
+  reminders        DiaryReminder[]
+  documents        DiaryDocument[]
+  activities       DiaryActivity[]
+  deletedAt        DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([lawyerId, status, deletedAt])
+  @@index([lawyerId, nextHearingAt])
+}
+
+// Append-only hearing timeline (never overwritten; corrections are new notes).
+model DiaryHearing {
+  id            String    @id @default(uuid())
+  caseId        String
+  case          DiaryCase @relation(fields: [caseId], references: [id])
+  date          DateTime
+  courtNumber   String?
+  judgeName     String?
+  purpose       String?
+  outcome       String?
+  nextHearingAt DateTime?
+  notes         String?
+  orderCopyUrl  String?
+  createdAt     DateTime  @default(now())
+
+  @@index([caseId, date])
+}
+
+model DiaryNote {
+  id        String    @id @default(uuid())
+  caseId    String
+  case      DiaryCase @relation(fields: [caseId], references: [id])
+  title     String
+  content   String
+  pinned    Boolean   @default(false)
+  private   Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([caseId, pinned])
+}
+
+model DiaryReminder {
+  id        String            @id @default(uuid())
+  lawyerId  String
+  lawyer    Lawyer            @relation(fields: [lawyerId], references: [id])
+  caseId    String?
+  case      DiaryCase?        @relation(fields: [caseId], references: [id])
+  type      DiaryReminderType @default(CUSTOM)
+  dueAt     DateTime
+  notes     String?
+  done      Boolean           @default(false)
+  deletedAt DateTime?
+  createdAt DateTime          @default(now())
+
+  @@index([lawyerId, done, dueAt])
+}
+
+model DiaryDocument {
+  id        String           @id @default(uuid())
+  caseId    String
+  case      DiaryCase        @relation(fields: [caseId], references: [id])
+  category  DiaryDocCategory @default(MISC)
+  name      String
+  fileKey   String // private object-storage key (backend-proxied download)
+  mimeType  String?
+  size      Int?
+  deletedAt DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([caseId, category])
+}
+
+// Append-only activity feed ("Case created", "Hearing added", "Status → EVIDENCE").
+model DiaryActivity {
+  id        String     @id @default(uuid())
+  lawyerId  String
+  lawyer    Lawyer     @relation(fields: [lawyerId], references: [id])
+  caseId    String?
+  case      DiaryCase? @relation(fields: [caseId], references: [id])
+  action    String
+  summary   String
+  createdAt DateTime   @default(now())
+
+  @@index([lawyerId, createdAt])
 }

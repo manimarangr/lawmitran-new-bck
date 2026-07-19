@@ -12,6 +12,7 @@ import Icon from '@/components/ui/Icon';
 
 const LAWYER_LINKS = [
   { href: '/dashboard/lawyer', label: 'Leads' },
+  { href: '/dashboard/diary', label: 'Case Diary' },
   { href: '/onboarding', label: 'My Profile' },
   { href: '/dashboard/plan', label: 'Subscription' },
 ];
