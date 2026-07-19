@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import SiteFooter from '@/components/site/SiteFooter';
 import Icon from '@/components/ui/Icon';
 import {
   getGuideView,
@@ -259,8 +258,6 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           {GUIDE_DISCLAIMER}
         </p>
       </article>
-
-      <SiteFooter />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />

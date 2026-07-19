@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import SiteFooter from '@/components/site/SiteFooter';
 import Icon from '@/components/ui/Icon';
 import { CONTACT_CATEGORIES, submitContactQuery } from '@/lib/api/contact';
 
@@ -246,7 +245,6 @@ export default function ContactPage() {
           </Link>
         </div>
       </div>
-      <SiteFooter />
     </main>
   );
 }

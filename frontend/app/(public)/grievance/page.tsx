@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Icon from '@/components/ui/Icon';
+import { API_BASE } from '@/lib/api/base';
 
 export const metadata: Metadata = {
   title: 'Grievance Redressal | LawMitran',
@@ -12,8 +13,7 @@ export const revalidate = 3600;
 
 async function getOfficer(): Promise<{ name: string | null; email: string }> {
   try {
-    const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
-    const res = await fetch(`${base}/contact/grievance`, {
+    const res = await fetch(`${API_BASE}/contact/grievance`, {
       next: { revalidate: 3600 },
       // Build-time safety: a black-holed API must not stall prerendering.
       signal: AbortSignal.timeout(6000),

@@ -1,6 +1,6 @@
 import type { LawyerListItem, LawyerSearchResult } from '@/types/lawyer';
+import { API_BASE } from './base';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 /**
  * Build-time safety: server-side fetches get a hard timeout so a slow or

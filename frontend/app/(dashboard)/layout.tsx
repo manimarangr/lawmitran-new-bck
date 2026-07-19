@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getToken } from '@/lib/api/client';
 import DashboardNav from '@/components/site/DashboardNav';
+import SiteFooter from '@/components/site/SiteFooter';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -28,9 +29,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-full bg-gray-50 text-slate-800">
+    <div className="flex min-h-screen flex-col bg-gray-50 text-slate-800">
       <DashboardNav />
-      <main id="main">{children}</main>
+      <main id="main" className="flex-1">{children}</main>
+      <SiteFooter />
     </div>
   );
 }

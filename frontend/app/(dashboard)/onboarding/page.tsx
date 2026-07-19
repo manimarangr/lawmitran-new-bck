@@ -283,7 +283,7 @@ export default function LawyerOnboardingPage() {
   const bioLen = bio.trim().length;
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-extrabold text-navy">{editing ? 'My profile' : 'Complete your lawyer profile'}</h1>
       <p className="mt-1 text-sm text-slate-500">
         {editing

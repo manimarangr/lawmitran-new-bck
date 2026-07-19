@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import SiteFooter from '@/components/site/SiteFooter';
 import Icon from '@/components/ui/Icon';
 import { guideCategories, allGuideCards } from '@/lib/legal-guides/source';
 
@@ -53,7 +52,6 @@ export default async function AllGuidesPage() {
           );
         })}
       </div>
-      <SiteFooter />
     </div>
   );
 }

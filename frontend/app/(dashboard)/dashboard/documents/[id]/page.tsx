@@ -15,7 +15,7 @@ export default function MyDocumentPage() {
   const [dlErr, setDlErr] = useState('');
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <div className="mx-auto max-w-4xl px-6 py-8">
       <div className="mb-5 flex items-center justify-between print:hidden">
         <Link href="/dashboard/documents" className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:border-gold hover:text-navy">
           <Icon name="chevron-left" aria-hidden="true" className="mr-1 text-xs" /> My documents

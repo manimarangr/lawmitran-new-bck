@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import SiteFooter from '@/components/site/SiteFooter';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
@@ -91,7 +90,6 @@ export default function PrivacyPage() {
           Platform. Continued use after an update constitutes acceptance.
         </P>
       </div>
-      <SiteFooter />
     </div>
   );
 }

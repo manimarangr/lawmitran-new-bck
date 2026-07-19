@@ -122,7 +122,7 @@ export default function LocationsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <div className="mx-auto max-w-5xl px-6 py-8">
       <h1 className="text-2xl font-extrabold text-navy">Locations &amp; service areas</h1>
       <p className="mt-1 text-sm text-slate-500">
         Offices are where you sit; service areas are where you take clients from. You appear in

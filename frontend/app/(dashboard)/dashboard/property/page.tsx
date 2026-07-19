@@ -41,7 +41,7 @@ export default function PropertyCasesPage() {
   const cases = casesQ.data ?? [];
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <div className="mx-auto max-w-5xl px-6 py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-navy">Property document check</h1>

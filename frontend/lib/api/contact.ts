@@ -1,7 +1,7 @@
 import { authFetch } from './client';
+import { API_BASE } from './base';
 import type { Paginated } from '@/types/pagination';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 export const CONTACT_CATEGORIES: { value: string; label: string }[] = [
   { value: 'PAYMENT_ISSUE', label: 'Payment issue' },

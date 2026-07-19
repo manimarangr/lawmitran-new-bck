@@ -1,27 +1,21 @@
-import Link from 'next/link';
-import Image from 'next/image';
 import Icon from '@/components/ui/Icon';
+import SiteHeader from '@/components/site/SiteHeader';
+import SiteFooter from '@/components/site/SiteFooter';
 
 /**
- * Centered auth layout (light theme): logo on top, white card in the middle,
- * trust signals + disclaimer below. Replaces the former navy split-panel.
+ * Auth layout: full site header + footer, light background, and a two-column
+ * shell — benefits panel on the left (desktop), form card on the right.
  */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="hero-light flex min-h-screen flex-col">
-      <div className="p-6">
-        <Link href="/" className="text-sm font-medium text-slate-500 hover:text-navy">
-          <Icon name="arrow-left" className="mr-1" /> Back to home
-        </Link>
-      </div>
+    <div className="flex min-h-screen flex-col">
+      <SiteHeader />
+      <div className="hero-light flex flex-1 flex-col">
 
-      <main id="main" className="flex flex-1 flex-col items-center justify-center px-6 pb-10">
-        <div className="flex w-full max-w-5xl items-center justify-center gap-14">
+      <main id="main" className="flex flex-1 flex-col items-center justify-center px-6 py-12">
+        <div className="flex w-full max-w-6xl items-center justify-center gap-16">
           {/* info panel (desktop) — why sign up, next to the form like CaseBench */}
-          <aside className="hidden max-w-sm lg:block">
-            <Link href="/" className="mb-8 inline-flex" aria-label="LawMitran home">
-              <Image src="/logo.svg" alt="LawMitran" width={170} height={40} className="h-10 w-auto" priority />
-            </Link>
+          <aside className="hidden max-w-md lg:block">
             <h1 className="text-3xl font-extrabold leading-tight text-navy">
               Legal help for every Indian,
               <br />
@@ -52,20 +46,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </aside>
 
           {/* form card */}
-          <div className="w-full max-w-md">
-            <Link href="/" className="mb-6 flex items-center justify-center lg:hidden" aria-label="LawMitran home">
-              <Image src="/logo.svg" alt="LawMitran" width={170} height={40} className="h-10 w-auto" priority />
-            </Link>
+          <div className="w-full max-w-lg">
             <div className="rounded-2xl border border-line bg-white p-8 shadow-[0_18px_50px_rgba(11,25,44,.10)]">
               {children}
             </div>
           </div>
         </div>
 
-        <p className="mt-6 max-w-md text-center text-[11px] text-slate-400">
-          © 2026 LawMitran · An information platform, not a law firm. We don&apos;t provide legal advice.
-        </p>
       </main>
+      </div>
+      <SiteFooter />
     </div>
   );
 }

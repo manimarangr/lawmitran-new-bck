@@ -1,7 +1,7 @@
 import { authFetch, getToken } from './client';
+import { API_BASE } from './base';
 import type { AppNotification, Me } from '@/types/user';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 export function getMe() {
   return authFetch<Me>('/users/me');

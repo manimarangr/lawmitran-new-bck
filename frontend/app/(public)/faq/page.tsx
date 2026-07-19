@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import SiteFooter from '@/components/site/SiteFooter';
 import Icon from '@/components/ui/Icon';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
@@ -297,7 +296,6 @@ export default function FaqPage() {
           Answers above are general guidance about how the platform works, not legal or financial advice.
         </p>
       </div>
-      <SiteFooter />
     </main>
   );
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import SiteFooter from '@/components/site/SiteFooter';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
@@ -106,7 +105,6 @@ export default function TermsPage() {
           acceptance. Material changes will be notified on the Platform.
         </P>
       </div>
-      <SiteFooter />
     </div>
   );
 }

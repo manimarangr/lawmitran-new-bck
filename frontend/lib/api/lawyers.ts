@@ -1,7 +1,7 @@
 import type { LawyerListItem, LawyerMarker, LawyerSearchResult, MapBounds, SearchFilters } from '@/types/lawyer';
+import { API_BASE } from './base';
 import { authFetch, getToken } from './client';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 export interface CreateProfileInput {
   fullName: string;

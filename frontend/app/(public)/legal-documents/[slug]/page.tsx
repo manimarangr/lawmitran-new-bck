@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import SiteFooter from '@/components/site/SiteFooter';
 import Icon from '@/components/ui/Icon';
 import DocumentWizard from '@/components/documents/DocumentWizard';
 import { fetchDocTemplate } from '@/lib/api/documents';
@@ -116,7 +115,6 @@ export default async function DocumentTemplatePage({ params }: { params: Promise
           <Link href="/lawyers" className="font-semibold text-gold hover:underline">talk to a verified lawyer</Link>.
         </p>
       </div>
-      <SiteFooter />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {videoLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoLd) }} />
