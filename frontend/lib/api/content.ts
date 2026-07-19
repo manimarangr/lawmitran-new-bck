@@ -2,6 +2,16 @@ import { authFetch } from './client';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
+/**
+ * Build-time safety: server-side fetches get a hard timeout so a slow or
+ * unreachable API fails fast (and the caller's fallback kicks in) instead of
+ * hanging Next.js static generation until its 60s export budget expires.
+ */
+const SERVER_FETCH_TIMEOUT_MS = 6000;
+function withTimeout(init?: RequestInit): RequestInit {
+  return { ...init, signal: AbortSignal.timeout(SERVER_FETCH_TIMEOUT_MS) };
+}
+
 // ─────────────────────────── types ───────────────────────────
 
 export type ContentType = 'GUIDE' | 'NEWS' | 'JUDGMENT' | 'NOTIFICATION' | 'FAQ';
@@ -153,9 +163,9 @@ export async function fetchPublicContent(
   query: PublicQuery = {},
   revalidate = 300,
 ): Promise<PublicContentList> {
-  const res = await fetch(`${API_BASE}/content${qs(query)}`, {
+  const res = await fetch(`${API_BASE}/content${qs(query)}`, withTimeout({
     next: { revalidate },
-  });
+  }));
   if (!res.ok) throw new Error(`content list failed: ${res.status}`);
   return res.json() as Promise<PublicContentList>;
 }
@@ -164,9 +174,9 @@ export async function fetchPublicContentBySlug(
   slug: string,
   revalidate = 300,
 ): Promise<PublicContent | null> {
-  const res = await fetch(`${API_BASE}/content/slug/${encodeURIComponent(slug)}`, {
+  const res = await fetch(`${API_BASE}/content/slug/${encodeURIComponent(slug)}`, withTimeout({
     next: { revalidate },
-  });
+  }));
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`content fetch failed: ${res.status}`);
   return res.json() as Promise<PublicContent>;
@@ -176,9 +186,9 @@ export async function fetchContentCategories(
   type?: ContentType,
   revalidate = 3600,
 ): Promise<ContentCategory[]> {
-  const res = await fetch(`${API_BASE}/content/categories${qs({ type })}`, {
+  const res = await fetch(`${API_BASE}/content/categories${qs({ type })}`, withTimeout({
     next: { revalidate },
-  });
+  }));
   if (!res.ok) throw new Error(`categories failed: ${res.status}`);
   return res.json() as Promise<ContentCategory[]>;
 }
