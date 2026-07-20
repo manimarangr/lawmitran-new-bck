@@ -1,6 +1,6 @@
 import { authFetch, getToken } from './client';
+import { API_BASE } from './base';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 export interface ChecklistItem {
   key: string;

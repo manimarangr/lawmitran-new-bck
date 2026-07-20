@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import SiteFooter from '@/components/site/SiteFooter';
 import Icon from '@/components/ui/Icon';
 import {
   guideCategories,
@@ -119,8 +118,6 @@ export default async function LegalGuidesPage() {
           </Link>
         </section>
       </div>
-
-      <SiteFooter />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
     </div>
   );

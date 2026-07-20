@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import SiteFooter from '@/components/site/SiteFooter';
 import Icon from '@/components/ui/Icon';
 import {
   getDocumentCategories,
@@ -147,7 +146,6 @@ export default async function LegalDocumentsPage() {
           provide legal advice.
         </p>
       </div>
-      <SiteFooter />
     </main>
   );
 }

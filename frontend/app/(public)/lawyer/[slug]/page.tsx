@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getLawyerBySlug } from '@/lib/api/seo';
 import Icon from '@/components/ui/Icon';
-import SiteFooter from '@/components/site/SiteFooter';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
@@ -299,7 +298,6 @@ export default async function LawyerProfilePage({ params }: Props) {
           endorsement or solicitation.
         </p>
       </section>
-      <SiteFooter />
     </main>
   );
 }
