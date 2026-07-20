@@ -2,9 +2,10 @@
 
 /**
  * The single site header, used by every layout (public, auth, dashboard).
- * Logged out  → marketing trust bar + public nav + Login / Sign Up.
- * Logged in   → role-based nav (client / lawyer / admin), notifications bell,
- *               and the account menu. No trust bar (it's visitor messaging).
+ * Trust bar is always shown; its right-hand links adapt (join pitches when
+ * signed out, useful destinations per role when signed in).
+ * Nav: public links when signed out, role-based links (client / lawyer / admin)
+ * plus notifications bell and account menu when signed in.
  */
 
 import Link from 'next/link';
@@ -118,10 +119,9 @@ export default function SiteHeader() {
 
   return (
     <>
-      {/* trust bar — visitors only */}
-      {!me && (
-        <div className="bg-navy text-[0.78125rem] text-slate-300">
-          <div className="mx-auto flex h-[2.375rem] max-w-[73.75rem] items-center justify-between px-5">
+      {/* trust bar — always visible, signed in or out */}
+      <div className="bg-navy text-[0.78125rem] text-slate-300">
+        <div className="mx-auto flex h-[2.375rem] max-w-[73.75rem] items-center justify-between px-5">
             <div className="flex items-center gap-5">
               <span className="font-semibold text-white">
                 <Icon name="circle-check" aria-hidden="true" className="mr-1.5 text-gold" />
@@ -137,12 +137,28 @@ export default function SiteHeader() {
               </span>
             </div>
             <div className="flex items-center gap-5">
-              <Link href="/signup?role=lawyer" className="hover:text-gold">For Lawyers</Link>
+              {/* Signed out → join pitches. Signed in → the equivalent destination
+                  for that role, so the bar is useful to lawyers and clients alike. */}
+              {!me ? (
+                <>
+                  <Link href="/signup?role=lawyer" className="hover:text-gold">For Lawyers</Link>
+                  <Link href="/signup" className="hover:text-gold">For Users</Link>
+                </>
+              ) : me.role === 'LAWYER' ? (
+                <>
+                  <Link href="/dashboard/lawyer" className="hover:text-gold">For Lawyers</Link>
+                  <Link href="/lawyers" className="hidden hover:text-gold sm:inline">Browse Lawyers</Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/lawyers" className="hover:text-gold">Find Lawyers</Link>
+                  <Link href="/legal-documents" className="hidden hover:text-gold sm:inline">Legal Documents</Link>
+                </>
+              )}
               <Link href="/legal-guides" className="hover:text-gold">Help Center</Link>
             </div>
-          </div>
         </div>
-      )}
+      </div>
 
       <header className="sticky top-0 z-50 border-b border-line bg-white/90 backdrop-blur-md print:hidden">
         <div className="mx-auto flex h-[4.625rem] max-w-[73.75rem] items-center justify-between px-5">

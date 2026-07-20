@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getToken } from '@/lib/api/client';
-import DashboardNav from '@/components/site/DashboardNav';
+import SiteHeader from '@/components/site/SiteHeader';
 import SiteFooter from '@/components/site/SiteFooter';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -30,7 +30,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 text-slate-800">
-      <DashboardNav />
+      <SiteHeader />
       <main id="main" className="flex-1">{children}</main>
       <SiteFooter />
     </div>
