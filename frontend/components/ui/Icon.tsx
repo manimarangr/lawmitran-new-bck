@@ -202,6 +202,38 @@ const PATHS: Record<string, React.ReactNode> = {
   ),
   plus: <path d="M12 5v14M5 12h14" />,
   pen: <path d="m14.5 5.5 4 4L8 20H4v-4L14.5 5.5zm2-2 1.6-1.6a1.4 1.4 0 0 1 2 0l2 2a1.4 1.4 0 0 1 0 2L20.5 7.5" />,
+  linkedin: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="4" fill="currentColor" stroke="none" />
+      <circle cx="7.5" cy="8" r="1.6" fill="#fff" stroke="none" />
+      <path d="M6.2 11h2.6v7H6.2v-7zm4.4 0h2.5v1c.6-.8 1.4-1.2 2.5-1.2 1.9 0 3 1.3 3 3.6V18h-2.6v-3.2c0-1-.4-1.7-1.3-1.7-.7 0-1.2.5-1.4 1-.1.2-.1.4-.1.7V18h-2.6v-7z" fill="#fff" stroke="none" />
+    </>
+  ),
+  facebook: (
+    <>
+      <circle cx="12" cy="12" r="9" fill="currentColor" stroke="none" />
+      <path d="M13.5 8.5h1.8V6.2h-2c-2 0-3 1.1-3 3v1.6H8.7v2.4h1.6V18h2.4v-4.8h1.8l.4-2.4h-2.2v-1.3c0-.6.2-1 1-1z" fill="#fff" stroke="none" />
+    </>
+  ),
+  instagram: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="12" r="3.4" fill="none" stroke="#fff" strokeWidth="1.6" />
+      <circle cx="16.6" cy="7.4" r="1.1" fill="#fff" stroke="none" />
+    </>
+  ),
+  youtube: (
+    <>
+      <rect x="2.5" y="5.5" width="19" height="13" rx="3.5" fill="currentColor" stroke="none" />
+      <path d="m10.2 9 5 3-5 3V9z" fill="#fff" stroke="none" />
+    </>
+  ),
+  "x-twitter": (
+    <>
+      <circle cx="12" cy="12" r="9" fill="currentColor" stroke="none" />
+      <path d="m8 8 8 8m0-8-8 8" stroke="#fff" strokeWidth="1.7" fill="none" strokeLinecap="round" />
+    </>
+  ),
   crown: <path d="m4 8 4 4 4-7 4 7 4-4-1.5 11h-13L4 8z" />,
   crosshairs: (
     <>

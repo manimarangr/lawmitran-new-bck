@@ -8,6 +8,7 @@ import { ReportModal } from '@/components/ReportModal';
 import Pagination from '@/components/ui/Pagination';
 import { RatingModal } from '@/components/RatingModal';
 import type { Lead, LeadStatus } from '@/types/lead';
+import Container from '@/components/ui/Container';
 
 const badge: Record<LeadStatus, string> = {
   NEW: 'bg-slate-100 text-slate-500',
@@ -34,7 +35,7 @@ export default function ClientDashboardPage() {
   });
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
+    <Container className="py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-navy">My requirements</h1>
@@ -131,6 +132,6 @@ export default function ClientDashboardPage() {
           onClose={() => setRateLead(null)}
         />
       )}
-    </div>
+    </Container>
   );
 }

@@ -64,11 +64,15 @@ export function parseTemplate(body: string): Node[] {
   let pos = 0; // char position in body
   let ti = 0; // token index
 
-  function parseNodes(stopTags: string[]): { nodes: Node[]; stopped: Token | null } {
+  function parseNodes(stopTags: string[]): {
+    nodes: Node[];
+    stopped: Token | null;
+  } {
     const nodes: Node[] = [];
     while (ti < tokens.length) {
       const t = tokens[ti];
-      if (t.index > pos) nodes.push({ kind: 'text', text: body.slice(pos, t.index) });
+      if (t.index > pos)
+        nodes.push({ kind: 'text', text: body.slice(pos, t.index) });
       if (t.tag && stopTags.includes(t.tag)) {
         // caller consumes this token
         return { nodes, stopped: t };
@@ -99,7 +103,13 @@ export function parseTemplate(body: string): Node[] {
         if (t.tag === '#if') {
           nodes.push({ kind: 'if', name: t.name ?? '', yes, no });
         } else {
-          nodes.push({ kind: 'eq', name: t.name ?? '', value: t.value ?? '', yes, no });
+          nodes.push({
+            kind: 'eq',
+            name: t.name ?? '',
+            value: t.value ?? '',
+            yes,
+            no,
+          });
         }
         continue;
       }
@@ -150,8 +160,9 @@ export function renderTemplate(
         out += evalNodes(truthy(input[n.name]) ? n.yes : n.no);
       } else {
         const match =
-          String(input[n.name] ?? '').trim().toLowerCase() ===
-          n.value.trim().toLowerCase();
+          String(input[n.name] ?? '')
+            .trim()
+            .toLowerCase() === n.value.trim().toLowerCase();
         out += evalNodes(match ? n.yes : n.no);
       }
     }

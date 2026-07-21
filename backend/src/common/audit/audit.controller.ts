@@ -13,7 +13,9 @@ export class AuditController {
   constructor(private prisma: PrismaService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Audit trail — ?q= matches action/summary/actor email' })
+  @ApiOperation({
+    summary: 'Audit trail — ?q= matches action/summary/actor email',
+  })
   async list(
     @Query('q') q?: string,
     @Query('page') page?: string,
@@ -26,7 +28,11 @@ export class AuditController {
             { action: { contains: query, mode: 'insensitive' } },
             { summary: { contains: query, mode: 'insensitive' } },
             { entityId: { contains: query, mode: 'insensitive' } },
-            { actor: { is: { email: { contains: query, mode: 'insensitive' } } } },
+            {
+              actor: {
+                is: { email: { contains: query, mode: 'insensitive' } },
+              },
+            },
           ],
         }
       : {};

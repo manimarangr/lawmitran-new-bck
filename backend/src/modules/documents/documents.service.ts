@@ -20,7 +20,15 @@ import { StampDutyService } from './stamp-duty.service';
 export interface TemplateField {
   name: string;
   label: string;
-  type?: 'text' | 'textarea' | 'date' | 'number' | 'select' | 'toggle' | 'checkbox' | 'state';
+  type?:
+    | 'text'
+    | 'textarea'
+    | 'date'
+    | 'number'
+    | 'select'
+    | 'toggle'
+    | 'checkbox'
+    | 'state';
   options?: string[];
   required?: boolean;
   placeholder?: string;
@@ -61,7 +69,9 @@ export class DocumentsService {
       orderBy: { name: 'asc' },
       include: {
         _count: {
-          select: { templates: { where: { status: TemplateStatus.PUBLISHED } } },
+          select: {
+            templates: { where: { status: TemplateStatus.PUBLISHED } },
+          },
         },
       },
     });
@@ -146,7 +156,9 @@ export class DocumentsService {
     return {
       title: template.title,
       previewText: truncated ? `${full.slice(0, PREVIEW_CHARS)}…` : full,
-      previewHtml: truncated ? `${fullHtml.slice(0, PREVIEW_CHARS * 2)}…` : fullHtml,
+      previewHtml: truncated
+        ? `${fullHtml.slice(0, PREVIEW_CHARS * 2)}…`
+        : fullHtml,
       truncated,
     };
   }
@@ -155,8 +167,12 @@ export class DocumentsService {
    * AI prefill (docs/12): extract guided-form values from the user's own words.
    * Settings-gated; extraction only — unknown fields stay empty. Returns {} on any failure.
    */
-  async prefill(idOrSlug: string, context: string): Promise<{ values: Record<string, string> }> {
-    if (!(await this.settings.getBool('AI_ENABLED', false))) return { values: {} };
+  async prefill(
+    idOrSlug: string,
+    context: string,
+  ): Promise<{ values: Record<string, string> }> {
+    if (!(await this.settings.getBool('AI_ENABLED', false)))
+      return { values: {} };
     const apiKey = await this.settings.get('AI_API_KEY');
     if (!apiKey) return { values: {} };
 
@@ -187,14 +203,18 @@ export class DocumentsService {
     );
     if (!raw) return { values: {} };
     try {
-      const parsed = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1)) as Record<
-        string,
-        unknown
-      >;
+      const parsed = JSON.parse(
+        raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1),
+      ) as Record<string, unknown>;
       const allowed = new Set(fields.map((f) => f.name));
       const values: Record<string, string> = {};
       for (const [k, v] of Object.entries(parsed)) {
-        if (allowed.has(k) && typeof v === 'string' && v.trim() && v.length < 300) {
+        if (
+          allowed.has(k) &&
+          typeof v === 'string' &&
+          v.trim() &&
+          v.length < 300
+        ) {
           values[k] = v.trim();
         }
       }
@@ -209,13 +229,23 @@ export class DocumentsService {
     idOrSlug: string,
     opts: { state?: string; declaredValue?: number },
   ) {
-    await assertFeature(this.settings, DOC_FLAGS.MARKETPLACE, 'Document marketplace', true);
+    await assertFeature(
+      this.settings,
+      DOC_FLAGS.MARKETPLACE,
+      'Document marketplace',
+      true,
+    );
     const template = await this.prisma.documentTemplate.findFirst({
       where: {
         status: TemplateStatus.PUBLISHED,
         OR: [{ id: idOrSlug }, { slug: idOrSlug }],
       },
-      select: { title: true, price: true, requiresStamp: true, stampBasis: true },
+      select: {
+        title: true,
+        price: true,
+        requiresStamp: true,
+        stampBasis: true,
+      },
     });
     if (!template) throw new NotFoundException('Document template not found');
 
@@ -250,7 +280,10 @@ export class DocumentsService {
       const required =
         f.type === 'checkbox' ? f.required === true : f.required !== false;
       const v = input?.[f.name];
-      if (required && (v === undefined || v === null || String(v).trim() === '')) {
+      if (
+        required &&
+        (v === undefined || v === null || String(v).trim() === '')
+      ) {
         throw new BadRequestException(`Please fill "${f.label}"`);
       }
     }
@@ -263,7 +296,12 @@ export class DocumentsService {
     input: Record<string, unknown>,
     opts: { state?: string; declaredValue?: number } = {},
   ) {
-    await assertFeature(this.settings, DOC_FLAGS.MARKETPLACE, 'Document marketplace', true);
+    await assertFeature(
+      this.settings,
+      DOC_FLAGS.MARKETPLACE,
+      'Document marketplace',
+      true,
+    );
     const template = await this.prisma.documentTemplate.findFirst({
       where: { id: templateId, status: TemplateStatus.PUBLISHED },
     });
@@ -283,7 +321,10 @@ export class DocumentsService {
         status: DocumentStatus.DRAFT,
       },
     });
-    const order = await this.razorpay.createOrder(amountPaise, `doc_${doc.id.slice(0, 30)}`);
+    const order = await this.razorpay.createOrder(
+      amountPaise,
+      `doc_${doc.id.slice(0, 30)}`,
+    );
     await this.prisma.customerDocument.update({
       where: { id: doc.id },
       data: { providerOrderId: order.id },
@@ -370,7 +411,9 @@ export class DocumentsService {
           data: { pdfUrl: key, status: DocumentStatus.GENERATED },
         });
       } catch (err) {
-        this.logger.warn(`PDF generation failed for ${doc.id}: ${(err as Error).message}`);
+        this.logger.warn(
+          `PDF generation failed for ${doc.id}: ${(err as Error).message}`,
+        );
       }
     }
 
@@ -387,7 +430,14 @@ export class DocumentsService {
         status: true,
         amount: true,
         createdAt: true,
-        template: { select: { title: true, slug: true, requiresStamp: true, stampBasis: true } },
+        template: {
+          select: {
+            title: true,
+            slug: true,
+            requiresStamp: true,
+            stampBasis: true,
+          },
+        },
       },
     });
   }
@@ -403,7 +453,14 @@ export class DocumentsService {
         createdAt: true,
         contentHtml: true,
         inputJson: true,
-        template: { select: { title: true, slug: true, requiresStamp: true, stampBasis: true } },
+        template: {
+          select: {
+            title: true,
+            slug: true,
+            requiresStamp: true,
+            stampBasis: true,
+          },
+        },
       },
     });
     if (!doc) throw new NotFoundException('Document not found');
@@ -414,7 +471,10 @@ export class DocumentsService {
   }
 
   /** Buyer: stream the document PDF (generate on demand if missing). */
-  async getPdf(userId: string, id: string): Promise<{ buffer: Buffer; filename: string }> {
+  async getPdf(
+    userId: string,
+    id: string,
+  ): Promise<{ buffer: Buffer; filename: string }> {
     await assertFeature(this.settings, DOC_FLAGS.PDF, 'PDF downloads');
     const doc = await this.prisma.customerDocument.findFirst({
       where: { id, userId },
@@ -505,12 +565,17 @@ export class DocumentsService {
     return category;
   }
 
-  async adminUpdateCategory(id: string, dto: { name?: string; description?: string }) {
+  async adminUpdateCategory(
+    id: string,
+    dto: { name?: string; description?: string },
+  ) {
     const category = await this.prisma.documentCategory.update({
       where: { id },
       data: {
         ...(dto.name ? { name: dto.name, slug: this.slugify(dto.name) } : {}),
-        ...(dto.description !== undefined ? { description: dto.description } : {}),
+        ...(dto.description !== undefined
+          ? { description: dto.description }
+          : {}),
       },
     });
     await this.audit.log('DOC_CATEGORY_UPDATED', {
@@ -535,7 +600,11 @@ export class DocumentsService {
         requiresStamp: true,
         updatedAt: true,
         category: { select: { id: true, name: true } },
-        _count: { select: { documents: { where: { status: { not: DocumentStatus.DRAFT } } } } },
+        _count: {
+          select: {
+            documents: { where: { status: { not: DocumentStatus.DRAFT } } },
+          },
+        },
       },
     });
   }
@@ -572,7 +641,7 @@ export class DocumentsService {
         requiresStamp: dto.requiresStamp ?? false,
         stampBasis: dto.stampBasis ?? null,
         videoUrl: dto.videoUrl ?? null,
-        schemaJson: (dto.schemaJson ?? { fields: [] }) as Prisma.InputJsonValue,
+        schemaJson: dto.schemaJson ?? { fields: [] },
         bodyTemplate: dto.bodyTemplate,
         status: TemplateStatus.DRAFT,
       },
@@ -600,16 +669,20 @@ export class DocumentsService {
       bodyTemplate: string;
     }>,
   ) {
-    const existing = await this.prisma.documentTemplate.findUnique({ where: { id } });
+    const existing = await this.prisma.documentTemplate.findUnique({
+      where: { id },
+    });
     if (!existing) throw new NotFoundException('Template not found');
 
     // Editing the content of a published template bumps the version —
     // already-purchased documents keep their frozen contentHtml snapshot.
     const contentChanged =
-      (dto.bodyTemplate !== undefined && dto.bodyTemplate !== existing.bodyTemplate) ||
+      (dto.bodyTemplate !== undefined &&
+        dto.bodyTemplate !== existing.bodyTemplate) ||
       (dto.schemaJson !== undefined &&
         JSON.stringify(dto.schemaJson) !== JSON.stringify(existing.schemaJson));
-    const bumpVersion = contentChanged && existing.status === TemplateStatus.PUBLISHED;
+    const bumpVersion =
+      contentChanged && existing.status === TemplateStatus.PUBLISHED;
 
     const template = await this.prisma.documentTemplate.update({
       where: { id },
@@ -619,13 +692,17 @@ export class DocumentsService {
         ...(dto.price !== undefined ? { price: dto.price } : {}),
         ...(dto.keywords ? { keywords: dto.keywords } : {}),
         ...(dto.language ? { language: dto.language } : {}),
-        ...(dto.requiresStamp !== undefined ? { requiresStamp: dto.requiresStamp } : {}),
+        ...(dto.requiresStamp !== undefined
+          ? { requiresStamp: dto.requiresStamp }
+          : {}),
         ...(dto.stampBasis !== undefined ? { stampBasis: dto.stampBasis } : {}),
         ...(dto.videoUrl !== undefined ? { videoUrl: dto.videoUrl } : {}),
         ...(dto.schemaJson !== undefined
           ? { schemaJson: dto.schemaJson as Prisma.InputJsonValue }
           : {}),
-        ...(dto.bodyTemplate !== undefined ? { bodyTemplate: dto.bodyTemplate } : {}),
+        ...(dto.bodyTemplate !== undefined
+          ? { bodyTemplate: dto.bodyTemplate }
+          : {}),
         ...(bumpVersion ? { version: { increment: 1 } } : {}),
       },
     });
@@ -634,14 +711,19 @@ export class DocumentsService {
       entityId: id,
       summary: `Updated template "${template.title}"${bumpVersion ? ` → v${template.version}` : ''}${dto.price !== undefined ? ` (price ₹${dto.price})` : ''}`,
       ...(dto.price !== undefined
-        ? { oldValue: { price: String(existing.price) }, newValue: { price: String(dto.price) } }
+        ? {
+            oldValue: { price: String(existing.price) },
+            newValue: { price: String(dto.price) },
+          }
         : {}),
     });
     return template;
   }
 
   async adminSetTemplateStatus(id: string, status: TemplateStatus) {
-    const existing = await this.prisma.documentTemplate.findUnique({ where: { id } });
+    const existing = await this.prisma.documentTemplate.findUnique({
+      where: { id },
+    });
     if (!existing) throw new NotFoundException('Template not found');
     const template = await this.prisma.documentTemplate.update({
       where: { id },

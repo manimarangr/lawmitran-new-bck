@@ -1,51 +1,21 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { APIProvider } from '@vis.gl/react-google-maps';
 import Link from 'next/link';
 import { FilterSidebar } from './FilterSidebar';
-import { LawyerMap } from './LawyerMap';
 import { LawyerCardList } from './LawyerCardList';
+import { DeepLinkOpener } from './DeepLinkOpener';
 import { LeadModal } from '@/components/LeadModal';
-import SiteFooter from '@/components/site/SiteFooter';
 import CityInput from '@/components/ui/CityInput';
+import Container from '@/components/ui/Container';
 import Icon from '@/components/ui/Icon';
 import { useLawyerSearchStore } from '@/stores/lawyerSearchStore';
-import { detectCity, getSavedCity, saveCity } from '@/lib/geo';
-import { PRACTICE_AREAS, normalizePracticeArea } from '@/lib/practice-areas';
+import { PRACTICE_AREAS } from '@/lib/practice-areas';
 
 const MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 
-/** Reads ?lawyer= (contact CTA deep links) and hero params (?city=&practiceArea=). */
-function DeepLinkOpener() {
-  const params = useSearchParams();
-  const { setLeadLawyerId, setFilters, filters } = useLawyerSearchStore();
-
-  useEffect(() => {
-    const lawyer = params.get('lawyer');
-    if (lawyer) setLeadLawyerId(lawyer);
-    const city = params.get('city') ?? undefined;
-    // Normalize loose values ("Property", "criminal") to the canonical seeded
-    // name — the search API matches practice area with exact equality.
-    const practiceArea = normalizePracticeArea(params.get('practiceArea'));
-    if (city || practiceArea) {
-      setFilters({ ...filters, ...(city ? { city } : {}), ...(practiceArea ? { practiceArea } : {}) });
-      if (city) saveCity(city);
-    } else if (!filters.city) {
-      // no explicit city → reuse the last detected/used one
-      const saved = getSavedCity();
-      if (saved) setFilters({ ...filters, city: saved });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params]);
-
-  return null;
-}
-
 export function LawyerSearchPage() {
   const { leadLawyerId, setLeadLawyerId, filters, setFilters } = useLawyerSearchStore();
-  const [view, setView] = useState<'list' | 'map'>('list');
   const [heroArea, setHeroArea] = useState('');
   const [heroCity, setHeroCity] = useState('');
 
@@ -68,42 +38,21 @@ export function LawyerSearchPage() {
     setFilters(next);
   }
 
-  // ---------- MAP VIEW (secondary) ----------
-  if (view === 'map' && MAPS_API_KEY) {
-    return (
-      <APIProvider apiKey={MAPS_API_KEY}>
-        <div className="flex h-[calc(100vh-74px)] overflow-hidden">
-          <FilterSidebar variant="rail" />
-          <main id="main" className="flex flex-1 flex-col overflow-hidden">
-            <div className="flex items-center justify-between border-b border-line bg-white px-4 py-2">
-              <p className="text-xs text-slate-500">Pan the map, then “Search this area”.</p>
-              <button
-                onClick={() => setView('list')}
-                className="rounded-xl border border-gray-200 px-3.5 py-1.5 text-xs font-semibold text-navy hover:border-gold"
-              >
-                <Icon name="sliders" aria-hidden="true" className="mr-1" /> List view
-              </button>
-            </div>
-            <div className="relative" style={{ height: '55%' }}>
-              <LawyerMap />
-            </div>
-            <div className="flex flex-col overflow-y-auto border-t border-line" style={{ height: '45%' }}>
-              <LawyerCardList />
-            </div>
-          </main>
-          {leadLawyerId && <LeadModal lawyerId={leadLawyerId} onClose={() => setLeadLawyerId(null)} />}
-          <Suspense><DeepLinkOpener /></Suspense>
-        </div>
-      </APIProvider>
-    );
-  }
+  // City/practice area carry over into the map route via the URL (in addition to
+  // the shared Zustand store, so a fresh load or shared link stays filtered too).
+  const mapHref = (() => {
+    const p = new URLSearchParams();
+    if (filters.city) p.set('city', filters.city);
+    if (filters.practiceArea) p.set('practiceArea', filters.practiceArea);
+    const qs = p.toString();
+    return qs ? `/lawyers/map?${qs}` : '/lawyers/map';
+  })();
 
-  // ---------- LIST VIEW (default, sample-ui style) ----------
   return (
     <main id="main">
       {/* light hero with search card */}
       <header className="hero-light py-10">
-        <div className="mx-auto max-w-6xl px-6">
+        <Container>
           <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-400">
             <Link href="/" className="hover:text-gold">Home</Link> <span className="mx-1">/</span> Find Lawyers
           </nav>
@@ -158,34 +107,31 @@ export function LawyerSearchPage() {
             >
               <Icon name="magnifying-glass" aria-hidden="true" /> Search
             </button>
+            {MAPS_API_KEY && (
+              <Link
+                href={mapHref}
+                className="m-1 flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-5 py-3 text-[15px] font-semibold text-navy transition hover:border-gold"
+              >
+                <Icon name="map-location-dot" aria-hidden="true" className="text-gold" /> Map
+              </Link>
+            )}
           </form>
-        </div>
+        </Container>
       </header>
 
       {/* filters + results */}
-      <div className="mx-auto max-w-6xl px-6 py-8">
+      <Container className="py-8">
         <div className="grid items-start gap-6 lg:grid-cols-4">
           <FilterSidebar variant="card" />
 
           <section aria-label="Search results" className="lg:col-span-3">
-            {MAPS_API_KEY && (
-              <div className="mb-4 flex justify-end">
-                <button
-                  onClick={() => setView('map')}
-                  className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-navy hover:border-gold"
-                >
-                  <Icon name="map-location-dot" aria-hidden="true" className="mr-1.5 text-gold" /> Map view
-                </button>
-              </div>
-            )}
             <LawyerCardList />
           </section>
         </div>
-      </div>
+      </Container>
 
       {leadLawyerId && <LeadModal lawyerId={leadLawyerId} onClose={() => setLeadLawyerId(null)} />}
       <Suspense><DeepLinkOpener /></Suspense>
-      <SiteFooter />
     </main>
   );
 }

@@ -63,13 +63,25 @@ export interface OfficePoint {
   lng: number;
 }
 
+/** Address parts resolved from a map point (reverse geocoding). */
+export interface ResolvedAddress {
+  addressLine: string;
+  pincode: string;
+  locality: string;
+  city: string;
+  label: string;
+}
+
 export default function OfficeMapPicker({
   value,
   onChange,
+  onAddressResolved,
   searchHint,
 }: {
   value: OfficePoint | null;
   onChange: (p: OfficePoint) => void;
+  /** Called whenever the pin moves and the address behind it is resolved. */
+  onAddressResolved?: (a: ResolvedAddress) => void;
   /** Appended to the address search to improve geocoding, e.g. the chosen city. */
   searchHint?: string;
 }) {
@@ -78,11 +90,51 @@ export default function OfficeMapPicker({
   const markerRef = useRef<LMarker | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const onAddressRef = useRef(onAddressResolved);
+  onAddressRef.current = onAddressResolved;
+  // Nominatim asks for <=1 req/sec — debounce pin moves before resolving.
+  const reverseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [address, setAddress] = useState('');
   const [busy, setBusy] = useState(false);
   const [mapError, setMapError] = useState('');
   const [notice, setNotice] = useState('');
+
+  /** lat/lng → address parts (OpenStreetMap Nominatim, same source as Locate). */
+  const reverseGeocode = useCallback((lat: number, lng: number) => {
+    if (!onAddressRef.current) return;
+    if (reverseTimer.current) clearTimeout(reverseTimer.current);
+    reverseTimer.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&lat=${lat}&lon=${lng}`,
+          { headers: { Accept: 'application/json' } },
+        );
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          display_name?: string;
+          address?: Record<string, string>;
+        };
+        const a = data.address ?? {};
+        const addressLine = [
+          a.house_number,
+          a.road ?? a.pedestrian ?? a.neighbourhood,
+          a.suburb ?? a.village ?? a.town,
+        ]
+          .filter(Boolean)
+          .join(', ');
+        onAddressRef.current?.({
+          addressLine,
+          pincode: a.postcode ?? '',
+          locality: a.suburb ?? a.neighbourhood ?? a.village ?? '',
+          city: a.city ?? a.town ?? a.state_district ?? '',
+          label: data.display_name ?? '',
+        });
+      } catch {
+        /* offline or rate-limited — the pin still works */
+      }
+    }, 600);
+  }, []);
 
   const place = useCallback((lat: number, lng: number, zoom = 15) => {
     const L = window.L;
@@ -95,12 +147,14 @@ export default function OfficeMapPicker({
       m.on('dragend', () => {
         const ll = m.getLatLng();
         onChangeRef.current({ lat: +ll.lat.toFixed(5), lng: +ll.lng.toFixed(5) });
+        reverseGeocode(ll.lat, ll.lng);
       });
       markerRef.current = m;
     }
     map.setView([lat, lng], zoom);
     onChangeRef.current({ lat: +lat.toFixed(5), lng: +lng.toFixed(5) });
-  }, []);
+    reverseGeocode(lat, lng);
+  }, [reverseGeocode]);
 
   useEffect(() => {
     let cancelled = false;

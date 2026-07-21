@@ -181,7 +181,9 @@ export class AuthService {
     code: string;
     rememberMe?: boolean;
   }) {
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
     if (!user || user.role !== Role.ADMIN) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -202,7 +204,11 @@ export class AuthService {
       where: { id: user.id },
       data: { adminOtpHash: null, adminOtpExpiresAt: null },
     });
-    const tokens = await this.issueTokens(user.id, user.role, dto.rememberMe ?? false);
+    const tokens = await this.issueTokens(
+      user.id,
+      user.role,
+      dto.rememberMe ?? false,
+    );
     await this.audit.log('ADMIN_LOGIN', {
       entityType: 'User',
       entityId: user.id,
@@ -219,7 +225,8 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({ where: { email } });
     const SAFE_RESPONSE = {
-      message: 'If an account with that email exists, a reset link has been sent.',
+      message:
+        'If an account with that email exists, a reset link has been sent.',
     };
 
     if (!user) return SAFE_RESPONSE;
@@ -231,10 +238,16 @@ export class AuthService {
 
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { passwordResetToken: tokenHash, passwordResetExpiresAt: expiresAt },
+      data: {
+        passwordResetToken: tokenHash,
+        passwordResetExpiresAt: expiresAt,
+      },
     });
 
-    const frontendOrigin = this.config.get<string>('FRONTEND_ORIGIN', 'http://localhost:3000');
+    const frontendOrigin = this.config.get<string>(
+      'FRONTEND_ORIGIN',
+      'http://localhost:3000',
+    );
     const resetUrl = `${frontendOrigin}/reset-password?token=${rawToken}`;
     await this.mail.sendPasswordResetEmail(email, resetUrl);
 
@@ -456,14 +469,17 @@ export class AuthService {
       throw new UnauthorizedException('Google sign-in could not be verified');
     }
     const issOk =
-      info.iss === 'accounts.google.com' || info.iss === 'https://accounts.google.com';
+      info.iss === 'accounts.google.com' ||
+      info.iss === 'https://accounts.google.com';
     const emailVerified =
       info.email_verified === true || info.email_verified === 'true';
     if (info.aud !== clientId || !issOk || !info.email || !emailVerified) {
       throw new UnauthorizedException('Google sign-in could not be verified');
     }
 
-    const user = await this.prisma.user.findUnique({ where: { email: info.email } });
+    const user = await this.prisma.user.findUnique({
+      where: { email: info.email },
+    });
     if (!user) {
       // New to LawMitran — hand back the verified identity for signup prefill.
       return {

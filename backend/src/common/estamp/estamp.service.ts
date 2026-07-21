@@ -6,12 +6,21 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { DeliveryType, DocumentStatus, EStampStatus, Prisma } from '@prisma/client';
+import {
+  DeliveryType,
+  DocumentStatus,
+  EStampStatus,
+  Prisma,
+} from '@prisma/client';
 import { NotifyService } from '../notify/notify.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SettingsService } from '../../modules/settings/settings.service';
 import { ESTAMP_PROVIDERS, EStampProvider } from './estamp-provider.interface';
-import { ESTAMP_TERMINAL, EStampStatusValue, EStampWebhookEvent } from './estamp.types';
+import {
+  ESTAMP_TERMINAL,
+  EStampStatusValue,
+  EStampWebhookEvent,
+} from './estamp.types';
 
 /**
  * Vendor-agnostic e-stamp orchestrator. Mirrors ESignService: persists
@@ -40,13 +49,23 @@ export class EStampService {
 
   private provider(name: string): EStampProvider {
     const p = this.registry.get(name);
-    if (!p) throw new BadRequestException(`e-stamp provider "${name}" is not implemented`);
+    if (!p)
+      throw new BadRequestException(
+        `e-stamp provider "${name}" is not implemented`,
+      );
     return p;
   }
 
-  private audit(existing: Prisma.JsonValue | null, event: string, status: string): Prisma.InputJsonValue {
+  private audit(
+    existing: Prisma.JsonValue | null,
+    event: string,
+    status: string,
+  ): Prisma.InputJsonValue {
     const prev = Array.isArray(existing) ? (existing as unknown[]) : [];
-    return [...prev, { at: new Date().toISOString(), event, status }] as Prisma.InputJsonValue;
+    return [
+      ...prev,
+      { at: new Date().toISOString(), event, status },
+    ] as Prisma.InputJsonValue;
   }
 
   async createForDocument(
@@ -86,21 +105,31 @@ export class EStampService {
     });
 
     try {
-      const res = await provider.create({ requestId: req.id, documentId, stateCode, amount });
+      const res = await provider.create({
+        requestId: req.id,
+        documentId,
+        stateCode,
+        amount,
+      });
       await this.prisma.eStampRequest.update({
         where: { id: req.id },
         data: {
           providerRequestId: res.providerRequestId,
-          status: res.status as unknown as EStampStatus,
+          status: res.status,
           auditLog: this.audit(req.auditLog, 'provider.create', res.status),
         },
       });
       return { id: req.id, provider: providerName, status: res.status, amount };
     } catch (err) {
-      this.logger.warn(`e-stamp create failed for ${req.id}: ${(err as Error).message}`);
+      this.logger.warn(
+        `e-stamp create failed for ${req.id}: ${(err as Error).message}`,
+      );
       await this.prisma.eStampRequest.update({
         where: { id: req.id },
-        data: { status: EStampStatus.FAILED, auditLog: this.audit(req.auditLog, 'provider.error', 'FAILED') },
+        data: {
+          status: EStampStatus.FAILED,
+          auditLog: this.audit(req.auditLog, 'provider.error', 'FAILED'),
+        },
       });
       throw new BadRequestException('Could not start the e-stamp request');
     }
@@ -138,23 +167,39 @@ export class EStampService {
     if (!event) return { ok: false, reason: 'unrecognized payload' };
 
     const req = await this.prisma.eStampRequest.findFirst({
-      where: { providerRequestId: event.providerRequestId, provider: providerName ?? undefined },
+      where: {
+        providerRequestId: event.providerRequestId,
+        provider: providerName ?? undefined,
+      },
     });
     if (!req) return { ok: false, reason: 'unknown request' };
-    if (ESTAMP_TERMINAL.includes(req.status as EStampStatusValue)) {
+    if (ESTAMP_TERMINAL.includes(req.status)) {
       return { ok: true, status: req.status, idempotent: true };
     }
-    await this.applyEvent(req.id, req.documentId, req.userId, req.auditLog, event);
+    await this.applyEvent(
+      req.id,
+      req.documentId,
+      req.userId,
+      req.auditLog,
+      event,
+    );
     return { ok: true, status: event.status };
   }
 
   async simulate(userId: string, id: string, outcome: string) {
-    const req = await this.prisma.eStampRequest.findFirst({ where: { id, userId } });
+    const req = await this.prisma.eStampRequest.findFirst({
+      where: { id, userId },
+    });
     if (!req) throw new NotFoundException('e-stamp request not found');
     if (req.provider !== 'mock') {
-      throw new BadRequestException('Simulation is only available for the mock provider');
+      throw new BadRequestException(
+        'Simulation is only available for the mock provider',
+      );
     }
-    return this.handleWebhook({ providerRequestId: req.providerRequestId, outcome });
+    return this.handleWebhook({
+      providerRequestId: req.providerRequestId,
+      outcome,
+    });
   }
 
   private async applyEvent(
@@ -167,7 +212,7 @@ export class EStampService {
     await this.prisma.eStampRequest.update({
       where: { id },
       data: {
-        status: event.status as unknown as EStampStatus,
+        status: event.status,
         certificateNumber: event.certificateNumber,
         certificateUrl: event.certificateUrl,
         callbackPayload: event as unknown as Prisma.InputJsonValue,

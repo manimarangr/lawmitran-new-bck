@@ -375,12 +375,24 @@ export class LawyersService {
     }
   }
 
+  /** Great-circle distance in km between two lat/lng points. */
+  private haversineKm(aLat: number, aLng: number, bLat: number, bLng: number): number {
+    const R = 6371;
+    const dLat = ((bLat - aLat) * Math.PI) / 180;
+    const dLng = ((bLng - aLng) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos((aLat * Math.PI) / 180) * Math.cos((bLat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
   async search(query: SearchLawyersDto) {
     const {
       city, practiceArea, courtId, locality, subscribed,
       experienceMin, experienceMax,
       language, gender, ratingMin, sort,
       swLat, swLng, neLat, neLng,
+      lat, lng, radiusKm,
       page, limit,
     } = query;
 
@@ -396,6 +408,29 @@ export class LawyersService {
       sort === 'rating' ? { ratingAvg: 'desc' }
       : sort === 'experience' ? { experienceYears: 'desc' }
       : { createdAt: 'desc' };
+
+    // Point-radius "near me" search — in-memory distance over a capped candidate
+    // set, same approach as the locality-ranking boost below (fine at current scale).
+    if (lat !== undefined && lng !== undefined) {
+      const all = await this.prisma.lawyer.findMany({ where, select: PUBLIC_SELECT, orderBy, take: 200 });
+      const scored = all
+        .map((l) => ({
+          l,
+          km:
+            l.latitude == null || l.longitude == null
+              ? null
+              : this.haversineKm(lat, lng, l.latitude, l.longitude),
+        }))
+        .filter((x) => radiusKm === undefined || (x.km !== null && x.km <= radiusKm));
+      if (sort === 'distance' || sort === undefined) {
+        scored.sort((a, b) => (a.km ?? Number.MAX_SAFE_INTEGER) - (b.km ?? Number.MAX_SAFE_INTEGER));
+      }
+      const total = scored.length;
+      const items = scored
+        .slice((page - 1) * limit, page * limit)
+        .map((x) => ({ ...x.l, distanceKm: x.km === null ? null : Math.round(x.km * 10) / 10 }));
+      return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
+    }
 
     // Locality = ranking boost, never a hard filter (a thin marketplace would
     // return zero results). Lawyers whose office is tagged with the locality
@@ -417,15 +452,7 @@ export class LawyersService {
         });
         const dist = (lat?: number | null, lng?: number | null) => {
           if (lat == null || lng == null) return Number.MAX_SAFE_INTEGER;
-          const R = 6371;
-          const dLat = ((lat - loc.lat) * Math.PI) / 180;
-          const dLng = ((lng - loc.lng) * Math.PI) / 180;
-          const a =
-            Math.sin(dLat / 2) ** 2 +
-            Math.cos((loc.lat * Math.PI) / 180) *
-              Math.cos((lat * Math.PI) / 180) *
-              Math.sin(dLng / 2) ** 2;
-          return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          return this.haversineKm(loc.lat, loc.lng, lat, lng);
         };
         const scored = all
           .map((l) => {
@@ -468,6 +495,7 @@ export class LawyersService {
       experienceMin, experienceMax,
       language, gender, ratingMin,
       swLat, swLng, neLat, neLng,
+      lat, lng, radiusKm,
     } = query;
 
     const where = this.buildWhere({
@@ -477,11 +505,20 @@ export class LawyersService {
       swLat, swLng, neLat, neLng,
     });
 
-    return this.prisma.lawyer.findMany({
-      where,
-      select: MARKER_SELECT,
-      take: 200,
-    });
+    const markers = await this.prisma.lawyer.findMany({ where, select: MARKER_SELECT, take: 200 });
+
+    if (lat === undefined || lng === undefined) return markers;
+
+    return markers
+      .map((m) => ({
+        ...m,
+        distanceKm:
+          m.latitude == null || m.longitude == null
+            ? null
+            : Math.round(this.haversineKm(lat, lng, m.latitude, m.longitude) * 10) / 10,
+      }))
+      .filter((m) => radiusKm === undefined || (m.distanceKm !== null && m.distanceKm <= radiusKm))
+      .sort((a, b) => (a.distanceKm ?? Number.MAX_SAFE_INTEGER) - (b.distanceKm ?? Number.MAX_SAFE_INTEGER));
   }
 
   private buildWhere(params: {

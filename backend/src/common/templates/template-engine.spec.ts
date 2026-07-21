@@ -2,12 +2,16 @@ import { renderTemplate } from './template-engine';
 
 describe('template engine', () => {
   it('substitutes plain variables', () => {
-    expect(renderTemplate('Hello {{name}}!', { name: 'Mani' })).toBe('Hello Mani!');
+    expect(renderTemplate('Hello {{name}}!', { name: 'Mani' })).toBe(
+      'Hello Mani!',
+    );
   });
 
   it('renders ruled blanks for missing/empty values', () => {
     expect(renderTemplate('Rent: {{rent}}', {})).toBe('Rent: __________');
-    expect(renderTemplate('Rent: {{rent}}', { rent: '  ' })).toBe('Rent: __________');
+    expect(renderTemplate('Rent: {{rent}}', { rent: '  ' })).toBe(
+      'Rent: __________',
+    );
   });
 
   it('handles {{#if}} truthy and falsy', () => {
@@ -20,10 +24,15 @@ describe('template engine', () => {
   });
 
   it('handles {{#eq}} with quoted and bare values, case-insensitive', () => {
-    const t = '{{#eq purpose "commercial"}}Commercial use{{else}}Residential use{{/eq}}';
+    const t =
+      '{{#eq purpose "commercial"}}Commercial use{{else}}Residential use{{/eq}}';
     expect(renderTemplate(t, { purpose: 'Commercial' })).toBe('Commercial use');
-    expect(renderTemplate(t, { purpose: 'residential' })).toBe('Residential use');
-    expect(renderTemplate('{{#eq n 11}}eleven{{/eq}}', { n: 11 })).toBe('eleven');
+    expect(renderTemplate(t, { purpose: 'residential' })).toBe(
+      'Residential use',
+    );
+    expect(renderTemplate('{{#eq n 11}}eleven{{/eq}}', { n: 11 })).toBe(
+      'eleven',
+    );
   });
 
   it('nests blocks', () => {

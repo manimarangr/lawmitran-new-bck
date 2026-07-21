@@ -14,7 +14,9 @@ export class RecaptchaService {
   async verify(token: string | undefined): Promise<boolean> {
     const enabled = await this.settings.getBool('RECAPTCHA_ENABLED', true);
     if (!enabled) {
-      this.logger.log('reCAPTCHA disabled in admin settings — skipping verification');
+      this.logger.log(
+        'reCAPTCHA disabled in admin settings — skipping verification',
+      );
       return true;
     }
     const secretKey = await this.settings.get('RECAPTCHA_SECRET_KEY');

@@ -2,7 +2,13 @@ import { Body, Controller, Get, Post, Put } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { ArrayMaxSize, IsArray, IsString, MaxLength, ValidateNested } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsString,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { AdminScopes } from '../../common/decorators/admin-scopes.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -39,13 +45,17 @@ export class SettingsController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Platform settings grouped by area (secrets masked)' })
+  @ApiOperation({
+    summary: 'Platform settings grouped by area (secrets masked)',
+  })
   list() {
     return this.settings.adminList();
   }
 
   @Put()
-  @ApiOperation({ summary: 'Save settings — empty value reverts to the env default' })
+  @ApiOperation({
+    summary: 'Save settings — empty value reverts to the env default',
+  })
   save(@Body() dto: SaveSettingsDto) {
     return this.settings.adminSave(dto.entries);
   }
@@ -58,7 +68,9 @@ export class SettingsController {
       select: { email: true },
     });
     const to =
-      me?.email ?? (await this.settings.get('SUPPORT_EMAIL')) ?? 'support@lawmitran.com';
+      me?.email ??
+      (await this.settings.get('SUPPORT_EMAIL')) ??
+      'support@lawmitran.com';
     await this.mail.sendSubscriptionReminder(
       to,
       'LawMitran test email',

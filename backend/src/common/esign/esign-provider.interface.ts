@@ -1,4 +1,8 @@
-import { ESignCreateInput, ESignCreateResult, ESignWebhookEvent } from './esign.types';
+import {
+  ESignCreateInput,
+  ESignCreateResult,
+  ESignWebhookEvent,
+} from './esign.types';
 
 /** DI token for the array of registered e-sign providers. */
 export const ESIGN_PROVIDERS = Symbol('ESIGN_PROVIDERS');

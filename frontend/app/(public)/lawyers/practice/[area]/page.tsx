@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getLawyers } from '@/lib/api/seo';
 import type { LawyerListItem } from '@/types/lawyer';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
@@ -59,7 +60,7 @@ export default async function PracticeHubPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
       <header className="hero-light py-10">
-        <div className="mx-auto max-w-6xl px-6">
+        <Container>
           <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-400">
             <Link href="/" className="hover:text-gold">Home</Link> /{' '}
             <Link href="/lawyers" className="hover:text-gold">Lawyers</Link> /{' '}
@@ -71,10 +72,10 @@ export default async function PracticeHubPage({ params }: Props) {
             compare experience and client ratings, and submit your requirement free — the lawyer
             contacts you directly.
           </p>
-        </div>
+        </Container>
       </header>
 
-      <div className="mx-auto max-w-6xl px-6 py-10">
+      <Container className="py-10">
         {/* city grid */}
         <section aria-labelledby="city-heading">
           <h2 id="city-heading" className="mb-4 text-xl font-extrabold text-navy">
@@ -153,7 +154,7 @@ export default async function PracticeHubPage({ params }: Props) {
           LawMitran is an information platform, not a law firm. Listings are informational and not an
           endorsement or solicitation.
         </p>
-      </div>
+      </Container>
     </main>
   );
 }

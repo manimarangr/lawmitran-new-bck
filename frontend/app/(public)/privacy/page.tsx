@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Container from '@/components/ui/Container';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
@@ -19,8 +20,8 @@ function P({ children }: { children: React.ReactNode }) {
 
 export default function PrivacyPage() {
   return (
-    <div>
-      <div className="mx-auto max-w-4xl px-6 py-10">
+    <Container className="py-10">
+      <div className="mx-auto max-w-4xl">
         <nav aria-label="Breadcrumb" className="mb-4 text-xs text-slate-400">
           <Link href="/" className="hover:text-gold">Home</Link> /{' '}
           <span className="text-slate-500">Privacy Policy</span>
@@ -90,6 +91,6 @@ export default function PrivacyPage() {
           Platform. Continued use after an update constitutes acceptance.
         </P>
       </div>
-    </div>
+    </Container>
   );
 }

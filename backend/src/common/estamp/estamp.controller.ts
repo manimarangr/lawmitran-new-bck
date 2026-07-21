@@ -11,7 +11,9 @@ export class EStampController {
   constructor(private readonly estamp: EStampService) {}
 
   @Post('documents/:id/estamp')
-  @ApiOperation({ summary: 'Start an e-stamp request for a document (provider-agnostic)' })
+  @ApiOperation({
+    summary: 'Start an e-stamp request for a document (provider-agnostic)',
+  })
   start(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
@@ -31,7 +33,9 @@ export class EStampController {
 
   @Public()
   @Post('webhooks/estamp')
-  @ApiOperation({ summary: 'Generic e-stamp webhook; dispatched to the owning provider' })
+  @ApiOperation({
+    summary: 'Generic e-stamp webhook; dispatched to the owning provider',
+  })
   webhook(@Body() body: unknown) {
     return this.estamp.handleWebhook(body);
   }

@@ -11,6 +11,7 @@ import {
 } from '@/lib/api/property';
 import CityInput from '@/components/ui/CityInput';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 
 const STATES = ['Karnataka', 'Tamil Nadu', 'Andhra Pradesh', 'Telangana', 'Kerala', 'Maharashtra', 'Delhi', 'Other'];
 
@@ -41,7 +42,7 @@ export default function PropertyCasesPage() {
   const cases = casesQ.data ?? [];
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
+    <Container className="py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-navy">Property document check</h1>
@@ -132,6 +133,6 @@ export default function PropertyCasesPage() {
           </div>
         </div>
       )}
-    </div>
+    </Container>
   );
 }

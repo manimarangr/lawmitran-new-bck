@@ -1,7 +1,15 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import type { Request } from 'express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ArrayMaxSize, IsArray, IsIn, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsIn,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { Role } from '@prisma/client';
 import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -98,7 +106,9 @@ export class AiIntakeController {
 
   @Roles(Role.ADMIN)
   @Get('admin/insights')
-  @ApiOperation({ summary: 'Demand intelligence — 30d question volume by topic + KB gaps' })
+  @ApiOperation({
+    summary: 'Demand intelligence — 30d question volume by topic + KB gaps',
+  })
   adminInsights() {
     return this.aiIntakeService.adminInsights();
   }

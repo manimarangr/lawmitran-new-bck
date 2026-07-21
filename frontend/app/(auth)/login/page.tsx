@@ -10,6 +10,8 @@ import { login, loginTwoFa } from '@/lib/api/auth';
 import Icon from '@/components/ui/Icon';
 import Captcha, { type CaptchaHandle } from '@/components/ui/Captcha';
 import GoogleSignIn from '@/components/auth/GoogleSignIn';
+import AuthShell from '@/components/auth/AuthShell';
+import DefaultAuthAside from '@/components/auth/DefaultAuthAside';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -238,7 +240,7 @@ function LoginForm() {
 
       <p className="mt-8 text-center text-sm text-slate-500">
         New to LawMitran?{' '}
-        <Link href="/signup" className="font-bold text-gold hover:underline">
+        <Link href="/signup/client" className="font-bold text-gold hover:underline">
           Create an account
         </Link>
       </p>
@@ -257,8 +259,10 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
+    <AuthShell aside={<DefaultAuthAside />} showAsideOnMobile={false}>
+      <Suspense>
+        <LoginForm />
+      </Suspense>
+    </AuthShell>
   );
 }

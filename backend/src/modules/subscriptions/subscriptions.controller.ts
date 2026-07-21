@@ -107,20 +107,31 @@ export class SubscriptionsController {
   @Roles(Role.ADMIN)
   @AdminScopes(AdminRole.FINANCE)
   @Get('admin/payments')
-  @ApiOperation({ summary: 'All transactions — ?status=PAID|FAILED|CREATED|ALL, ?q= lawyer/order id' })
+  @ApiOperation({
+    summary:
+      'All transactions — ?status=PAID|FAILED|CREATED|ALL, ?q= lawyer/order id',
+  })
   adminListPayments(
     @Query('status') status?: string,
     @Query('q') q?: string,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
   ) {
-    return this.subscriptionsService.adminListPayments(status, q, page, pageSize);
+    return this.subscriptionsService.adminListPayments(
+      status,
+      q,
+      page,
+      pageSize,
+    );
   }
 
   @Roles(Role.ADMIN)
   @AdminScopes(AdminRole.FINANCE)
   @Get('admin/payments/:id/invoice')
-  @ApiOperation({ summary: 'GST invoice for a paid transaction (assigns the number on first call)' })
+  @ApiOperation({
+    summary:
+      'GST invoice for a paid transaction (assigns the number on first call)',
+  })
   adminGetInvoice(@Param('id') id: string) {
     return this.subscriptionsService.adminGetInvoice(id);
   }
@@ -128,13 +139,20 @@ export class SubscriptionsController {
   @Roles(Role.ADMIN)
   @AdminScopes(AdminRole.FINANCE)
   @Post('admin/payments/:id/mark-paid')
-  @ApiOperation({ summary: 'Manual reconcile — mark a stuck/failed payment as paid and activate the plan' })
+  @ApiOperation({
+    summary:
+      'Manual reconcile — mark a stuck/failed payment as paid and activate the plan',
+  })
   adminMarkPaymentPaid(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
     @Body() body: { note?: string },
   ) {
-    return this.subscriptionsService.adminMarkPaymentPaid(user.userId, id, body?.note);
+    return this.subscriptionsService.adminMarkPaymentPaid(
+      user.userId,
+      id,
+      body?.note,
+    );
   }
 
   @Get('admin/plans')
@@ -239,7 +257,9 @@ export class SubscriptionsController {
   @Roles(Role.ADMIN)
   @AdminScopes(AdminRole.FINANCE)
   @Delete('admin/offers/:id')
-  @ApiOperation({ summary: 'Delete an offer (past payments keep their snapshot)' })
+  @ApiOperation({
+    summary: 'Delete an offer (past payments keep their snapshot)',
+  })
   deleteOffer(@Param('id') id: string) {
     return this.subscriptionsService.deleteOffer(id);
   }

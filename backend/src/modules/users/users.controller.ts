@@ -34,7 +34,9 @@ export class UsersController {
   // ---------- Settings ----------
 
   @Patch('me/password')
-  @ApiOperation({ summary: 'Change password (verifies current; revokes other sessions)' })
+  @ApiOperation({
+    summary: 'Change password (verifies current; revokes other sessions)',
+  })
   changePassword(
     @CurrentUser() user: CurrentUserPayload,
     @Body() dto: ChangePasswordDto,
@@ -43,7 +45,9 @@ export class UsersController {
   }
 
   @Post('me/mobile/change')
-  @ApiOperation({ summary: 'Request a mobile-number change (sends OTP to the new number)' })
+  @ApiOperation({
+    summary: 'Request a mobile-number change (sends OTP to the new number)',
+  })
   requestMobileChange(
     @CurrentUser() user: CurrentUserPayload,
     @Body() dto: ChangeMobileDto,
@@ -76,7 +80,9 @@ export class UsersController {
   }
 
   @Delete('me')
-  @ApiOperation({ summary: 'Delete my account (soft delete; records retained)' })
+  @ApiOperation({
+    summary: 'Delete my account (soft delete; records retained)',
+  })
   deleteMe(@CurrentUser() user: CurrentUserPayload) {
     return this.usersService.deleteAccount(user.userId);
   }
@@ -97,10 +103,7 @@ export class UsersController {
 
   @Patch('me/notifications/:id/read')
   @ApiOperation({ summary: 'Mark one notification read' })
-  markRead(
-    @CurrentUser() user: CurrentUserPayload,
-    @Param('id') id: string,
-  ) {
+  markRead(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
     return this.usersService.markNotificationRead(user.userId, id);
   }
 }

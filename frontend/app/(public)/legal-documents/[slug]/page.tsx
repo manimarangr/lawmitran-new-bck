@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 import DocumentWizard from '@/components/documents/DocumentWizard';
 import { fetchDocTemplate } from '@/lib/api/documents';
 
@@ -56,7 +57,7 @@ export default async function DocumentTemplatePage({ params }: { params: Promise
   return (
     <main id="main">
       <header className="hero-light py-10">
-        <div className="mx-auto max-w-7xl px-6">
+        <Container>
           <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-400">
             <Link href="/" className="hover:text-gold">Home</Link> <span className="mx-1">/</span>
             <Link href="/legal-documents" className="hover:text-gold">Legal Documents</Link> <span className="mx-1">/</span>
@@ -74,10 +75,10 @@ export default async function DocumentTemplatePage({ params }: { params: Promise
               receive the draft; e-stamping is done separately per your state&apos;s rules.
             </p>
           )}
-        </div>
+        </Container>
       </header>
 
-      <div className="mx-auto max-w-7xl px-6 py-10">
+      <Container className="py-10">
         {t.videoUrl && (
           <section aria-label="How-to video" className="mx-auto mb-8 max-w-3xl">
             <h2 className="mb-3 text-sm font-extrabold uppercase tracking-wide text-navy">
@@ -114,7 +115,7 @@ export default async function DocumentTemplatePage({ params }: { params: Promise
           is not a law firm. For anything unusual,{' '}
           <Link href="/lawyers" className="font-semibold text-gold hover:underline">talk to a verified lawyer</Link>.
         </p>
-      </div>
+      </Container>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {videoLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoLd) }} />

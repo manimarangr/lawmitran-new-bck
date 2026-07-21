@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 import { API_BASE } from '@/lib/api/base';
 
 export const metadata: Metadata = {
@@ -28,7 +29,8 @@ async function getOfficer(): Promise<{ name: string | null; email: string }> {
 export default async function GrievancePage() {
   const officer = await getOfficer();
   return (
-    <div className="mx-auto max-w-4xl px-6 py-12">
+    <Container className="py-12">
+    <div className="mx-auto max-w-4xl">
       <h1 className="text-3xl font-extrabold text-navy">Grievance Redressal</h1>
       <p className="mt-2 text-sm text-slate-500">
         Published in compliance with the Information Technology (Intermediary Guidelines and
@@ -64,5 +66,6 @@ export default async function GrievancePage() {
         </p>
       </section>
     </div>
+    </Container>
   );
 }

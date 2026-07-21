@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { fetchMyDocument, downloadMyDocumentPdf } from '@/lib/api/documents';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 
 export default function MyDocumentPage() {
   const { id } = useParams<{ id: string }>();
@@ -15,7 +16,7 @@ export default function MyDocumentPage() {
   const [dlErr, setDlErr] = useState('');
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
+    <Container className="py-8">
       <div className="mb-5 flex items-center justify-between print:hidden">
         <Link href="/dashboard/documents" className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:border-gold hover:text-navy">
           <Icon name="chevron-left" aria-hidden="true" className="mr-1 text-xs" /> My documents
@@ -81,6 +82,6 @@ export default function MyDocumentPage() {
           </p>
         </article>
       )}
-    </div>
+    </Container>
   );
 }

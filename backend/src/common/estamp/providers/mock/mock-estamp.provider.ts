@@ -25,7 +25,10 @@ export class MockEStampProvider implements EStampProvider {
   }
 
   parseWebhook(payload: unknown): EStampWebhookEvent | null {
-    const p = payload as { providerRequestId?: string; outcome?: string } | null;
+    const p = payload as {
+      providerRequestId?: string;
+      outcome?: string;
+    } | null;
     if (!p?.providerRequestId) return null;
     const map: Record<string, EStampStatusValue> = {
       stamped: 'STAMPED',

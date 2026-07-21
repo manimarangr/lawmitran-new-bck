@@ -15,8 +15,19 @@ import { Type } from 'class-transformer';
 // Keep string unions in sync with the Prisma enums. Using @IsIn (rather than
 // importing the enum) avoids a hard compile dependency on the generated client
 // in DTOs and mirrors the documents module convention.
-export const CONTENT_TYPES = ['GUIDE', 'NEWS', 'JUDGMENT', 'NOTIFICATION', 'FAQ'] as const;
-export const CONTENT_STATUSES = ['DRAFT', 'IN_REVIEW', 'PUBLISHED', 'ARCHIVED'] as const;
+export const CONTENT_TYPES = [
+  'GUIDE',
+  'NEWS',
+  'JUDGMENT',
+  'NOTIFICATION',
+  'FAQ',
+] as const;
+export const CONTENT_STATUSES = [
+  'DRAFT',
+  'IN_REVIEW',
+  'PUBLISHED',
+  'ARCHIVED',
+] as const;
 // Dashboard buckets. SCHEDULED is derived (PUBLISHED with a future publishedAt),
 // so it lives here rather than in the ContentStatus enum.
 export const BUCKETS = [
@@ -36,7 +47,7 @@ export const REVIEW_STATES = [
 // ---- public query ----
 export class PublicContentQueryDto {
   @IsOptional()
-  @IsIn(CONTENT_TYPES as unknown as string[])
+  @IsIn(CONTENT_TYPES)
   type?: string;
 
   @IsOptional()
@@ -73,17 +84,17 @@ export class PublicContentQueryDto {
 // ---- admin query ----
 export class AdminContentQueryDto extends PublicContentQueryDto {
   @IsOptional()
-  @IsIn(CONTENT_STATUSES as unknown as string[])
+  @IsIn(CONTENT_STATUSES)
   status?: string;
 
   @IsOptional()
-  @IsIn(BUCKETS as unknown as string[])
+  @IsIn(BUCKETS)
   bucket?: string;
 }
 
 // ---- create / update ----
 export class ContentCreateDto {
-  @IsIn(CONTENT_TYPES as unknown as string[])
+  @IsIn(CONTENT_TYPES)
   type: string;
 
   @IsString()
@@ -126,20 +137,28 @@ export class ContentCreateDto {
   @IsOptional() @IsArray() @IsString({ each: true }) tags?: string[];
   @IsOptional() @IsArray() @IsString({ each: true }) practiceAreas?: string[];
   @IsOptional() @IsArray() @IsString({ each: true }) states?: string[];
-  @IsOptional() @IsArray() @IsString({ each: true }) relatedDocumentIds?: string[];
-  @IsOptional() @IsArray() @IsString({ each: true }) relatedLawyerIds?: string[];
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  relatedDocumentIds?: string[];
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  relatedLawyerIds?: string[];
 
   // editorial / review
   @IsOptional() @IsString() @MaxLength(120) authorName?: string;
   @IsOptional() @IsString() reviewerId?: string;
-  @IsOptional() @IsIn(REVIEW_STATES as unknown as string[]) reviewState?: string;
+  @IsOptional()
+  @IsIn(REVIEW_STATES)
+  reviewState?: string;
 
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) readMinutes?: number;
 }
 
 // PATCH — every field optional; type/slug editable too.
 export class ContentUpdateDto {
-  @IsOptional() @IsIn(CONTENT_TYPES as unknown as string[]) type?: string;
+  @IsOptional() @IsIn(CONTENT_TYPES) type?: string;
   @IsOptional() @IsString() @MinLength(3) @MaxLength(160) title?: string;
   @IsOptional() @IsString() @MaxLength(200) slug?: string;
   @IsOptional() @IsString() @MaxLength(300) excerpt?: string;
@@ -156,11 +175,19 @@ export class ContentUpdateDto {
   @IsOptional() @IsArray() @IsString({ each: true }) tags?: string[];
   @IsOptional() @IsArray() @IsString({ each: true }) practiceAreas?: string[];
   @IsOptional() @IsArray() @IsString({ each: true }) states?: string[];
-  @IsOptional() @IsArray() @IsString({ each: true }) relatedDocumentIds?: string[];
-  @IsOptional() @IsArray() @IsString({ each: true }) relatedLawyerIds?: string[];
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  relatedDocumentIds?: string[];
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  relatedLawyerIds?: string[];
   @IsOptional() @IsString() @MaxLength(120) authorName?: string;
   @IsOptional() @IsString() reviewerId?: string;
-  @IsOptional() @IsIn(REVIEW_STATES as unknown as string[]) reviewState?: string;
+  @IsOptional()
+  @IsIn(REVIEW_STATES)
+  reviewState?: string;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) readMinutes?: number;
   @IsOptional() @IsString() @MaxLength(300) revisionNote?: string;
 }
@@ -168,7 +195,7 @@ export class ContentUpdateDto {
 // Workflow transition. `publishedAt` (ISO) lets an admin schedule: set a future
 // date with status PUBLISHED and the item stays hidden until then.
 export class SetContentStatusDto {
-  @IsIn(CONTENT_STATUSES as unknown as string[])
+  @IsIn(CONTENT_STATUSES)
   status: string;
 
   @IsOptional()
@@ -201,7 +228,7 @@ export class ReviewerUpdateDto {
 
 // ---- category ----
 export class ContentCategoryDto {
-  @IsIn(CONTENT_TYPES as unknown as string[]) type: string;
+  @IsIn(CONTENT_TYPES) type: string;
   @IsString() @MinLength(2) @MaxLength(80) slug: string;
   @IsString() @MinLength(2) @MaxLength(80) name: string;
   @IsOptional() @IsString() @MaxLength(300) description?: string;

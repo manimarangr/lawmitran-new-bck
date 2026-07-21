@@ -27,6 +27,25 @@ const CITY_ALIASES: Record<string, string> = {
 };
 
 const nextConfig: NextConfig = {
+  images: {
+    // Local dev serves profile/office photos straight from MinIO on this
+    // origin (S3_PUBLIC_URL is unset locally — see backend storage.service.ts).
+    // Deployed envs proxy storage same-origin under /storage (docker/nginx/nginx.conf),
+    // so no remote pattern is needed there.
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "9000",
+        pathname: "/lawmitran-documents/**",
+      },
+    ],
+    // `next start`'s image optimizer refuses upstream hosts that resolve to a
+    // loopback/private IP by default (SSRF guard) — "localhost" always does,
+    // so local MinIO needs this explicit opt-in. Only affects the one host/path
+    // allow-listed above; deployed envs never hit this path (same-origin /storage).
+    dangerouslyAllowLocalIP: true,
+  },
   async redirects() {
     return [
       // /bengaluru → /lawyers/bengaluru

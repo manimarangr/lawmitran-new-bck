@@ -75,14 +75,19 @@ export class UsersService {
 
     const passwordHash = await bcrypt.hash(dto.newPassword, 12);
     await this.prisma.$transaction([
-      this.prisma.user.update({ where: { id: userId }, data: { passwordHash } }),
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash },
+      }),
       // sign out other sessions
       this.prisma.refreshToken.updateMany({
         where: { userId, revoked: false },
         data: { revoked: true },
       }),
     ]);
-    return { message: 'Password updated. Please sign in again on other devices.' };
+    return {
+      message: 'Password updated. Please sign in again on other devices.',
+    };
   }
 
   /** Step 1 of change-mobile: send an OTP to the NEW number. */
@@ -96,7 +101,8 @@ export class UsersService {
       where: { mobile: newMobile },
       select: { id: true },
     });
-    if (taken) throw new ConflictException('This mobile number is already in use');
+    if (taken)
+      throw new ConflictException('This mobile number is already in use');
 
     if (user.mobileOtpLastSentAt) {
       const elapsed = (Date.now() - user.mobileOtpLastSentAt.getTime()) / 1000;
@@ -130,9 +136,15 @@ export class UsersService {
       throw new BadRequestException('No mobile change in progress');
     }
     if (user.mobileOtpLockedUntil && user.mobileOtpLockedUntil > new Date()) {
-      throw new ForbiddenException('Too many attempts. Request a new code shortly.');
+      throw new ForbiddenException(
+        'Too many attempts. Request a new code shortly.',
+      );
     }
-    if (!user.mobileOtpHash || !user.mobileOtpExpiresAt || user.mobileOtpExpiresAt < new Date()) {
+    if (
+      !user.mobileOtpHash ||
+      !user.mobileOtpExpiresAt ||
+      user.mobileOtpExpiresAt < new Date()
+    ) {
       throw new BadRequestException('Invalid or expired OTP code');
     }
 
@@ -143,7 +155,9 @@ export class UsersService {
         where: { id: userId },
         data: {
           mobileOtpAttempts: attempts,
-          mobileOtpLockedUntil: lock ? new Date(Date.now() + OTP_LOCK_MINUTES * 60_000) : null,
+          mobileOtpLockedUntil: lock
+            ? new Date(Date.now() + OTP_LOCK_MINUTES * 60_000)
+            : null,
           ...(lock ? { mobileOtpHash: null, mobileOtpExpiresAt: null } : {}),
         },
       });
@@ -168,13 +182,20 @@ export class UsersService {
   async uploadAvatar(userId: string, file?: Express.Multer.File) {
     if (!file) throw new BadRequestException('No image uploaded');
     if (!file.mimetype?.startsWith('image/')) {
-      throw new BadRequestException('Profile picture must be an image (JPG/PNG/WebP)');
+      throw new BadRequestException(
+        'Profile picture must be an image (JPG/PNG/WebP)',
+      );
     }
     if (file.size > 2 * 1024 * 1024) {
-      throw new BadRequestException('Photo is too large — maximum size is 2 MB');
+      throw new BadRequestException(
+        'Photo is too large — maximum size is 2 MB',
+      );
     }
     const avatarUrl = await this.storage.upload(file, 'avatars');
-    await this.prisma.user.update({ where: { id: userId }, data: { avatarUrl } });
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+    });
     return { avatarUrl };
   }
 
@@ -205,7 +226,8 @@ export class UsersService {
 
   async markNotificationRead(userId: string, id: string) {
     const n = await this.prisma.notification.findUnique({ where: { id } });
-    if (!n || n.userId !== userId) throw new ForbiddenException('Not your notification');
+    if (!n || n.userId !== userId)
+      throw new ForbiddenException('Not your notification');
     return this.prisma.notification.update({
       where: { id },
       data: { readAt: new Date() },
@@ -277,7 +299,9 @@ export class UsersService {
     const [signups, otpVerified, submitted, approved, subscribed] =
       await this.prisma.$transaction([
         this.prisma.user.count({ where: { role: Role.LAWYER } }),
-        this.prisma.user.count({ where: { role: Role.LAWYER, mobileVerified: true } }),
+        this.prisma.user.count({
+          where: { role: Role.LAWYER, mobileVerified: true },
+        }),
         this.prisma.lawyer.count(),
         this.prisma.lawyer.count({
           where: { verificationStatus: VerificationStatus.APPROVED },
@@ -483,7 +507,7 @@ export class UsersService {
         email: dto.email,
         mobile: dto.mobile,
         passwordHash,
-        role: dto.role as Role,
+        role: dto.role,
         ...(dto.role === 'ADMIN'
           ? { adminRole: (dto.adminRole ?? 'OPS') as never }
           : {}),
@@ -491,7 +515,15 @@ export class UsersService {
         emailVerified: true,
         mobileVerified: true,
       },
-      select: { id: true, email: true, mobile: true, fullName: true, role: true, status: true, createdAt: true },
+      select: {
+        id: true,
+        email: true,
+        mobile: true,
+        fullName: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
     });
     await this.audit.log('USER_CREATED', {
       entityType: 'User',
@@ -514,12 +546,20 @@ export class UsersService {
       throw new ForbiddenException('Admin accounts cannot be edited here');
     }
     if (dto.email && dto.email !== user.email) {
-      const taken = await this.prisma.user.findUnique({ where: { email: dto.email }, select: { id: true } });
-      if (taken) throw new ConflictException('This email is already registered');
+      const taken = await this.prisma.user.findUnique({
+        where: { email: dto.email },
+        select: { id: true },
+      });
+      if (taken)
+        throw new ConflictException('This email is already registered');
     }
     if (dto.mobile && dto.mobile !== user.mobile) {
-      const taken = await this.prisma.user.findUnique({ where: { mobile: dto.mobile }, select: { id: true } });
-      if (taken) throw new ConflictException('This mobile number is already registered');
+      const taken = await this.prisma.user.findUnique({
+        where: { mobile: dto.mobile },
+        select: { id: true },
+      });
+      if (taken)
+        throw new ConflictException('This mobile number is already registered');
     }
     const updated = await this.prisma.user.update({
       where: { id },
@@ -528,14 +568,30 @@ export class UsersService {
         ...(dto.email !== undefined ? { email: dto.email } : {}),
         ...(dto.mobile !== undefined ? { mobile: dto.mobile } : {}),
       },
-      select: { id: true, email: true, mobile: true, fullName: true, role: true, status: true, createdAt: true },
+      select: {
+        id: true,
+        email: true,
+        mobile: true,
+        fullName: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
     });
     await this.audit.log('USER_UPDATED', {
       entityType: 'User',
       entityId: id,
       summary: `Edited account ${user.email}`,
-      oldValue: { fullName: user.fullName, email: user.email, mobile: user.mobile },
-      newValue: { fullName: updated.fullName, email: updated.email, mobile: updated.mobile },
+      oldValue: {
+        fullName: user.fullName,
+        email: user.email,
+        mobile: user.mobile,
+      },
+      newValue: {
+        fullName: updated.fullName,
+        email: updated.email,
+        mobile: updated.mobile,
+      },
     });
     return updated;
   }
@@ -545,7 +601,9 @@ export class UsersService {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
     if (user.role === Role.ADMIN) {
-      throw new ForbiddenException('Reset admin passwords via the environment/seed');
+      throw new ForbiddenException(
+        'Reset admin passwords via the environment/seed',
+      );
     }
     const tempPassword = this.generateTempPassword();
     const passwordHash = await bcrypt.hash(tempPassword, 12);
@@ -569,8 +627,10 @@ export class UsersService {
       this.prisma.user.findUnique({ where: { email }, select: { id: true } }),
       this.prisma.user.findUnique({ where: { mobile }, select: { id: true } }),
     ]);
-    if (emailTaken) throw new ConflictException('This email is already registered');
-    if (mobileTaken) throw new ConflictException('This mobile number is already registered');
+    if (emailTaken)
+      throw new ConflictException('This email is already registered');
+    if (mobileTaken)
+      throw new ConflictException('This mobile number is already registered');
   }
 
   private generateTempPassword(): string {
@@ -634,47 +694,96 @@ export class UsersService {
       where: { userId: id },
       include: { documents: true },
     });
-    const [lawyer, leadsAsClient, ratings, bookmarks, notifications, reportsFiled, reportsAgainst, contactQueries] =
-      await Promise.all([
-        this.prisma.lawyer.findUnique({
-          where: { userId: id },
-          include: {
-            practiceAreas: { select: { practiceArea: { select: { name: true } } } },
-            languages: { select: { language: { select: { name: true } } } },
-            courts: { select: { court: { select: { name: true } } } },
-            offices: true,
-            serviceAreas: { select: { city: { select: { name: true } }, active: true } },
-            payments: {
-              select: {
-                planName: true, amount: true, status: true, invoiceNo: true,
-                providerOrderId: true, createdAt: true,
-              },
-            },
-            subscriptions: true,
-            leads: { select: { id: true, practiceArea: true, status: true, createdAt: true } },
-            verifications: true,
+    const [
+      lawyer,
+      leadsAsClient,
+      ratings,
+      bookmarks,
+      notifications,
+      reportsFiled,
+      reportsAgainst,
+      contactQueries,
+    ] = await Promise.all([
+      this.prisma.lawyer.findUnique({
+        where: { userId: id },
+        include: {
+          practiceAreas: {
+            select: { practiceArea: { select: { name: true } } },
           },
-        }),
-        this.prisma.lead.findMany({
-          where: { clientId: id },
-          select: { id: true, practiceArea: true, description: true, status: true, createdAt: true },
-        }),
-        this.prisma.rating.findMany({
-          where: { clientId: id },
-          select: { score: true, comment: true, createdAt: true },
-        }),
-        this.prisma.bookmark.findMany({ where: { userId: id }, select: { lawyerId: true, createdAt: true } }),
-        this.prisma.notification.findMany({
-          where: { userId: id },
-          select: { type: true, payloadJson: true, readAt: true, createdAt: true },
-        }),
-        this.prisma.report.findMany({ where: { reporterId: id }, select: { reason: true, status: true, createdAt: true } }),
-        this.prisma.report.findMany({ where: { reportedUserId: id }, select: { reason: true, status: true, createdAt: true } }),
-        this.prisma.contactQuery.findMany({
-          where: { userId: id },
-          select: { category: true, subject: true, message: true, status: true, createdAt: true },
-        }),
-      ]);
+          languages: { select: { language: { select: { name: true } } } },
+          courts: { select: { court: { select: { name: true } } } },
+          offices: true,
+          serviceAreas: {
+            select: { city: { select: { name: true } }, active: true },
+          },
+          payments: {
+            select: {
+              planName: true,
+              amount: true,
+              status: true,
+              invoiceNo: true,
+              providerOrderId: true,
+              createdAt: true,
+            },
+          },
+          subscriptions: true,
+          leads: {
+            select: {
+              id: true,
+              practiceArea: true,
+              status: true,
+              createdAt: true,
+            },
+          },
+          verifications: true,
+        },
+      }),
+      this.prisma.lead.findMany({
+        where: { clientId: id },
+        select: {
+          id: true,
+          practiceArea: true,
+          description: true,
+          status: true,
+          createdAt: true,
+        },
+      }),
+      this.prisma.rating.findMany({
+        where: { clientId: id },
+        select: { score: true, comment: true, createdAt: true },
+      }),
+      this.prisma.bookmark.findMany({
+        where: { userId: id },
+        select: { lawyerId: true, createdAt: true },
+      }),
+      this.prisma.notification.findMany({
+        where: { userId: id },
+        select: {
+          type: true,
+          payloadJson: true,
+          readAt: true,
+          createdAt: true,
+        },
+      }),
+      this.prisma.report.findMany({
+        where: { reporterId: id },
+        select: { reason: true, status: true, createdAt: true },
+      }),
+      this.prisma.report.findMany({
+        where: { reportedUserId: id },
+        select: { reason: true, status: true, createdAt: true },
+      }),
+      this.prisma.contactQuery.findMany({
+        where: { userId: id },
+        select: {
+          category: true,
+          subject: true,
+          message: true,
+          status: true,
+          createdAt: true,
+        },
+      }),
+    ]);
 
     await this.audit.log('USER_DATA_EXPORTED', {
       entityType: 'User',
@@ -713,7 +822,9 @@ export class UsersService {
       throw new ForbiddenException('Admin accounts cannot be erased here');
     }
     if (user.status !== UserStatus.DELETED) {
-      throw new BadRequestException('Soft-delete the account first, then erase its PII');
+      throw new BadRequestException(
+        'Soft-delete the account first, then erase its PII',
+      );
     }
 
     const short = id.slice(0, 8);
@@ -764,7 +875,9 @@ export class UsersService {
         take: pg.pageSize,
         include: {
           reporter: { select: { id: true, email: true, role: true } },
-          reportedUser: { select: { id: true, email: true, role: true, status: true } },
+          reportedUser: {
+            select: { id: true, email: true, role: true, status: true },
+          },
         },
       }),
       this.prisma.report.count({ where }),

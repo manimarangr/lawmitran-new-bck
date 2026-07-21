@@ -12,6 +12,7 @@ import {
   setCaseDocument,
 } from '@/lib/api/property';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 
 export default function PropertyCasePage() {
   const { id } = useParams<{ id: string }>();
@@ -55,7 +56,7 @@ export default function PropertyCasePage() {
   const have = new Set((c?.documents ?? []).filter((d) => d.provided).map((d) => d.docType));
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
+    <Container className="py-8">
       <div className="mb-5 flex items-center justify-between">
         <Link href="/dashboard/property" className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:border-gold hover:text-navy">
           <Icon name="chevron-left" aria-hidden="true" className="mr-1 text-xs" /> All checks
@@ -236,6 +237,6 @@ export default function PropertyCasePage() {
           )}
         </>
       )}
-    </div>
+    </Container>
   );
 }

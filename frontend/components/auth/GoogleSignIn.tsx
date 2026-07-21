@@ -79,7 +79,7 @@ export default function GoogleSignIn() {
         theme: 'outline',
         size: 'large',
         width: 320,
-        text: pathname === '/signup' ? 'signup_with' : 'continue_with',
+        text: pathname.startsWith('/signup') ? 'signup_with' : 'continue_with',
         logo_alignment: 'center',
       });
       setEnabled(true);
@@ -110,10 +110,10 @@ export default function GoogleSignIn() {
           JSON.stringify({ email: res.email, fullName: res.fullName }),
         );
       } catch { /* private mode */ }
-      if (pathname === '/signup') {
+      if (pathname.startsWith('/signup')) {
         window.dispatchEvent(new Event(GOOGLE_PREFILL_EVENT));
       } else {
-        router.push('/signup?google=1');
+        router.push('/signup/client?google=1');
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Google sign-in failed');

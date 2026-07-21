@@ -12,6 +12,7 @@ import {
   type DiaryPriority,
 } from '@/lib/api/diary';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 
 const input = 'w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm focus:border-gold focus:outline-none';
 const label = 'mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500';
@@ -90,7 +91,7 @@ export default function DiaryCasePage({ params }: { params: Promise<{ id: string
   const setH = (k: string, v: string) => setHearing((p) => ({ ...p, [k]: v }));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <Container className="py-8">
       <nav aria-label="Breadcrumb" className="mb-2 text-xs text-slate-400">
         <Link href="/dashboard/diary" className="hover:text-gold">Case Diary</Link> /{' '}
         <Link href="/dashboard/diary/cases" className="hover:text-gold">Cases</Link> / {c.title}
@@ -223,6 +224,6 @@ export default function DiaryCasePage({ params }: { params: Promise<{ id: string
           </section>
         </aside>
       </div>
-    </div>
+    </Container>
   );
 }

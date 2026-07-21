@@ -50,7 +50,11 @@ function pause(ms: number, reason: string) {
   );
 }
 
-export async function complete(cfg: LlmConfig, system: string, user: string): Promise<string | null> {
+export async function complete(
+  cfg: LlmConfig,
+  system: string,
+  user: string,
+): Promise<string | null> {
   if (llmPaused()) return null; // breaker open — instant deterministic fallback
 
   const first = await completeOnce(cfg, system, user);
@@ -58,7 +62,10 @@ export async function complete(cfg: LlmConfig, system: string, user: string): Pr
 
   if (first.quota) {
     // 429: retrying only burns more quota — back off instead.
-    pause(first.daily ? QUOTA_COOLDOWN_MS : SPIKE_COOLDOWN_MS, first.error ?? 'quota exceeded');
+    pause(
+      first.daily ? QUOTA_COOLDOWN_MS : SPIKE_COOLDOWN_MS,
+      first.error ?? 'quota exceeded',
+    );
     return null;
   }
   if (first.transient) {
@@ -82,7 +89,11 @@ interface OnceResult {
   error?: string;
 }
 
-async function completeOnce(cfg: LlmConfig, system: string, user: string): Promise<OnceResult> {
+async function completeOnce(
+  cfg: LlmConfig,
+  system: string,
+  user: string,
+): Promise<OnceResult> {
   try {
     if (cfg.provider === 'gemini') {
       const model = cfg.model || 'gemini-flash-latest';
@@ -100,41 +111,54 @@ async function completeOnce(cfg: LlmConfig, system: string, user: string): Promi
         },
       );
       if (!res.ok) {
-        throw new Error(`gemini ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}`);
+        throw new Error(
+          `gemini ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}`,
+        );
       }
       const body = (await res.json()) as {
         candidates?: { content?: { parts?: { text?: string }[] } }[];
       };
-      return { ok: true, text: body.candidates?.[0]?.content?.parts?.[0]?.text ?? null };
+      return {
+        ok: true,
+        text: body.candidates?.[0]?.content?.parts?.[0]?.text ?? null,
+      };
     }
 
     // default: openai-compatible chat completions
-    const res = await withTimeout('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${cfg.apiKey}`,
+    const res = await withTimeout(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${cfg.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: cfg.model || 'gpt-4o-mini',
+          temperature: 0.2,
+          max_tokens: 500,
+          messages: [
+            { role: 'system', content: system },
+            { role: 'user', content: user },
+          ],
+        }),
       },
-      body: JSON.stringify({
-        model: cfg.model || 'gpt-4o-mini',
-        temperature: 0.2,
-        max_tokens: 500,
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: user },
-        ],
-      }),
-    });
+    );
     if (!res.ok) {
-      throw new Error(`openai ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}`);
+      throw new Error(
+        `openai ${res.status}: ${(await res.text().catch(() => '')).slice(0, 200)}`,
+      );
     }
-    const body = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    const body = (await res.json()) as {
+      choices?: { message?: { content?: string } }[];
+    };
     return { ok: true, text: body.choices?.[0]?.message?.content ?? null };
   } catch (err) {
     const msg = (err as Error).message ?? 'unknown';
     const quota = /\b429\b|quota|RESOURCE_EXHAUSTED/i.test(msg);
     const daily = quota && /per ?day|plan and billing/i.test(msg);
-    const transient = !quota && /\b503\b|overloaded|UNAVAILABLE|aborted/i.test(msg);
+    const transient =
+      !quota && /\b503\b|overloaded|UNAVAILABLE|aborted/i.test(msg);
     return { ok: false, quota, daily, transient, error: msg.slice(0, 300) };
   }
 }

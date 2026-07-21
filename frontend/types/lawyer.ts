@@ -39,6 +39,8 @@ export interface LawyerListItem {
   nearLocality?: string | null;
   /** Distance (km) from the selected locality centroid; null if no office pin. */
   localityKm?: number | null;
+  /** Distance (km) from a lat/lng "near me" search; null if no coordinates. */
+  distanceKm?: number | null;
   /** Present on GET /lawyers/me/profile — latest review outcome. */
   verifications?: { status: string; comments: string | null; reviewedAt: string | null }[];
   languages: { language: { id: string; name: string; code: string } }[];
@@ -70,6 +72,8 @@ export interface LawyerMarker {
   ratingCount: number;
   city: { name: string } | null;
   practiceAreas: { practiceArea: { name: string } }[];
+  /** Distance (km) from a lat/lng "near me" search; present only when lat/lng was queried. */
+  distanceKm?: number | null;
 }
 
 export interface SearchFilters {
@@ -84,7 +88,11 @@ export interface SearchFilters {
   language?: string;
   gender?: Gender;
   ratingMin?: number;
-  sort?: 'rating' | 'experience' | 'createdAt';
+  sort?: 'rating' | 'experience' | 'createdAt' | 'distance';
+  /** Point-radius "near me" search. */
+  lat?: number;
+  lng?: number;
+  radiusKm?: number;
 }
 
 export interface MapBounds {

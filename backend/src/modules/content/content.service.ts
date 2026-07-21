@@ -3,11 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  ContentStatus,
-  ContentType,
-  Prisma,
-} from '@prisma/client';
+import { ContentStatus, ContentType, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   AdminContentQueryDto,
@@ -107,7 +103,9 @@ export class ContentService {
 
   // Shape sent to the public frontend. Never leak the fake "reviewer": when
   // none is assigned we surface an explicit "To Be Assigned" placeholder.
-  private toPublic(i: Prisma.ContentItemGetPayload<{ include: { reviewer: true } }>) {
+  private toPublic(
+    i: Prisma.ContentItemGetPayload<{ include: { reviewer: true } }>,
+  ) {
     return {
       id: i.id,
       type: i.type,
@@ -220,7 +218,11 @@ export class ContentService {
           where: { ...base, status: ContentStatus.IN_REVIEW },
         }),
         this.prisma.contentItem.count({
-          where: { ...base, status: ContentStatus.PUBLISHED, publishedAt: { gt: now } },
+          where: {
+            ...base,
+            status: ContentStatus.PUBLISHED,
+            publishedAt: { gt: now },
+          },
         }),
         this.prisma.contentItem.count({
           where: {
@@ -254,10 +256,13 @@ export class ContentService {
     let candidate = root;
     let n = 1;
     // Loop until the slug is free (excluding the row being updated).
-    // eslint-disable-next-line no-constant-condition
+
     while (true) {
       const clash = await this.prisma.contentItem.findFirst({
-        where: { slug: candidate, ...(ignoreId ? { id: { not: ignoreId } } : {}) },
+        where: {
+          slug: candidate,
+          ...(ignoreId ? { id: { not: ignoreId } } : {}),
+        },
         select: { id: true },
       });
       if (!clash) return candidate;
@@ -276,8 +281,9 @@ export class ContentService {
         title: dto.title,
         excerpt: dto.excerpt,
         bodyHtml: dto.bodyHtml ?? '',
-        sections: (dto.sections ?? undefined) as Prisma.InputJsonValue | undefined,
-        faqs: (dto.faqs ?? undefined) as unknown as Prisma.InputJsonValue | undefined,
+        sections: (dto.sections ?? undefined) as
+          Prisma.InputJsonValue | undefined,
+        faqs: dto.faqs ?? undefined,
         seoTitle: dto.seoTitle,
         metaDescription: dto.metaDescription,
         canonicalUrl: dto.canonicalUrl,
@@ -301,7 +307,9 @@ export class ContentService {
   }
 
   async update(id: string, dto: ContentUpdateDto, userId?: string) {
-    const existing = await this.prisma.contentItem.findUnique({ where: { id } });
+    const existing = await this.prisma.contentItem.findUnique({
+      where: { id },
+    });
     if (!existing) throw new NotFoundException('Content not found');
 
     // Snapshot the current state before mutating (revision history).
@@ -310,7 +318,7 @@ export class ContentService {
         contentId: id,
         editorId: userId,
         note: dto.revisionNote,
-        snapshot: existing as unknown as Prisma.InputJsonValue,
+        snapshot: existing,
       },
     });
 
@@ -322,33 +330,40 @@ export class ContentService {
     if (dto.bodyHtml !== undefined) data.bodyHtml = dto.bodyHtml;
     if (dto.sections !== undefined)
       data.sections = dto.sections as Prisma.InputJsonValue;
-    if (dto.faqs !== undefined)
-      data.faqs = dto.faqs as unknown as Prisma.InputJsonValue;
+    if (dto.faqs !== undefined) data.faqs = dto.faqs;
     if (dto.seoTitle !== undefined) data.seoTitle = dto.seoTitle;
-    if (dto.metaDescription !== undefined) data.metaDescription = dto.metaDescription;
+    if (dto.metaDescription !== undefined)
+      data.metaDescription = dto.metaDescription;
     if (dto.canonicalUrl !== undefined) data.canonicalUrl = dto.canonicalUrl;
     if (dto.ogImageUrl !== undefined) data.ogImageUrl = dto.ogImageUrl;
-    if (dto.featuredImageUrl !== undefined) data.featuredImageUrl = dto.featuredImageUrl;
-    if (dto.jsonLd !== undefined) data.jsonLd = dto.jsonLd as Prisma.InputJsonValue;
+    if (dto.featuredImageUrl !== undefined)
+      data.featuredImageUrl = dto.featuredImageUrl;
+    if (dto.jsonLd !== undefined)
+      data.jsonLd = dto.jsonLd as Prisma.InputJsonValue;
     if (dto.categorySlug !== undefined) data.categorySlug = dto.categorySlug;
     if (dto.tags !== undefined) data.tags = dto.tags;
     if (dto.practiceAreas !== undefined) data.practiceAreas = dto.practiceAreas;
     if (dto.states !== undefined) data.states = dto.states;
-    if (dto.relatedDocumentIds !== undefined) data.relatedDocumentIds = dto.relatedDocumentIds;
-    if (dto.relatedLawyerIds !== undefined) data.relatedLawyerIds = dto.relatedLawyerIds;
+    if (dto.relatedDocumentIds !== undefined)
+      data.relatedDocumentIds = dto.relatedDocumentIds;
+    if (dto.relatedLawyerIds !== undefined)
+      data.relatedLawyerIds = dto.relatedLawyerIds;
     if (dto.authorName !== undefined) data.authorName = dto.authorName;
     if (dto.reviewerId !== undefined)
       data.reviewer = dto.reviewerId
         ? { connect: { id: dto.reviewerId } }
         : { disconnect: true };
-    if (dto.reviewState !== undefined) data.reviewState = dto.reviewState as never;
+    if (dto.reviewState !== undefined)
+      data.reviewState = dto.reviewState as never;
     if (dto.readMinutes !== undefined) data.readMinutes = dto.readMinutes;
 
     return this.prisma.contentItem.update({ where: { id }, data });
   }
 
   async setStatus(id: string, dto: SetContentStatusDto, userId?: string) {
-    const existing = await this.prisma.contentItem.findUnique({ where: { id } });
+    const existing = await this.prisma.contentItem.findUnique({
+      where: { id },
+    });
     if (!existing) throw new NotFoundException('Content not found');
 
     const from = existing.status;
@@ -357,7 +372,10 @@ export class ContentService {
       throw new BadRequestException(`Illegal transition ${from} -> ${to}`);
     }
 
-    const data: Prisma.ContentItemUpdateInput = { status: to, updatedById: userId };
+    const data: Prisma.ContentItemUpdateInput = {
+      status: to,
+      updatedById: userId,
+    };
     if (to === ContentStatus.PUBLISHED) {
       // Explicit date = schedule (may be future); otherwise publish now,
       // preserving an earlier publish date if one already exists.
@@ -418,12 +436,18 @@ export class ContentService {
 
   // Promote a verified, APPROVED Lawyer into a Reviewer (idempotent by lawyerId).
   async reviewerFromLawyer(lawyerId: string) {
-    const lawyer = await this.prisma.lawyer.findUnique({ where: { id: lawyerId } });
+    const lawyer = await this.prisma.lawyer.findUnique({
+      where: { id: lawyerId },
+    });
     if (!lawyer) throw new NotFoundException('Lawyer not found');
     if (lawyer.verificationStatus !== 'APPROVED') {
-      throw new BadRequestException('Only APPROVED lawyers can become reviewers');
+      throw new BadRequestException(
+        'Only APPROVED lawyers can become reviewers',
+      );
     }
-    const existing = await this.prisma.reviewer.findUnique({ where: { lawyerId } });
+    const existing = await this.prisma.reviewer.findUnique({
+      where: { lawyerId },
+    });
     if (existing) return existing;
     return this.prisma.reviewer.create({
       data: {

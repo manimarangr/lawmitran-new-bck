@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { resetPassword } from '@/lib/api/auth';
 import Icon from '@/components/ui/Icon';
+import AuthShell from '@/components/auth/AuthShell';
+import DefaultAuthAside from '@/components/auth/DefaultAuthAside';
 
 const schema = z
   .object({
@@ -176,8 +178,10 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="text-center text-sm text-slate-400">Loading…</div>}>
-      <ResetPasswordForm />
-    </Suspense>
+    <AuthShell aside={<DefaultAuthAside />} showAsideOnMobile={false}>
+      <Suspense fallback={<div className="text-center text-sm text-slate-400">Loading…</div>}>
+        <ResetPasswordForm />
+      </Suspense>
+    </AuthShell>
   );
 }

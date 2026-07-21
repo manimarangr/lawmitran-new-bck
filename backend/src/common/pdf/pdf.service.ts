@@ -15,7 +15,6 @@ export interface PdfInput {
 /** Optionally load a package that may not be installed (puppeteer, qrcode). */
 function loadOptional(name: string): any {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     return require(name);
   } catch {
     return null;
@@ -72,12 +71,21 @@ export class PdfService {
   // ---------------- rendering ----------------
 
   private async renderGotenberg(html: string, footer: string): Promise<Buffer> {
-    const base = this.config.get<string>('GOTENBERG_URL') ?? 'http://gotenberg:3000';
+    const base =
+      this.config.get<string>('GOTENBERG_URL') ?? 'http://gotenberg:3000';
     const url = `${base}/forms/chromium/convert/html`;
     const g = globalThis as any;
     const form = new g.FormData();
-    form.append('files', new g.Blob([html], { type: 'text/html' }), 'index.html');
-    form.append('files', new g.Blob([footer], { type: 'text/html' }), 'footer.html');
+    form.append(
+      'files',
+      new g.Blob([html], { type: 'text/html' }),
+      'index.html',
+    );
+    form.append(
+      'files',
+      new g.Blob([footer], { type: 'text/html' }),
+      'footer.html',
+    );
     form.append('marginTop', '0.6');
     form.append('marginBottom', '0.7');
     form.append('marginLeft', '0.6');
@@ -94,7 +102,9 @@ export class PdfService {
   private async renderPuppeteer(html: string, footer: string): Promise<Buffer> {
     const puppeteer = loadOptional('puppeteer');
     if (!puppeteer) {
-      throw new Error('puppeteer is not installed; set DOCS_PDF_ENGINE=gotenberg');
+      throw new Error(
+        'puppeteer is not installed; set DOCS_PDF_ENGINE=gotenberg',
+      );
     }
     const browser = await puppeteer.launch({
       headless: 'new',

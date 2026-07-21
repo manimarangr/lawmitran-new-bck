@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { getLawyers } from '@/lib/api/seo';
 import type { LawyerListItem } from '@/types/lawyer';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
+import { LocalityMapPreview, type LocalityMapMarker } from '@/components/lawyers/LocalityMapPreview';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
@@ -55,6 +57,17 @@ export default async function CityHubPage({ params }: Props) {
     totalPages: 0,
   }));
 
+  const mapMarkers: LocalityMapMarker[] = result.items
+    .filter((l) => l.latitude != null && l.longitude != null)
+    .map((l) => ({
+      id: l.id,
+      lat: l.latitude as number,
+      lng: l.longitude as number,
+      label: l.fullName,
+      sublabel: l.practiceAreas[0]?.practiceArea.name,
+      href: `/lawyer/${l.slug ?? l.id}`,
+    }));
+
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -71,7 +84,7 @@ export default async function CityHubPage({ params }: Props) {
 
       {/* hero */}
       <header className="hero-light py-10">
-        <div className="mx-auto max-w-6xl px-6">
+        <Container>
           <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-400">
             <Link href="/" className="hover:text-gold">Home</Link> /{' '}
             <Link href="/lawyers" className="hover:text-gold">Lawyers</Link> /{' '}
@@ -88,10 +101,10 @@ export default async function CityHubPage({ params }: Props) {
               <Icon name="circle-check" aria-hidden="true" /> {result.total} verified lawyer{result.total !== 1 ? 's' : ''} in {cityName}
             </p>
           )}
-        </div>
+        </Container>
       </header>
 
-      <div className="mx-auto max-w-6xl px-6 py-10">
+      <Container className="py-10">
         {/* practice area grid */}
         <section aria-labelledby="areas-heading">
           <h2 id="areas-heading" className="mb-4 text-xl font-extrabold text-navy">
@@ -127,6 +140,12 @@ export default async function CityHubPage({ params }: Props) {
               See all <Icon name="arrow-right" aria-hidden="true" />
             </Link>
           </div>
+
+          {mapMarkers.length > 0 && (
+            <div className="mb-6">
+              <LocalityMapPreview markers={mapMarkers} />
+            </div>
+          )}
 
           <div className="space-y-4">
             {result.items.length === 0 && (
@@ -195,7 +214,7 @@ export default async function CityHubPage({ params }: Props) {
           LawMitran is an information platform, not a law firm. Listings are informational and not an
           endorsement or solicitation.
         </p>
-      </div>
+      </Container>
     </main>
   );
 }

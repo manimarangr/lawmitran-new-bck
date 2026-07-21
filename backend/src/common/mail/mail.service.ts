@@ -9,7 +9,9 @@ export class MailService {
 
   async sendEmailVerification(email: string, token: string): Promise<void> {
     const verificationUrl = `${process.env.FRONTEND_ORIGIN ?? 'http://localhost:3000'}/verify-email?token=${token}`;
-    this.logger.log(`[placeholder email] verification link for ${email}: ${verificationUrl}`);
+    this.logger.log(
+      `[placeholder email] verification link for ${email}: ${verificationUrl}`,
+    );
     return Promise.resolve();
   }
 
@@ -19,7 +21,8 @@ export class MailService {
     email: string,
     subject: string | null,
   ): Promise<void> {
-    const to = (await this.settings.get('SUPPORT_EMAIL')) ?? 'support@lawmitran.com';
+    const to =
+      (await this.settings.get('SUPPORT_EMAIL')) ?? 'support@lawmitran.com';
     this.logger.log(
       `[placeholder email] to ${to}: new contact query [${category}] from ${name} <${email}>${subject ? ` — ${subject}` : ''}`,
     );
@@ -27,7 +30,9 @@ export class MailService {
   }
 
   async sendAdminLoginOtp(email: string, code: string): Promise<void> {
-    this.logger.log(`[placeholder email] to ${email}: your LawMitran admin login code is ${code} (valid 10 minutes)`);
+    this.logger.log(
+      `[placeholder email] to ${email}: your LawMitran admin login code is ${code} (valid 10 minutes)`,
+    );
     return Promise.resolve();
   }
 
@@ -38,7 +43,11 @@ export class MailService {
     return Promise.resolve();
   }
 
-  async sendLeadSlaNudge(email: string, practiceArea: string, hours: number): Promise<void> {
+  async sendLeadSlaNudge(
+    email: string,
+    practiceArea: string,
+    hours: number,
+  ): Promise<void> {
     this.logger.log(
       `[placeholder email] to ${email}: a ${practiceArea} lead has been waiting ${hours}+ hours — contact the client soon or the lead may go elsewhere.`,
     );
@@ -53,17 +62,26 @@ export class MailService {
   }
 
   async sendLawyerApproved(email: string): Promise<void> {
-    this.logger.log(`[placeholder email] to ${email}: your LawMitran profile has been approved`);
+    this.logger.log(
+      `[placeholder email] to ${email}: your LawMitran profile has been approved`,
+    );
     return Promise.resolve();
   }
 
-  async sendNewLeadNotification(email: string, practiceArea: string): Promise<void> {
-    this.logger.log(`[placeholder email] to ${email}: you have a new ${practiceArea} lead waiting`);
+  async sendNewLeadNotification(
+    email: string,
+    practiceArea: string,
+  ): Promise<void> {
+    this.logger.log(
+      `[placeholder email] to ${email}: you have a new ${practiceArea} lead waiting`,
+    );
     return Promise.resolve();
   }
 
   async sendPasswordResetEmail(email: string, resetUrl: string): Promise<void> {
-    this.logger.log(`[placeholder email] to ${email}: reset password link: ${resetUrl}`);
+    this.logger.log(
+      `[placeholder email] to ${email}: reset password link: ${resetUrl}`,
+    );
     return Promise.resolve();
   }
 

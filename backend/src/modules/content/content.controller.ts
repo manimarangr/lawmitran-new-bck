@@ -35,7 +35,9 @@ export class ContentController {
 
   @Public()
   @Get()
-  @ApiOperation({ summary: 'List published content (filters: type, category, tag, state, q)' })
+  @ApiOperation({
+    summary: 'List published content (filters: type, category, tag, state, q)',
+  })
   list(@Query() q: PublicContentQueryDto) {
     return this.content.listPublic(q);
   }
@@ -102,7 +104,9 @@ export class ContentController {
   @Roles(Role.ADMIN)
   @AdminScopes(AdminRole.OPS)
   @Post('admin/categories')
-  @ApiOperation({ summary: 'Create or update a content category (by type+slug)' })
+  @ApiOperation({
+    summary: 'Create or update a content category (by type+slug)',
+  })
   upsertCategory(@Body() dto: ContentCategoryDto) {
     return this.content.categoryUpsert(dto);
   }
@@ -120,7 +124,10 @@ export class ContentController {
   @Roles(Role.ADMIN)
   @AdminScopes(AdminRole.OPS)
   @Get('admin/dashboard')
-  @ApiOperation({ summary: 'Help Center dashboard counts (drafts/review/scheduled/published/archived)' })
+  @ApiOperation({
+    summary:
+      'Help Center dashboard counts (drafts/review/scheduled/published/archived)',
+  })
   adminDashboard(@Query('type') type?: string) {
     return this.content.adminDashboard(type);
   }
@@ -129,7 +136,10 @@ export class ContentController {
   @AdminScopes(AdminRole.OPS)
   @Post('admin')
   @ApiOperation({ summary: 'Create content (starts as DRAFT)' })
-  create(@Body() dto: ContentCreateDto, @CurrentUser() user: CurrentUserPayload) {
+  create(
+    @Body() dto: ContentCreateDto,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
     return this.content.create(dto, user.userId);
   }
 
@@ -156,7 +166,10 @@ export class ContentController {
   @Roles(Role.ADMIN)
   @AdminScopes(AdminRole.OPS)
   @Patch('admin/:id/status')
-  @ApiOperation({ summary: 'Workflow transition (Draft/Review/Published/Archived; publishedAt schedules)' })
+  @ApiOperation({
+    summary:
+      'Workflow transition (Draft/Review/Published/Archived; publishedAt schedules)',
+  })
   setStatus(
     @Param('id') id: string,
     @Body() dto: SetContentStatusDto,

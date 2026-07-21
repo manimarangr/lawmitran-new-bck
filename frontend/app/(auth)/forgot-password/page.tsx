@@ -8,13 +8,15 @@ import Link from 'next/link';
 import { forgotPassword } from '@/lib/api/auth';
 import Icon from '@/components/ui/Icon';
 import Captcha, { type CaptchaHandle } from '@/components/ui/Captcha';
+import AuthShell from '@/components/auth/AuthShell';
+import DefaultAuthAside from '@/components/auth/DefaultAuthAside';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
 });
 type FormValues = z.infer<typeof schema>;
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordForm() {
   const [sentTo, setSentTo] = useState('');
   const [error, setError] = useState('');
   const [captcha, setCaptcha] = useState({ token: '', required: false });
@@ -129,5 +131,13 @@ export default function ForgotPasswordPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <AuthShell aside={<DefaultAuthAside />} showAsideOnMobile={false}>
+      <ForgotPasswordForm />
+    </AuthShell>
   );
 }

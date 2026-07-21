@@ -6,6 +6,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { fetchDiaryCalendar } from '@/lib/api/diary';
 import DiaryNav from '@/components/diary/DiaryNav';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 
 interface DayEvent {
   key: string;
@@ -62,7 +63,7 @@ export default function DiaryCalendarPage() {
   const monthLabel = first.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <Container className="py-8">
       <h1 className="mb-4 text-2xl font-extrabold text-navy">Calendar</h1>
       <DiaryNav />
 
@@ -129,6 +130,6 @@ export default function DiaryCalendarPage() {
       {q.isError && (
         <p role="alert" className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{(q.error as Error).message}</p>
       )}
-    </div>
+    </Container>
   );
 }

@@ -17,8 +17,10 @@ import {
 } from '@/lib/api/lawyers';
 import { getPracticeAreas } from '@/lib/api/seo';
 import CityInput from '@/components/ui/CityInput';
-import OfficeMapPicker, { type OfficePoint } from '@/components/ui/OfficeMapPicker';
+import OfficeMapPicker, { type OfficePoint, type ResolvedAddress } from '@/components/ui/OfficeMapPicker';
 import Icon from '@/components/ui/Icon';
+import MultiSelectDropdown from '@/components/ui/MultiSelectDropdown';
+import Container from '@/components/ui/Container';
 
 const STATES = [
   'Andhra Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Delhi', 'Goa', 'Gujarat', 'Haryana',
@@ -44,51 +46,6 @@ const BIO_MAX = 1000;
 
 const inputClass = 'w-full rounded-xl border border-gray-200 px-3.5 py-3 text-sm focus:border-gold focus:outline-none';
 const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500';
-
-function Chips({
-  options,
-  selected,
-  onToggle,
-  max,
-  label,
-  hint,
-}: {
-  options: string[];
-  selected: string[];
-  onToggle: (v: string) => void;
-  max?: number;
-  label: string;
-  hint?: string;
-}) {
-  return (
-    <div>
-      <span className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
-        {label} <span className="text-rose-500">*</span>
-        {hint && <span className="ml-1 font-medium normal-case text-slate-400">({hint})</span>}
-      </span>
-      <div className="flex flex-wrap gap-2">
-        {options.map((o) => {
-          const on = selected.includes(o);
-          const full = !on && !!max && selected.length >= max;
-          return (
-            <button
-              key={o}
-              type="button"
-              aria-pressed={on}
-              disabled={full}
-              onClick={() => onToggle(o)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                on ? 'border-navy bg-navy text-white' : 'border-gray-200 text-slate-600 hover:border-gold disabled:opacity-40'
-              }`}
-            >
-              {o}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 export default function LawyerOnboardingPage() {
   const router = useRouter();
@@ -120,12 +77,44 @@ export default function LawyerOnboardingPage() {
   const [landmark, setLandmark] = useState('');
   const [point, setPoint] = useState<OfficePoint | null>(null);
   const [locality, setLocality] = useState('');
+  const [detected, setDetected] = useState<ResolvedAddress | null>(null);
   const [localities, setLocalities] = useState<LocalityRef[]>([]);
   const [error, setError] = useState('');
 
   const areasQ = useQuery({ queryKey: ['practice-areas'], queryFn: getPracticeAreas, staleTime: 300_000 });
   const courtsQ = useQuery({ queryKey: ['courts'], queryFn: fetchCourts, staleTime: 300_000 });
   const langsQ = useQuery({ queryKey: ['languages'], queryFn: fetchLanguages, staleTime: 300_000 });
+
+  // Reverse-geocoded address from the map pin: fill empty fields silently,
+  // never clobber what the lawyer typed (they can apply it with one click).
+  function onAddressResolved(a: ResolvedAddress) {
+    let usedSomething = false;
+    if (!addressLine.trim() && a.addressLine) { setAddressLine(a.addressLine); usedSomething = true; }
+    if (!pincode.trim() && a.pincode) { setPincode(a.pincode); usedSomething = true; }
+    if (!locality && a.locality) {
+      const match = localities.find(
+        (l) => l.name.toLowerCase() === a.locality.toLowerCase(),
+      );
+      if (match) { setLocality(match.id); usedSomething = true; }
+    }
+    const differs =
+      (a.addressLine && a.addressLine !== addressLine) ||
+      (a.pincode && a.pincode !== pincode);
+    setDetected(usedSomething || !differs ? null : a);
+  }
+
+  function applyDetected() {
+    if (!detected) return;
+    if (detected.addressLine) setAddressLine(detected.addressLine);
+    if (detected.pincode) setPincode(detected.pincode);
+    if (detected.locality) {
+      const match = localities.find(
+        (l) => l.name.toLowerCase() === detected.locality.toLowerCase(),
+      );
+      if (match) setLocality(match.id);
+    }
+    setDetected(null);
+  }
 
   const areaOptions = areasQ.data?.map((a) => a.name) ?? FALLBACK_AREAS;
   const courtOptions = courtsQ.data?.length ? courtsQ.data.map((c) => c.name) : FALLBACK_COURTS;
@@ -255,11 +244,6 @@ export default function LawyerOnboardingPage() {
     onError: (e: Error) => setError(e.message),
   });
 
-  const toggle = (setter: React.Dispatch<React.SetStateAction<string[]>>, max?: number) => (v: string) =>
-    setter((prev) =>
-      prev.includes(v) ? prev.filter((x) => x !== v) : !max || prev.length < max ? [...prev, v] : prev,
-    );
-
   function submit() {
     setError('');
     setNotice('');
@@ -283,7 +267,7 @@ export default function LawyerOnboardingPage() {
   const bioLen = bio.trim().length;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <Container className="py-8">
       <h1 className="text-2xl font-extrabold text-navy">{editing ? 'My profile' : 'Complete your lawyer profile'}</h1>
       <p className="mt-1 text-sm text-slate-500">
         {editing
@@ -382,7 +366,16 @@ export default function LawyerOnboardingPage() {
       <div className="mt-5 space-y-5 rounded-2xl border border-gray-200/60 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-extrabold uppercase tracking-wide text-navy">Practice & work</h2>
 
-        <Chips label="Areas of practice" hint={`pick ${MIN_AREAS}–${MAX_AREAS}`} options={areaOptions} selected={areas} onToggle={toggle(setAreas, MAX_AREAS)} max={MAX_AREAS} />
+        <MultiSelectDropdown
+          id="ob-areas"
+          label="Areas of practice"
+          hint={`pick ${MIN_AREAS}–${MAX_AREAS}`}
+          options={areaOptions}
+          selected={areas}
+          onChange={setAreas}
+          max={MAX_AREAS}
+          placeholder="Search or type to add…"
+        />
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -408,9 +401,25 @@ export default function LawyerOnboardingPage() {
           </div>
         </div>
 
-        <Chips label="Courts you practise in" hint="pick all that apply" options={courtOptions} selected={courtSel} onToggle={toggle(setCourtSel)} />
+        <MultiSelectDropdown
+          id="ob-courts"
+          label="Courts you practise in"
+          hint="pick all that apply"
+          options={courtOptions}
+          selected={courtSel}
+          onChange={setCourtSel}
+          placeholder="Search or type to add…"
+        />
 
-        <Chips label="Languages" hint="pick all you consult in" options={langOptions} selected={langs} onToggle={toggle(setLangs)} />
+        <MultiSelectDropdown
+          id="ob-langs"
+          label="Languages"
+          hint="pick all you consult in"
+          options={langOptions}
+          selected={langs}
+          onChange={setLangs}
+          placeholder="Search or type to add…"
+        />
 
         <div>
           <label htmlFor="ob-bio" className={labelClass}>
@@ -469,7 +478,34 @@ export default function LawyerOnboardingPage() {
           </div>
         )}
 
-        <OfficeMapPicker value={point} onChange={setPoint} searchHint={city || undefined} />
+        <OfficeMapPicker
+          value={point}
+          onChange={setPoint}
+          onAddressResolved={onAddressResolved}
+          searchHint={city || undefined}
+        />
+        {detected && (
+          <div className="mt-2 flex flex-wrap items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-xs text-amber-800">
+            <Icon name="location-dot" aria-hidden="true" className="text-gold" />
+            <span className="min-w-0 flex-1">
+              Address at this pin: <b>{[detected.addressLine, detected.pincode].filter(Boolean).join(' · ')}</b>
+            </span>
+            <button
+              type="button"
+              onClick={applyDetected}
+              className="rounded-lg bg-navy px-3 py-1 font-bold text-white hover:bg-navy-2"
+            >
+              Use this address
+            </button>
+            <button
+              type="button"
+              onClick={() => setDetected(null)}
+              className="font-semibold text-amber-700 hover:underline"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
       </div>
 
       <button onClick={submit} disabled={m.isPending} className="mt-6 w-full rounded-xl bg-gold py-3 text-sm font-bold text-navy hover:bg-[#b58f3f] disabled:opacity-60">
@@ -481,6 +517,6 @@ export default function LawyerOnboardingPage() {
           Our team verifies your ID card against the enrollment number before your profile goes live.
         </p>
       )}
-    </div>
+    </Container>
   );
 }

@@ -5,11 +5,14 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { sendMobileOtp, verifyMobileOtp } from '@/lib/api/auth';
 import Icon from '@/components/ui/Icon';
+import AuthShell from '@/components/auth/AuthShell';
+import DefaultAuthAside from '@/components/auth/DefaultAuthAside';
 
 function VerifyOtpInner() {
   const router = useRouter();
   const params = useSearchParams();
   const mobile = params.get('mobile') ?? '';
+  const role = params.get('role')?.toUpperCase() === 'LAWYER' ? 'lawyer' : 'client';
 
   const [digits, setDigits] = useState<string[]>(Array(6).fill(''));
   const [error, setError] = useState('');
@@ -78,7 +81,7 @@ function VerifyOtpInner() {
             <Icon name="whatsapp" aria-hidden="true" /> WhatsApp
           </span>{' '}
           (or SMS) to <span className="font-semibold text-slate-700">+91 {mobile}</span>.{' '}
-          <Link href="/signup" className="font-semibold text-gold hover:underline">
+          <Link href={`/signup/${role}`} className="font-semibold text-gold hover:underline">
             Change
           </Link>
         </p>
@@ -138,8 +141,10 @@ function VerifyOtpInner() {
 
 export default function VerifyOtpPage() {
   return (
-    <Suspense fallback={<p className="text-center text-sm text-zinc-400">Loading…</p>}>
-      <VerifyOtpInner />
-    </Suspense>
+    <AuthShell aside={<DefaultAuthAside />} showAsideOnMobile={false}>
+      <Suspense fallback={<p className="text-center text-sm text-zinc-400">Loading…</p>}>
+        <VerifyOtpInner />
+      </Suspense>
+    </AuthShell>
   );
 }

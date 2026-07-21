@@ -46,21 +46,27 @@ export class DocumentsController {
 
   @Public()
   @Get('categories')
-  @ApiOperation({ summary: 'Document categories with template counts (public)' })
+  @ApiOperation({
+    summary: 'Document categories with template counts (public)',
+  })
   listCategories() {
     return this.documentsService.listCategories();
   }
 
   @Public()
   @Get('templates')
-  @ApiOperation({ summary: 'Published document templates (?category=slug to filter)' })
+  @ApiOperation({
+    summary: 'Published document templates (?category=slug to filter)',
+  })
   listTemplates(@Query('category') category?: string) {
     return this.documentsService.listTemplates(category);
   }
 
   @Public()
   @Get('verify/:id')
-  @ApiOperation({ summary: 'Verify a document\'s authenticity (public, content hash)' })
+  @ApiOperation({
+    summary: "Verify a document's authenticity (public, content hash)",
+  })
   verify(@Param('id') id: string) {
     return this.documentsService.verifyDocument(id);
   }
@@ -74,18 +80,25 @@ export class DocumentsController {
   }
 
   @Get('me/:id')
-  @ApiOperation({ summary: 'One of my documents (content unlocked after payment)' })
+  @ApiOperation({
+    summary: 'One of my documents (content unlocked after payment)',
+  })
   myDocument(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
     return this.documentsService.myDocument(user.userId, id);
   }
 
   @Get('me/:id/pdf')
-  @ApiOperation({ summary: 'Download my document as a PDF (generated on demand)' })
+  @ApiOperation({
+    summary: 'Download my document as a PDF (generated on demand)',
+  })
   async myDocumentPdf(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
   ): Promise<StreamableFile> {
-    const { buffer, filename } = await this.documentsService.getPdf(user.userId, id);
+    const { buffer, filename } = await this.documentsService.getPdf(
+      user.userId,
+      id,
+    );
     return new StreamableFile(buffer, {
       type: 'application/pdf',
       disposition: `attachment; filename="${filename}"`,
@@ -93,13 +106,20 @@ export class DocumentsController {
   }
 
   @Post('me/:id/request-review')
-  @ApiOperation({ summary: 'Request a lawyer review (opens a Razorpay order for the fee)' })
-  requestReview(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+  @ApiOperation({
+    summary: 'Request a lawyer review (opens a Razorpay order for the fee)',
+  })
+  requestReview(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+  ) {
     return this.reviewService.requestReview(user.userId, id);
   }
 
   @Post('me/:id/review-payment')
-  @ApiOperation({ summary: 'Confirm the review-fee payment; enters the review queue' })
+  @ApiOperation({
+    summary: 'Confirm the review-fee payment; enters the review queue',
+  })
   reviewPayment(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
@@ -117,15 +137,22 @@ export class DocumentsController {
   @Post('checkout')
   @ApiOperation({ summary: 'Answers → draft document + Razorpay order' })
   checkout(@CurrentUser() user: CurrentUserPayload, @Body() dto: CheckoutDto) {
-    return this.documentsService.checkout(user.userId, dto.templateId, dto.input, {
-      state: dto.state,
-      declaredValue: dto.declaredValue,
-    });
+    return this.documentsService.checkout(
+      user.userId,
+      dto.templateId,
+      dto.input,
+      {
+        state: dto.state,
+        declaredValue: dto.declaredValue,
+      },
+    );
   }
 
   @Public()
   @Post('quote')
-  @ApiOperation({ summary: 'Price quote incl. stamp duty for a state (public)' })
+  @ApiOperation({
+    summary: 'Price quote incl. stamp duty for a state (public)',
+  })
   quote(@Body() dto: QuoteDto) {
     return this.documentsService.quote(dto.templateId, {
       state: dto.state,
@@ -134,8 +161,13 @@ export class DocumentsController {
   }
 
   @Post('verify-payment')
-  @ApiOperation({ summary: 'Verify Razorpay signature; freezes and unlocks the document' })
-  verifyPayment(@CurrentUser() user: CurrentUserPayload, @Body() dto: VerifyDocPaymentDto) {
+  @ApiOperation({
+    summary: 'Verify Razorpay signature; freezes and unlocks the document',
+  })
+  verifyPayment(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() dto: VerifyDocPaymentDto,
+  ) {
     return this.documentsService.verifyPayment(user.userId, dto);
   }
 
@@ -151,7 +183,10 @@ export class DocumentsController {
   @Roles(Role.LAWYER)
   @Post('reviews/:id/claim')
   @ApiOperation({ summary: 'Claim a requested review' })
-  claimReview(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+  claimReview(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+  ) {
     return this.reviewService.claim(user.userId, id);
   }
 
@@ -218,21 +253,33 @@ export class DocumentsController {
   @Roles(Role.ADMIN)
   @AdminScopes(AdminRole.OPS)
   @Patch('admin/templates/:id')
-  adminUpdateTemplate(@Param('id') id: string, @Body() dto: AdminUpdateTemplateDto) {
+  adminUpdateTemplate(
+    @Param('id') id: string,
+    @Body() dto: AdminUpdateTemplateDto,
+  ) {
     return this.documentsService.adminUpdateTemplate(id, dto);
   }
 
   @Roles(Role.ADMIN)
   @AdminScopes(AdminRole.OPS)
   @Patch('admin/templates/:id/status')
-  adminSetTemplateStatus(@Param('id') id: string, @Body() dto: SetTemplateStatusDto) {
-    return this.documentsService.adminSetTemplateStatus(id, dto.status as TemplateStatus);
+  adminSetTemplateStatus(
+    @Param('id') id: string,
+    @Body() dto: SetTemplateStatusDto,
+  ) {
+    return this.documentsService.adminSetTemplateStatus(
+      id,
+      dto.status as TemplateStatus,
+    );
   }
 
   @Roles(Role.ADMIN)
   @AdminScopes(AdminRole.OPS)
   @Get('admin/orders')
-  adminListOrders(@Query('page') page?: string, @Query('pageSize') pageSize?: string) {
+  adminListOrders(
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+  ) {
     return this.documentsService.adminListOrders(page, pageSize);
   }
 
@@ -253,7 +300,10 @@ export class DocumentsController {
   @Roles(Role.ADMIN)
   @AdminScopes(AdminRole.OPS)
   @Patch('admin/stamp-duty/:id')
-  adminUpdateStampDuty(@Param('id') id: string, @Body() dto: StampDutyUpdateDto) {
+  adminUpdateStampDuty(
+    @Param('id') id: string,
+    @Body() dto: StampDutyUpdateDto,
+  ) {
     return this.documentsService.adminUpdateStampDuty(id, dto);
   }
 
@@ -262,21 +312,28 @@ export class DocumentsController {
   @Public()
   @RateLimit(6, 60_000)
   @Post('templates/:id/prefill')
-  @ApiOperation({ summary: 'AI-extract form values from the user\u2019s description (settings-gated)' })
+  @ApiOperation({
+    summary:
+      'AI-extract form values from the user\u2019s description (settings-gated)',
+  })
   prefill(@Param('id') id: string, @Body() dto: PrefillDto) {
     return this.documentsService.prefill(id, dto.context);
   }
 
   @Public()
   @Post('templates/:id/preview')
-  @ApiOperation({ summary: 'Watermarked partial preview from answers (public)' })
+  @ApiOperation({
+    summary: 'Watermarked partial preview from answers (public)',
+  })
   preview(@Param('id') id: string, @Body() dto: PreviewDto) {
     return this.documentsService.preview(id, dto.input ?? {});
   }
 
   @Public()
   @Get('templates/:id')
-  @ApiOperation({ summary: 'One template by id or slug with its guided-form schema' })
+  @ApiOperation({
+    summary: 'One template by id or slug with its guided-form schema',
+  })
   getTemplate(@Param('id') id: string) {
     return this.documentsService.getTemplate(id);
   }

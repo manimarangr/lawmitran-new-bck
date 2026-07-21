@@ -21,8 +21,10 @@ export class DiaryCronService {
   @Cron('0 7 * * *')
   async dailyDigest() {
     const now = new Date();
-    const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
-    const todayEnd = new Date(now); todayEnd.setHours(23, 59, 59, 999);
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(now);
+    todayEnd.setHours(23, 59, 59, 999);
     const tomorrowStart = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
     const tomorrowEnd = new Date(todayEnd.getTime() + 24 * 60 * 60 * 1000);
 
@@ -67,7 +69,9 @@ export class DiaryCronService {
       await this.notify.notifyUser(r.lawyer.userId, 'DIARY_REMINDER_DUE', {
         title: `Reminder due today: ${r.notes ?? r.type.replace('_', ' ').toLowerCase()}`,
         body: r.case?.title,
-        link: r.case ? `/dashboard/diary/cases/${r.case.id}` : '/dashboard/diary/reminders',
+        link: r.case
+          ? `/dashboard/diary/cases/${r.case.id}`
+          : '/dashboard/diary/reminders',
       });
     }
 

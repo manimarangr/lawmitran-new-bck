@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { fetchAdminLawyer, reviewLawyer } from '@/lib/api/admin';
+import { fetchAdminLawyer, fetchAdminLawyerAsset, reviewLawyer } from '@/lib/api/admin';
 import AdminPageHeader from '@/components/site/AdminPageHeader';
 import Icon from '@/components/ui/Icon';
 
@@ -32,7 +32,8 @@ export default function AdminLawyerReviewPage() {
   const qc = useQueryClient();
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
-  const [doc, setDoc] = useState<{ title: string; url: string } | null>(null);
+  const [doc, setDoc] = useState<{ title: string; url: string; isPdf: boolean } | null>(null);
+  const [docLoading, setDocLoading] = useState(false);
 
   const q = useQuery({
     queryKey: ['admin-lawyer', id],
@@ -49,6 +50,28 @@ export default function AdminLawyerReviewPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [doc]);
 
+  // Each open creates a blob: URL — revoke the previous one to avoid leaks.
+  useEffect(() => {
+    return () => {
+      if (doc?.url) URL.revokeObjectURL(doc.url);
+    };
+  }, [doc?.url]);
+
+  // Private KYC docs are streamed through the authenticated API, then shown as
+  // a blob (bearer token can't ride on <img>/<iframe> src).
+  async function openAsset(kind: 'certificate' | 'profile', title: string) {
+    setError('');
+    setDocLoading(true);
+    try {
+      const { url, isPdf } = await fetchAdminLawyerAsset(id, kind);
+      setDoc({ title, url, isPdf });
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setDocLoading(false);
+    }
+  }
+
   const m = useMutation({
     mutationFn: (status: 'APPROVED' | 'REJECTED' | 'SUSPENDED') =>
       reviewLawyer(id, status, note.trim() || undefined),
@@ -63,7 +86,6 @@ export default function AdminLawyerReviewPage() {
   const pending = l && (l.verificationStatus === 'PENDING' || l.verificationStatus === 'UNDER_REVIEW');
   const awaiting = l?.verificationStatus === 'AWAITING_ONBOARDING';
   const office = l?.offices?.find((o) => o.isPrimary) ?? l?.offices?.[0];
-  const isPdf = doc ? /\.pdf(\?|$)/i.test(doc.url) : false;
 
   return (
     <div>
@@ -91,7 +113,7 @@ export default function AdminLawyerReviewPage() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex items-center gap-4">
                 {l.profileImageUrl ? (
-                  <button type="button" onClick={() => setDoc({ title: 'Profile photo', url: l.profileImageUrl! })} aria-label="View profile photo">
+                  <button type="button" onClick={() => openAsset('profile', 'Profile photo')} aria-label="View profile photo">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={l.profileImageUrl} alt="" className="h-14 w-14 rounded-2xl object-cover ring-1 ring-gray-200" />
                   </button>
@@ -182,7 +204,7 @@ export default function AdminLawyerReviewPage() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <button
                     type="button"
-                    onClick={() => setDoc({ title: 'Bar Council ID card', url: l.certificateImageUrl })}
+                    onClick={() => openAsset('certificate', 'Bar Council ID card')}
                     className="rounded-2xl border border-gray-200 p-5 text-center transition hover:border-gold"
                   >
                     <Icon name="id-card" aria-hidden="true" className="mb-2 text-2xl text-gold" />
@@ -192,7 +214,7 @@ export default function AdminLawyerReviewPage() {
                   {l.profileImageUrl ? (
                     <button
                       type="button"
-                      onClick={() => setDoc({ title: 'Profile photo', url: l.profileImageUrl! })}
+                      onClick={() => openAsset('profile', 'Profile photo')}
                       className="rounded-2xl border border-gray-200 p-5 text-center transition hover:border-gold"
                     >
                       <Icon name="camera" aria-hidden="true" className="mb-2 text-2xl text-gold" />
@@ -281,6 +303,14 @@ export default function AdminLawyerReviewPage() {
         )}
       </div>
 
+      {docLoading && !doc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <span className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-navy shadow">
+            Loading document…
+          </span>
+        </div>
+      )}
+
       {/* ===== document popup ===== */}
       {doc && l && (
         <div role="dialog" aria-modal="true" aria-labelledby="doc-title" className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -311,7 +341,7 @@ export default function AdminLawyerReviewPage() {
               </div>
             </div>
             <div className="overflow-auto bg-slate-50 p-4">
-              {isPdf ? (
+              {doc.isPdf ? (
                 <iframe src={doc.url} title={doc.title} className="h-[75vh] w-full rounded-lg border border-gray-200 bg-white" />
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element

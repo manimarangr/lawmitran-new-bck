@@ -28,14 +28,18 @@ export class AuditService {
           entityType: entry.entityType ?? null,
           entityId: entry.entityId ?? null,
           summary: entry.summary,
-          oldValue: (entry.oldValue ?? undefined) as Prisma.InputJsonValue | undefined,
-          newValue: (entry.newValue ?? undefined) as Prisma.InputJsonValue | undefined,
+          oldValue: (entry.oldValue ?? undefined) as
+            Prisma.InputJsonValue | undefined,
+          newValue: (entry.newValue ?? undefined) as
+            Prisma.InputJsonValue | undefined,
           ip: ctx?.ip ?? null,
           userAgent: ctx?.userAgent?.slice(0, 300) ?? null,
         },
       });
     } catch (err) {
-      this.logger.warn(`audit log failed [${action}]: ${(err as Error).message}`);
+      this.logger.warn(
+        `audit log failed [${action}]: ${(err as Error).message}`,
+      );
     }
   }
 }

@@ -12,6 +12,7 @@ import {
 } from '@/lib/api/diary';
 import DiaryNav from '@/components/diary/DiaryNav';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 
 const input = 'w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm focus:border-gold focus:outline-none';
 const TYPES: { value: DiaryReminderType; label: string }[] = [
@@ -56,7 +57,7 @@ export default function DiaryRemindersPage() {
   const overdue = (iso: string) => new Date(iso) < new Date();
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+    <Container className="py-8">
       <h1 className="mb-4 text-2xl font-extrabold text-navy">Reminders</h1>
       <DiaryNav />
 
@@ -129,6 +130,6 @@ export default function DiaryRemindersPage() {
           </p>
         )}
       </ul>
-    </div>
+    </Container>
   );
 }

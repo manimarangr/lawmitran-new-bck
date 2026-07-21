@@ -11,7 +11,13 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
-import { IsBoolean, IsIn, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { CurrentUserPayload } from '../../common/decorators/current-user.decorator';
@@ -27,7 +33,13 @@ class CreateCaseDto {
   @MinLength(2)
   city: string;
 
-  @IsIn(['FLAT_PURCHASE', 'SITE_PURCHASE', 'RESALE_HOUSE', 'AGRICULTURAL_LAND', 'OTHER'])
+  @IsIn([
+    'FLAT_PURCHASE',
+    'SITE_PURCHASE',
+    'RESALE_HOUSE',
+    'AGRICULTURAL_LAND',
+    'OTHER',
+  ])
   transactionType: string;
 }
 
@@ -54,7 +66,9 @@ export class PropertyController {
 
   @Public()
   @Get('checklists')
-  @ApiOperation({ summary: 'Document checklist for ?state=&type= (public, informational)' })
+  @ApiOperation({
+    summary: 'Document checklist for ?state=&type= (public, informational)',
+  })
   checklist(@Query('state') state = 'ANY', @Query('type') type = 'OTHER') {
     return this.propertyService.getChecklist(state, type);
   }
@@ -67,7 +81,10 @@ export class PropertyController {
 
   @Post('cases')
   @ApiOperation({ summary: 'Start a property document check' })
-  createCase(@CurrentUser() user: CurrentUserPayload, @Body() dto: CreateCaseDto) {
+  createCase(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() dto: CreateCaseDto,
+  ) {
     return this.propertyService.createCase(user.userId, dto);
   }
 
@@ -82,7 +99,10 @@ export class PropertyController {
   }
 
   @Post('cases/:id/documents')
-  @ApiOperation({ summary: 'Tick a checklist item, optionally attaching a scan (multipart "file")' })
+  @ApiOperation({
+    summary:
+      'Tick a checklist item, optionally attaching a scan (multipart "file")',
+  })
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -105,19 +125,26 @@ export class PropertyController {
   }
 
   @Post('cases/:id/analyze')
-  @ApiOperation({ summary: 'Run the deterministic checklist analysis (not legal advice)' })
+  @ApiOperation({
+    summary: 'Run the deterministic checklist analysis (not legal advice)',
+  })
   analyze(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
     return this.propertyService.analyze(user.userId, id);
   }
 
   @Get('cases/:id/lawyers')
   @ApiOperation({ summary: 'Verified property lawyers serving the case city' })
-  suggestLawyers(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+  suggestLawyers(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+  ) {
     return this.propertyService.suggestLawyers(user.userId, id);
   }
 
   @Post('cases/:id/request-opinion')
-  @ApiOperation({ summary: 'Send the case summary to a chosen lawyer as a lead' })
+  @ApiOperation({
+    summary: 'Send the case summary to a chosen lawyer as a lead',
+  })
   requestOpinion(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,

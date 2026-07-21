@@ -14,6 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchLawyers } from '@/lib/api/lawyers';
 import { getSavedCity } from '@/lib/geo';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 import type { LawyerListItem } from '@/types/lawyer';
 
 export default function HomeLawyers() {
@@ -44,8 +45,8 @@ export default function HomeLawyers() {
   const localised = q.data?.local && city;
 
   return (
-    <section className="bg-bg-soft px-5 pb-10 pt-8">
-      <div className="mx-auto max-w-[73.75rem]">
+    <section className="bg-bg-soft pb-10 pt-8">
+      <Container>
         <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
           <div>
             <span className="text-[0.78125rem] font-bold uppercase tracking-[.14em] text-gold">
@@ -68,7 +69,7 @@ export default function HomeLawyers() {
                 Verified lawyers are joining LawMitran now —{' '}
                 <Link href="/lawyers" className="font-semibold text-gold hover:underline">browse the directory</Link>{' '}
                 or{' '}
-                <Link href="/signup?role=lawyer" className="font-semibold text-gold hover:underline">join as a lawyer</Link>.
+                <Link href="/signup/lawyer" className="font-semibold text-gold hover:underline">join as a lawyer</Link>.
               </>
             )}
           </p>
@@ -130,7 +131,7 @@ export default function HomeLawyers() {
             })}
           </div>
         )}
-      </div>
+      </Container>
     </section>
   );
 }

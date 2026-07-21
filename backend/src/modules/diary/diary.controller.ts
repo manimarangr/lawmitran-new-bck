@@ -32,14 +32,22 @@ export class DiaryController {
   constructor(private diary: DiaryService) {}
 
   @Get('dashboard')
-  @ApiOperation({ summary: 'Case Diary dashboard (counts, hearings, reminders, activity)' })
+  @ApiOperation({
+    summary: 'Case Diary dashboard (counts, hearings, reminders, activity)',
+  })
   dashboard(@CurrentUser() u: CurrentUserPayload) {
     return this.diary.dashboard(u.userId);
   }
 
   @Get('calendar')
-  @ApiOperation({ summary: 'Month feed of hearings, next-hearing dates and reminders (?month=YYYY-MM)' })
-  calendar(@CurrentUser() u: CurrentUserPayload, @Query('month') month: string) {
+  @ApiOperation({
+    summary:
+      'Month feed of hearings, next-hearing dates and reminders (?month=YYYY-MM)',
+  })
+  calendar(
+    @CurrentUser() u: CurrentUserPayload,
+    @Query('month') month: string,
+  ) {
     return this.diary.calendar(u.userId, month);
   }
 
@@ -52,7 +60,10 @@ export class DiaryController {
 
   @Post('clients')
   @ApiOperation({ summary: 'Add a client' })
-  createClient(@CurrentUser() u: CurrentUserPayload, @Body() dto: DiaryClientDto) {
+  createClient(
+    @CurrentUser() u: CurrentUserPayload,
+    @Body() dto: DiaryClientDto,
+  ) {
     return this.diary.createClient(u.userId, dto);
   }
 
@@ -75,13 +86,21 @@ export class DiaryController {
 
   @Post('cases')
   @ApiOperation({ summary: 'Create a case' })
-  createCase(@CurrentUser() u: CurrentUserPayload, @Body() dto: DiaryCaseCreateDto) {
+  createCase(
+    @CurrentUser() u: CurrentUserPayload,
+    @Body() dto: DiaryCaseCreateDto,
+  ) {
     return this.diary.createCase(u.userId, dto);
   }
 
   @Post('cases/from-lead/:leadId')
-  @ApiOperation({ summary: 'Convert a marketplace lead into a diary case (idempotent)' })
-  fromLead(@CurrentUser() u: CurrentUserPayload, @Param('leadId') leadId: string) {
+  @ApiOperation({
+    summary: 'Convert a marketplace lead into a diary case (idempotent)',
+  })
+  fromLead(
+    @CurrentUser() u: CurrentUserPayload,
+    @Param('leadId') leadId: string,
+  ) {
     return this.diary.createCaseFromLead(u.userId, leadId);
   }
 
@@ -108,7 +127,9 @@ export class DiaryController {
   }
 
   @Post('cases/:id/hearings')
-  @ApiOperation({ summary: 'Append a hearing (also syncs the case next-hearing date)' })
+  @ApiOperation({
+    summary: 'Append a hearing (also syncs the case next-hearing date)',
+  })
   addHearing(
     @CurrentUser() u: CurrentUserPayload,
     @Param('id') id: string,
@@ -126,7 +147,10 @@ export class DiaryController {
 
   @Post('reminders')
   @ApiOperation({ summary: 'Create a reminder' })
-  createReminder(@CurrentUser() u: CurrentUserPayload, @Body() dto: DiaryReminderDto) {
+  createReminder(
+    @CurrentUser() u: CurrentUserPayload,
+    @Body() dto: DiaryReminderDto,
+  ) {
     return this.diary.createReminder(u.userId, dto);
   }
 

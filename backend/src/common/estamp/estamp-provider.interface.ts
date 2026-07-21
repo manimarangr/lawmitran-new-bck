@@ -1,4 +1,8 @@
-import { EStampCreateInput, EStampCreateResult, EStampWebhookEvent } from './estamp.types';
+import {
+  EStampCreateInput,
+  EStampCreateResult,
+  EStampWebhookEvent,
+} from './estamp.types';
 
 /** DI token for the array of registered e-stamp providers. */
 export const ESTAMP_PROVIDERS = Symbol('ESTAMP_PROVIDERS');

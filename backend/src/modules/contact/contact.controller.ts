@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { Public } from '../../common/decorators/public.decorator';
@@ -33,7 +41,8 @@ export class ContactController {
   @Public()
   @Post()
   @ApiOperation({
-    summary: 'Submit a contact-us query (public) — payment issues, ID card upload issues, etc.',
+    summary:
+      'Submit a contact-us query (public) — payment issues, ID card upload issues, etc.',
   })
   create(@Body() dto: CreateContactQueryDto) {
     return this.contactService.create(dto);
@@ -41,7 +50,10 @@ export class ContactController {
 
   @Roles(Role.ADMIN)
   @Get('admin')
-  @ApiOperation({ summary: 'List client queries (filter with ?status=OPEN|RESOLVED, ?q, ?page, ?pageSize)' })
+  @ApiOperation({
+    summary:
+      'List client queries (filter with ?status=OPEN|RESOLVED, ?q, ?page, ?pageSize)',
+  })
   list(
     @Query('status') status?: 'OPEN' | 'RESOLVED',
     @Query('q') q?: string,
@@ -53,7 +65,9 @@ export class ContactController {
 
   @Roles(Role.ADMIN)
   @Patch('admin/:id')
-  @ApiOperation({ summary: 'Resolve/reopen a query and attach an internal note' })
+  @ApiOperation({
+    summary: 'Resolve/reopen a query and attach an internal note',
+  })
   update(@Param('id') id: string, @Body() dto: ResolveContactQueryDto) {
     return this.contactService.update(id, dto);
   }

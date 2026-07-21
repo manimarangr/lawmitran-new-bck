@@ -13,7 +13,19 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 import { CATEGORIES } from '@/lib/legal-guides/categories';
+import NavDropdown from '@/components/site/NavDropdown';
+
+const LEGAL_GUIDE_ITEMS = CATEGORIES.map((c) => ({
+  href: `/legal-guides/category/${c.slug}`,
+  label: c.name,
+  icon: c.icon,
+}));
+const SIGNUP_ITEMS = [
+  { href: '/signup/client', label: 'Client Signup' },
+  { href: '/signup/lawyer', label: 'Lawyer Signup' },
+];
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
@@ -121,7 +133,7 @@ export default function SiteHeader() {
     <>
       {/* trust bar — always visible, signed in or out */}
       <div className="bg-navy text-[0.78125rem] text-slate-300">
-        <div className="mx-auto flex h-[2.375rem] max-w-[73.75rem] items-center justify-between px-5">
+        <Container className="flex h-[2.375rem] items-center justify-between">
             <div className="flex items-center gap-5">
               <span className="font-semibold text-white">
                 <Icon name="circle-check" aria-hidden="true" className="mr-1.5 text-gold" />
@@ -141,8 +153,8 @@ export default function SiteHeader() {
                   for that role, so the bar is useful to lawyers and clients alike. */}
               {!me ? (
                 <>
-                  <Link href="/signup?role=lawyer" className="hover:text-gold">For Lawyers</Link>
-                  <Link href="/signup" className="hover:text-gold">For Users</Link>
+                  <Link href="/signup/lawyer" className="hover:text-gold">For Lawyers</Link>
+                  <Link href="/signup/client" className="hover:text-gold">For Users</Link>
                 </>
               ) : me.role === 'LAWYER' ? (
                 <>
@@ -157,11 +169,11 @@ export default function SiteHeader() {
               )}
               <Link href="/legal-guides" className="hover:text-gold">Help Center</Link>
             </div>
-        </div>
+        </Container>
       </div>
 
       <header className="sticky top-0 z-50 border-b border-line bg-white/90 backdrop-blur-md print:hidden">
-        <div className="mx-auto flex h-[4.625rem] max-w-[73.75rem] items-center justify-between px-5">
+        <Container className="flex h-[4.625rem] items-center justify-between">
           <Link href={me ? dashboardPath(me.role) : '/'} className="flex items-center" aria-label="LawMitran home">
             <Image src="/logo.svg" alt="LawMitran" width={160} height={38} className="h-[2.375rem] w-auto" priority />
           </Link>
@@ -169,32 +181,14 @@ export default function SiteHeader() {
           <nav aria-label="Main" className="ml-auto mr-6 hidden items-center gap-7 md:flex">
             {links.map((l) =>
               !me && l.href === '/legal-guides' ? (
-                <div key={l.label} className="group relative">
-                  <Link href="/legal-guides" className="text-[0.9375rem] font-semibold text-ink hover:text-gold">
-                    {l.label}
-                  </Link>
-                  <div className="invisible absolute left-1/2 top-full z-50 w-[35rem] -translate-x-1/2 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-                    <div className="rounded-2xl border border-line bg-white p-4 shadow-lg">
-                      <div className="grid grid-cols-2 gap-1">
-                        {CATEGORIES.map((c) => (
-                          <Link
-                            key={c.slug}
-                            href={`/legal-guides/category/${c.slug}`}
-                            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-bg-soft hover:text-gold"
-                          >
-                            <Icon name={c.icon} aria-hidden="true" className="text-gold" />
-                            {c.name}
-                          </Link>
-                        ))}
-                      </div>
-                      <div className="mt-2 border-t border-line pt-2 text-center">
-                        <Link href="/legal-guides/all" className="text-sm font-semibold text-gold hover:underline">
-                          Browse all guides
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <NavDropdown
+                  key={l.label}
+                  label={l.label}
+                  items={LEGAL_GUIDE_ITEMS}
+                  footerLink={{ href: '/legal-guides/all', label: 'Browse all guides' }}
+                  columns={2}
+                  align="center"
+                />
               ) : (
                 <Link
                   key={l.label}
@@ -276,9 +270,9 @@ export default function SiteHeader() {
                 </div>
               </>
             ) : (
-              <Link href="/signup" className="hidden rounded-[10px] bg-gold px-5 py-2.5 text-sm font-semibold text-navy transition hover:-translate-y-px hover:bg-[#b88a10] sm:inline-flex">
-                Sign Up
-              </Link>
+              <div className="hidden sm:block">
+                <NavDropdown label="Sign Up" items={SIGNUP_ITEMS} variant="button" align="right" />
+              </div>
             )}
 
             {!me && (
@@ -294,40 +288,36 @@ export default function SiteHeader() {
               </button>
             )}
           </div>
-        </div>
+        </Container>
 
         {/* mobile nav (visitors) */}
         {!me && open && (
           <nav id="mobile-nav" aria-label="Main menu" className="border-t border-line bg-white px-5 py-4 md:hidden">
             <ul className="space-y-1">
-              {PUBLIC_LINKS.map((l) => (
-                <li key={l.label}>
-                  <Link href={l.href} onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 text-[0.9375rem] font-semibold text-ink hover:bg-bg-soft">
-                    {l.label}
-                  </Link>
-                  {l.href === '/legal-guides' && (
-                    <ul className="ml-3 border-l border-line pl-2">
-                      {CATEGORIES.map((c) => (
-                        <li key={c.slug}>
-                          <Link href={`/legal-guides/category/${c.slug}`} onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2 text-sm text-slate-500 hover:bg-bg-soft hover:text-gold">
-                            {c.name}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              ))}
+              {PUBLIC_LINKS.map((l) =>
+                l.href === '/legal-guides' ? (
+                  <NavDropdown
+                    key={l.label}
+                    mobile
+                    label={l.label}
+                    items={LEGAL_GUIDE_ITEMS}
+                    footerLink={{ href: '/legal-guides/all', label: 'Browse all guides' }}
+                    onNavigate={() => setOpen(false)}
+                  />
+                ) : (
+                  <li key={l.label}>
+                    <Link href={l.href} onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 text-[0.9375rem] font-semibold text-ink hover:bg-bg-soft">
+                      {l.label}
+                    </Link>
+                  </li>
+                ),
+              )}
               <li>
                 <Link href="/login" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 text-[0.9375rem] font-semibold text-ink hover:bg-bg-soft">
                   Login
                 </Link>
               </li>
-              <li>
-                <Link href="/signup" onClick={() => setOpen(false)} className="mt-2 block rounded-[10px] bg-gold px-3 py-2.5 text-center text-sm font-semibold text-navy">
-                  Sign Up
-                </Link>
-              </li>
+              <NavDropdown mobile label="Sign Up" items={SIGNUP_ITEMS} onNavigate={() => setOpen(false)} />
             </ul>
           </nav>
         )}

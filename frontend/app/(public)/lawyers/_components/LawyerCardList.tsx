@@ -3,10 +3,11 @@
 import { useLawyerSearch } from '@/hooks/useLawyerSearch';
 import { useLawyerSearchStore } from '@/stores/lawyerSearchStore';
 import { LawyerCard } from './LawyerCard';
+import Icon from '@/components/ui/Icon';
 
 export function LawyerCardList() {
   const { data, isLoading, isError } = useLawyerSearch();
-  const { page, setPage } = useLawyerSearchStore();
+  const { page, setPage, setLeadLawyerId } = useLawyerSearchStore();
 
   if (isLoading) {
     return (
@@ -44,6 +45,27 @@ export function LawyerCardList() {
         Showing <span className="font-semibold text-slate-800">{from}–{to}</span> of {data.total}{' '}
         verified lawyer{data.total !== 1 ? 's' : ''}
       </p>
+
+      <div className="mb-5 flex flex-col items-start justify-between gap-3 rounded-2xl border border-gold/30 bg-gradient-to-r from-amber-50 to-white p-4 sm:flex-row sm:items-center">
+        <div className="flex items-start gap-3">
+          <span aria-hidden="true" className="hero-gradient flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-gold">
+            <Icon name="paper-plane" />
+          </span>
+          <div>
+            <p className="text-sm font-bold text-navy">Not sure who to pick?</p>
+            <p className="text-xs text-slate-500">
+              Submit your requirement once — the top-matched lawyer below contacts you directly.
+              Free &amp; confidential, no obligation.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => setLeadLawyerId(data.items[0].id)}
+          className="w-full shrink-0 rounded-xl bg-gold px-5 py-2.5 text-sm font-bold text-navy transition hover:bg-[#b58f3f] sm:w-auto"
+        >
+          Get Contacted
+        </button>
+      </div>
 
       <div className="space-y-4">
         {data.items.map((lawyer) => (

@@ -16,6 +16,7 @@ import {
 } from '@/lib/api/lawyers';
 import CityInput from '@/components/ui/CityInput';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 
 export default function LocationsPage() {
   const qc = useQueryClient();
@@ -122,7 +123,7 @@ export default function LocationsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
+    <Container className="py-8">
       <h1 className="text-2xl font-extrabold text-navy">Locations &amp; service areas</h1>
       <p className="mt-1 text-sm text-slate-500">
         Offices are where you sit; service areas are where you take clients from. You appear in
@@ -349,6 +350,6 @@ export default function LocationsPage() {
           </button>
         </div>
       </section>
-    </div>
+    </Container>
   );
 }

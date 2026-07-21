@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { fetchMyDocuments, type MyDocument } from '@/lib/api/documents';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 
 const STATUS_CHIP: Record<string, string> = {
   DRAFT: 'bg-amber-50 text-amber-700',
@@ -17,7 +18,7 @@ export default function MyDocumentsPage() {
   const docs = q.data ?? [];
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
+    <Container className="py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-navy">My documents</h1>
@@ -66,6 +67,6 @@ export default function MyDocumentsPage() {
           </Link>
         ))}
       </div>
-    </div>
+    </Container>
   );
 }

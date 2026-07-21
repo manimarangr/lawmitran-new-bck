@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getLawyerBySlug } from '@/lib/api/seo';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
+import { LocalityMapPreview, type LocalityMapMarker } from '@/components/lawyers/LocalityMapPreview';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
@@ -45,6 +47,16 @@ export default async function LawyerProfilePage({ params }: Props) {
   const initials = lawyer.fullName.split(' ').map((w) => w[0]).slice(0, 2).join('');
   const verified = lawyer.verificationStatus === 'APPROVED';
 
+  const officeMarkers: LocalityMapMarker[] = offices
+    .filter((o) => o.latitude != null && o.longitude != null)
+    .map((o) => ({
+      id: o.id,
+      lat: o.latitude as number,
+      lng: o.longitude as number,
+      label: o.label || 'Office',
+      sublabel: [o.addressLine, o.city.name].filter(Boolean).join(', '),
+    }));
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Attorney',
@@ -70,15 +82,15 @@ export default async function LawyerProfilePage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="mx-auto max-w-7xl px-6 pt-6">
+      <Container className="pt-6">
         <nav aria-label="Breadcrumb" className="text-xs text-slate-400">
           <Link href="/" className="hover:text-gold">Home</Link> <span className="mx-1">/</span>{' '}
           <Link href="/lawyers" className="hover:text-gold">Lawyers{lawyer.city ? ` in ${lawyer.city.name}` : ''}</Link>{' '}
           <span className="mx-1">/</span> <span className="font-medium text-slate-700">{lawyer.fullName}</span>
         </nav>
-      </div>
+      </Container>
 
-      <section className="mx-auto max-w-7xl px-6 py-8">
+      <Container as="section" className="py-8">
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
           {/* LEFT */}
           <div className="space-y-6 lg:col-span-2">
@@ -253,6 +265,11 @@ export default async function LawyerProfilePage({ params }: Props) {
                     </div>
                   </div>
                 )}
+                {officeMarkers.length > 0 && (
+                  <div className="mt-4">
+                    <LocalityMapPreview markers={officeMarkers} height="240px" />
+                  </div>
+                )}
               </section>
             )}
 
@@ -297,7 +314,7 @@ export default async function LawyerProfilePage({ params }: Props) {
           LawMitran is an information platform, not a law firm. Listings are informational and not an
           endorsement or solicitation.
         </p>
-      </section>
+      </Container>
     </main>
   );
 }

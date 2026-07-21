@@ -39,7 +39,9 @@ export function LawyerCard({ lawyer }: { lawyer: LawyerListItem }) {
   const cityName = lawyer.city?.name;
   const nearLabel = lawyer.nearLocality
     ? `Near ${lawyer.nearLocality}${lawyer.localityKm != null ? ` (~${lawyer.localityKm} km)` : ''}`
-    : null;
+    : lawyer.distanceKm != null
+      ? `~${lawyer.distanceKm} km away`
+      : null;
   const stateName = lawyer.city?.district.state.name;
   const rating = lawyer.ratingAvg ? parseFloat(lawyer.ratingAvg) : 0;
   const verified = lawyer.verificationStatus === 'APPROVED';

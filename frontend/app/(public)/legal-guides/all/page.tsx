@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 import { guideCategories, allGuideCards } from '@/lib/legal-guides/source';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
@@ -16,8 +17,8 @@ export default async function AllGuidesPage() {
   const [categories, all] = await Promise.all([guideCategories(), allGuideCards()]);
 
   return (
-    <div>
-      <div className="mx-auto max-w-5xl px-6 py-10">
+    <Container className="py-10">
+      <div className="mx-auto max-w-5xl">
         <nav aria-label="Breadcrumb" className="mb-4 text-xs text-slate-400">
           <Link href="/" className="hover:text-gold">Home</Link> /{' '}
           <Link href="/legal-guides" className="hover:text-gold">Legal Guides</Link> /{' '}
@@ -52,6 +53,6 @@ export default async function AllGuidesPage() {
           );
         })}
       </div>
-    </div>
+    </Container>
   );
 }

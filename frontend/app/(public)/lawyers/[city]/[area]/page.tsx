@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getLanding, getLawyers } from '@/lib/api/seo';
 import type { LawyerListItem } from '@/types/lawyer';
+import Container from '@/components/ui/Container';
+import { LocalityMapPreview, type LocalityMapMarker } from '@/components/lawyers/LocalityMapPreview';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
@@ -47,6 +49,17 @@ export default async function CityPracticeLanding({ params }: Props) {
   const areaName = titleCase(area);
   const faqs = landing.faqJson ?? [];
 
+  const mapMarkers: LocalityMapMarker[] = result.items
+    .filter((l) => l.latitude != null && l.longitude != null)
+    .map((l) => ({
+      id: l.id,
+      lat: l.latitude as number,
+      lng: l.longitude as number,
+      label: l.fullName,
+      sublabel: areaName,
+      href: `/lawyer/${l.slug ?? l.id}`,
+    }));
+
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -76,7 +89,7 @@ export default async function CityPracticeLanding({ params }: Props) {
       {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <header className="bg-gradient-to-br from-[#0B192C] to-[#1E3E62] py-10 text-white">
-        <div className="mx-auto max-w-6xl px-6">
+        <Container>
           <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-300">
             <Link href="/" className="hover:text-amber-400">Home</Link> /{' '}
             <Link href="/lawyers" className="hover:text-amber-400">Lawyers</Link> /{' '}
@@ -85,11 +98,12 @@ export default async function CityPracticeLanding({ params }: Props) {
           </nav>
           <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl">{landing.title}</h1>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-300">{landing.intro}</p>
-        </div>
+        </Container>
       </header>
 
-      <div className="mx-auto max-w-6xl px-6 py-10">
+      <Container className="py-10">
         <section aria-label={`${areaName} lawyers in ${cityName}`} className="space-y-4">
+          {mapMarkers.length > 0 && <LocalityMapPreview markers={mapMarkers} />}
           {result.items.length === 0 && (
             <p className="rounded-2xl border border-dashed border-gray-200 p-8 text-center text-sm text-slate-400">
               No verified {areaName.toLowerCase()} lawyers listed in {cityName} yet.
@@ -162,7 +176,7 @@ export default async function CityPracticeLanding({ params }: Props) {
             </ul>
           </div>
         </section>
-      </div>
+      </Container>
     </main>
   );
 }

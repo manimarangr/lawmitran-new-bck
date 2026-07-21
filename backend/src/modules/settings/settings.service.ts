@@ -1,11 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { AuditService } from '../../common/audit/audit.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import {
-  GROUPS,
-  REGISTRY_KEYS,
-  SETTINGS_REGISTRY,
-} from './settings.registry';
+import { GROUPS, REGISTRY_KEYS, SETTINGS_REGISTRY } from './settings.registry';
 
 const CACHE_TTL_MS = 30_000;
 
@@ -25,10 +21,14 @@ export class SettingsService {
     if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.value;
     let value: string | undefined;
     try {
-      const row = await this.prisma.platformSetting.findUnique({ where: { key } });
+      const row = await this.prisma.platformSetting.findUnique({
+        where: { key },
+      });
       value = row?.value ?? process.env[key];
     } catch (err) {
-      this.logger.warn(`settings lookup failed for ${key}: ${(err as Error).message}`);
+      this.logger.warn(
+        `settings lookup failed for ${key}: ${(err as Error).message}`,
+      );
       value = process.env[key];
     }
     this.cache.set(key, { value, at: Date.now() });

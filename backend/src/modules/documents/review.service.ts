@@ -5,7 +5,11 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { DocReviewStatus, DocumentStatus, VerificationStatus } from '@prisma/client';
+import {
+  DocReviewStatus,
+  DocumentStatus,
+  VerificationStatus,
+} from '@prisma/client';
 import { AuditService } from '../../common/audit/audit.service';
 import { NotifyService } from '../../common/notify/notify.service';
 import { RazorpayService } from '../../common/payments/razorpay.service';
@@ -32,7 +36,12 @@ export class ReviewService {
     private audit: AuditService,
   ) {}
 
-  private async event(documentId: string, actorId: string, action: string, comment?: string) {
+  private async event(
+    documentId: string,
+    actorId: string,
+    action: string,
+    comment?: string,
+  ) {
     await this.prisma.documentReviewEvent.create({
       data: { documentId, actorId, action, comment: comment ?? null },
     });
@@ -44,7 +53,9 @@ export class ReviewService {
       select: { verificationStatus: true },
     });
     if (!lawyer || lawyer.verificationStatus !== VerificationStatus.APPROVED) {
-      throw new ForbiddenException('Only verified lawyers can review documents');
+      throw new ForbiddenException(
+        'Only verified lawyers can review documents',
+      );
     }
   }
 
@@ -52,17 +63,25 @@ export class ReviewService {
 
   /** Client: open a Razorpay order for the review fee on a paid document. */
   async requestReview(userId: string, id: string) {
-    await assertFeature(this.settings, DOC_FLAGS.LAWYER_REVIEW, 'Lawyer review');
+    await assertFeature(
+      this.settings,
+      DOC_FLAGS.LAWYER_REVIEW,
+      'Lawyer review',
+    );
     const doc = await this.prisma.customerDocument.findFirst({
       where: { id, userId },
       include: { template: { select: { title: true } } },
     });
     if (!doc) throw new NotFoundException('Document not found');
     if (doc.status === DocumentStatus.DRAFT || !doc.contentHtml) {
-      throw new BadRequestException('Pay for the document before requesting a review');
+      throw new BadRequestException(
+        'Pay for the document before requesting a review',
+      );
     }
     if (doc.reviewStatus !== DocReviewStatus.NONE) {
-      throw new BadRequestException('A review has already been requested for this document');
+      throw new BadRequestException(
+        'A review has already been requested for this document',
+      );
     }
 
     const fee = await this.settings.getNumber('DOCS_LAWYER_REVIEW_FEE', 499);
@@ -89,9 +108,15 @@ export class ReviewService {
   async verifyReviewPayment(
     userId: string,
     id: string,
-    dto: { razorpayOrderId: string; razorpayPaymentId: string; razorpaySignature: string },
+    dto: {
+      razorpayOrderId: string;
+      razorpayPaymentId: string;
+      razorpaySignature: string;
+    },
   ) {
-    const doc = await this.prisma.customerDocument.findFirst({ where: { id, userId } });
+    const doc = await this.prisma.customerDocument.findFirst({
+      where: { id, userId },
+    });
     if (!doc) throw new NotFoundException('Document not found');
     if (doc.reviewStatus !== DocReviewStatus.NONE) {
       throw new BadRequestException('This review is already paid');
@@ -104,11 +129,15 @@ export class ReviewService {
       dto.razorpayPaymentId,
       dto.razorpaySignature,
     );
-    if (!ok) throw new BadRequestException('Payment signature verification failed');
+    if (!ok)
+      throw new BadRequestException('Payment signature verification failed');
 
     const updated = await this.prisma.customerDocument.update({
       where: { id: doc.id },
-      data: { reviewStatus: DocReviewStatus.REQUESTED, reviewPaymentId: dto.razorpayPaymentId },
+      data: {
+        reviewStatus: DocReviewStatus.REQUESTED,
+        reviewPaymentId: dto.razorpayPaymentId,
+      },
       select: { id: true, reviewStatus: true },
     });
     await this.event(doc.id, userId, 'REQUESTED');
@@ -139,16 +168,24 @@ export class ReviewService {
         reviewFee: true,
         createdAt: true,
         lawyerId: true,
-        template: { select: { title: true, category: { select: { name: true } } } },
+        template: {
+          select: { title: true, category: { select: { name: true } } },
+        },
       },
     });
   }
 
   /** Lawyer: claim a requested review. */
   async claim(lawyerUserId: string, id: string) {
-    await assertFeature(this.settings, DOC_FLAGS.LAWYER_REVIEW, 'Lawyer review');
+    await assertFeature(
+      this.settings,
+      DOC_FLAGS.LAWYER_REVIEW,
+      'Lawyer review',
+    );
     await this.assertApprovedLawyer(lawyerUserId);
-    const doc = await this.prisma.customerDocument.findUnique({ where: { id } });
+    const doc = await this.prisma.customerDocument.findUnique({
+      where: { id },
+    });
     if (!doc) throw new NotFoundException('Document not found');
     if (doc.reviewStatus !== DocReviewStatus.REQUESTED) {
       throw new BadRequestException('This review is not available to claim');
@@ -169,18 +206,32 @@ export class ReviewService {
     decision: Decision,
     comment?: string,
   ) {
-    await assertFeature(this.settings, DOC_FLAGS.LAWYER_REVIEW, 'Lawyer review');
-    const doc = await this.prisma.customerDocument.findUnique({ where: { id } });
+    await assertFeature(
+      this.settings,
+      DOC_FLAGS.LAWYER_REVIEW,
+      'Lawyer review',
+    );
+    const doc = await this.prisma.customerDocument.findUnique({
+      where: { id },
+    });
     if (!doc) throw new NotFoundException('Document not found');
-    if (doc.lawyerId !== lawyerUserId || doc.reviewStatus !== DocReviewStatus.IN_REVIEW) {
+    if (
+      doc.lawyerId !== lawyerUserId ||
+      doc.reviewStatus !== DocReviewStatus.IN_REVIEW
+    ) {
       throw new ForbiddenException('You are not reviewing this document');
     }
     if (decision !== 'APPROVED' && !comment?.trim()) {
-      throw new BadRequestException('A comment is required to reject or request changes');
+      throw new BadRequestException(
+        'A comment is required to reject or request changes',
+      );
     }
 
     if (decision === 'APPROVED') {
-      const pct = await this.settings.getNumber('DOCS_LAWYER_PAYOUT_PERCENT', 70);
+      const pct = await this.settings.getNumber(
+        'DOCS_LAWYER_PAYOUT_PERCENT',
+        70,
+      );
       const fee = doc.reviewFee ? Number(doc.reviewFee) : 0;
       const payout = Math.round((fee * pct) / 100);
       await this.prisma.customerDocument.update({
@@ -192,7 +243,11 @@ export class ReviewService {
         title: 'Your document was approved',
         body: 'A lawyer has reviewed and approved your document.',
       });
-      return { id, reviewStatus: DocReviewStatus.APPROVED, lawyerPayout: payout };
+      return {
+        id,
+        reviewStatus: DocReviewStatus.APPROVED,
+        lawyerPayout: payout,
+      };
     }
 
     if (decision === 'REJECTED') {

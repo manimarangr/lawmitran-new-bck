@@ -9,7 +9,8 @@ export class SetPlanPriceDto {
 
   @ApiPropertyOptional({
     example: 25,
-    description: 'Max new leads per month for this plan; omit/null for unlimited',
+    description:
+      'Max new leads per month for this plan; omit/null for unlimited',
   })
   @IsOptional()
   @IsInt()
@@ -17,7 +18,8 @@ export class SetPlanPriceDto {
   monthlyLeadCap?: number | null;
   @ApiPropertyOptional({
     example: 3,
-    description: 'Max active service areas for this plan; omit/null for unlimited (docs/28)',
+    description:
+      'Max active service areas for this plan; omit/null for unlimited (docs/28)',
   })
   @IsOptional()
   @IsInt()

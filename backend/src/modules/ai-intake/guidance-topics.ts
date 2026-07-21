@@ -20,7 +20,16 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
     key: 'cheque-bounce',
     title: 'Cheque bounce (Section 138, NI Act)',
     practiceMatch: 'cheque',
-    keywords: ['cheque', 'check bounce', 'bounced', 'dishonour', 'dishonor', 'insufficient funds', 'ni act', '138'],
+    keywords: [
+      'cheque',
+      'check bounce',
+      'bounced',
+      'dishonour',
+      'dishonor',
+      'insufficient funds',
+      'ni act',
+      '138',
+    ],
     summary:
       'A bounced cheque is a criminal offence under Section 138 of the Negotiable Instruments Act. The law gives you a strict, time-bound process to recover your money.',
     steps: [
@@ -29,14 +38,25 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
       'The drawer gets 15 days to pay after receiving the notice.',
       'If unpaid, a complaint must be filed in court within the next 30 days.',
     ],
-    urgentNote: 'Deadlines here are strict — missing the 30-day notice window can sink the case.',
+    urgentNote:
+      'Deadlines here are strict — missing the 30-day notice window can sink the case.',
     templateMatch: ['notice', 'cheque'],
   },
   {
     key: 'tenant-landlord',
     title: 'Tenant–landlord dispute',
     practiceMatch: 'property',
-    keywords: ['rent', 'tenant', 'landlord', 'deposit', 'evict', 'eviction', 'vacate', 'lease', 'rental'],
+    keywords: [
+      'rent',
+      'tenant',
+      'landlord',
+      'deposit',
+      'evict',
+      'eviction',
+      'vacate',
+      'lease',
+      'rental',
+    ],
     summary:
       'Rental disputes — unreturned deposits, eviction threats, rent hikes — are governed by your rent agreement and the state Rent Control / Tenancy Act.',
     steps: [
@@ -51,7 +71,18 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
     key: 'divorce-family',
     title: 'Divorce & family matters',
     practiceMatch: 'family',
-    keywords: ['divorce', 'wife', 'husband', 'alimony', 'custody', 'maintenance', 'marriage', 'dowry', '498', 'separation'],
+    keywords: [
+      'divorce',
+      'wife',
+      'husband',
+      'alimony',
+      'custody',
+      'maintenance',
+      'marriage',
+      'dowry',
+      '498',
+      'separation',
+    ],
     summary:
       'Divorce can be mutual-consent (fastest — typically 6–18 months) or contested. Custody, maintenance, and property division are decided alongside.',
     steps: [
@@ -60,21 +91,47 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
       'Contested divorce needs grounds (cruelty, desertion, adultery, etc.) — evidence is key.',
       'Interim maintenance and custody can be sought while the case runs.',
     ],
-    urgentNote: 'If there is any threat to your safety, approach the police or a protection officer first.',
+    urgentNote:
+      'If there is any threat to your safety, approach the police or a protection officer first.',
   },
   {
     key: 'consumer',
     title: 'Consumer complaint',
     practiceMatch: 'consumer',
     keywords: [
-      'refund', 'defective', 'warranty', 'consumer', 'ecommerce', 'delivery',
-      'builder delay', 'service deficiency', 'insurance claim rejected',
+      'refund',
+      'defective',
+      'warranty',
+      'consumer',
+      'ecommerce',
+      'delivery',
+      'builder delay',
+      'service deficiency',
+      'insurance claim rejected',
       // online shopping — return/replacement disputes
-      'amazon', 'flipkart', 'myntra', 'meesho', 'online order', 'return it',
-      'not able to return', 'replacement', 'seller refused', 'wrong product', 'fake product',
+      'amazon',
+      'flipkart',
+      'myntra',
+      'meesho',
+      'online order',
+      'return it',
+      'not able to return',
+      'replacement',
+      'seller refused',
+      'wrong product',
+      'fake product',
       // travel & airlines — deficiency of service under CPA 2019
-      'flight', 'airline', 'missed flight', 'flight cancelled', 'flight delayed',
-      'baggage', 'travel agent', 'tour package', 'hotel booking', 'train ticket', 'overbooking',
+      'flight',
+      'airline',
+      'missed flight',
+      'flight cancelled',
+      'flight delayed',
+      'baggage',
+      'travel agent',
+      'tour package',
+      'hotel booking',
+      'train ticket',
+      'overbooking',
     ],
     summary:
       'Deficient service or defective goods fall under the Consumer Protection Act, 2019. Consumer forums are designed to work without heavy legal costs.',
@@ -90,7 +147,19 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
     key: 'criminal-fir',
     title: 'FIR, police matters & bail',
     practiceMatch: 'criminal',
-    keywords: ['fir', 'police', 'arrest', 'bail', 'complaint against', 'theft', 'fraud', 'cheating', '420', 'assault', 'threat'],
+    keywords: [
+      'fir',
+      'police',
+      'arrest',
+      'bail',
+      'complaint against',
+      'theft',
+      'fraud',
+      'cheating',
+      '420',
+      'assault',
+      'threat',
+    ],
     summary:
       'For cognizable offences the police must register an FIR. If someone you know is arrested, bail strategy depends on whether the offence is bailable.',
     steps: [
@@ -99,13 +168,25 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
       'If arrested: a bailable offence means bail is a right; otherwise a bail application is filed.',
       'Never sign statements you have not read — and involve a lawyer early.',
     ],
-    urgentNote: 'Arrest or police summons is time-critical — speak to a criminal lawyer immediately.',
+    urgentNote:
+      'Arrest or police summons is time-critical — speak to a criminal lawyer immediately.',
   },
   {
     key: 'employment',
     title: 'Employment & salary issues',
     practiceMatch: 'employment',
-    keywords: ['salary', 'terminated', 'fired', 'notice period', 'pf', 'gratuity', 'resignation', 'employer', 'layoff', 'full and final'],
+    keywords: [
+      'salary',
+      'terminated',
+      'fired',
+      'notice period',
+      'pf',
+      'gratuity',
+      'resignation',
+      'employer',
+      'layoff',
+      'full and final',
+    ],
     summary:
       'Unpaid salary, wrongful termination, and withheld full-and-final settlements are enforceable — your appointment letter and the shops & establishments / labour laws govern.',
     steps: [
@@ -120,7 +201,20 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
     key: 'property-purchase',
     title: 'Property purchase & title checks',
     practiceMatch: 'property',
-    keywords: ['buy', 'buying', 'sale deed', 'khata', 'registration', 'plot', 'site', 'flat', 'apartment', 'title', 'encumbrance', 'land'],
+    keywords: [
+      'buy',
+      'buying',
+      'sale deed',
+      'khata',
+      'registration',
+      'plot',
+      'site',
+      'flat',
+      'apartment',
+      'title',
+      'encumbrance',
+      'land',
+    ],
     summary:
       'Before paying for property, verify the title chain, encumbrances, and approvals. Most disputes come from documents nobody checked.',
     steps: [
@@ -135,7 +229,19 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
     key: 'encroachment',
     title: 'Land encroachment & boundary disputes',
     practiceMatch: 'property',
-    keywords: ['encroach', 'encroachment', 'boundary', 'wall', 'fence', 'trespass', 'neighbour', 'neighbor', 'survey dispute', 'occupied my land', 'grabbed'],
+    keywords: [
+      'encroach',
+      'encroachment',
+      'boundary',
+      'wall',
+      'fence',
+      'trespass',
+      'neighbour',
+      'neighbor',
+      'survey dispute',
+      'occupied my land',
+      'grabbed',
+    ],
     summary:
       'Encroachment — a neighbour building over your boundary or occupying your land — is a civil wrong. Your survey records and title documents decide it, so paper beats argument here.',
     steps: [
@@ -144,14 +250,24 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
       'Send a legal notice demanding removal of the encroachment — many disputes end here.',
       'If not, a civil suit for injunction/possession follows; do not demolish anything yourself.',
     ],
-    urgentNote: 'If construction is actively going up, act fast — an interim injunction can stop work.',
+    urgentNote:
+      'If construction is actively going up, act fast — an interim injunction can stop work.',
     templateMatch: ['notice'],
   },
   {
     key: 'motor-accident',
     title: 'Motor accident claims',
     practiceMatch: 'motor',
-    keywords: ['accident', 'hit', 'vehicle', 'bike', 'car crash', 'compensation', 'mact', 'insurance accident'],
+    keywords: [
+      'accident',
+      'hit',
+      'vehicle',
+      'bike',
+      'car crash',
+      'compensation',
+      'mact',
+      'insurance accident',
+    ],
     summary:
       'Accident victims (or their families) can claim compensation before the Motor Accident Claims Tribunal (MACT) — no court fee is needed upfront in most states.',
     steps: [
@@ -165,7 +281,16 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
     key: 'will-succession',
     title: 'Wills & inheritance',
     practiceMatch: 'documentation',
-    keywords: ['will', 'inheritance', 'succession', 'legal heir', 'ancestral', 'partition', 'nominee', 'father property'],
+    keywords: [
+      'will',
+      'inheritance',
+      'succession',
+      'legal heir',
+      'ancestral',
+      'partition',
+      'nominee',
+      'father property',
+    ],
     summary:
       'Property of a person who dies without a will devolves by succession law (Hindu Succession Act / personal law). A registered will avoids most family disputes.',
     steps: [
@@ -180,7 +305,20 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
     key: 'loans-banking',
     title: 'Loan, EMI & bank disputes',
     practiceMatch: 'banking',
-    keywords: ['emi', 'loan', 'bank', 'recovery agent', 'credit card', 'cibil', 'default', 'sarfaesi', 'foreclosure', 'harassment recovery', 'ombudsman', 'interest charged'],
+    keywords: [
+      'emi',
+      'loan',
+      'bank',
+      'recovery agent',
+      'credit card',
+      'cibil',
+      'default',
+      'sarfaesi',
+      'foreclosure',
+      'harassment recovery',
+      'ombudsman',
+      'interest charged',
+    ],
     summary:
       'Missed EMIs, wrong charges, and recovery-agent pressure are all governed by RBI rules and the loan agreement — banks must follow due process, and harassment is not part of it.',
     steps: [
@@ -189,14 +327,26 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
       'For missed EMIs: banks must issue notices before classifying NPA or acting under SARFAESI — respond in writing, ask for restructuring if needed.',
       'Recovery agents may not threaten, visit odd hours, or shame you — record incidents and complain to the bank + police if it continues.',
     ],
-    urgentNote: 'Received a SARFAESI / possession notice? The reply windows are short — involve a lawyer immediately.',
+    urgentNote:
+      'Received a SARFAESI / possession notice? The reply windows are short — involve a lawyer immediately.',
     templateMatch: ['notice'],
   },
   {
     key: 'cyber',
     title: 'Cyber fraud & online harassment',
     practiceMatch: 'cyber',
-    keywords: ['online fraud', 'upi', 'scam', 'hacked', 'otp', 'cyber', 'social media', 'morphed', 'blackmail', 'phishing'],
+    keywords: [
+      'online fraud',
+      'upi',
+      'scam',
+      'hacked',
+      'otp',
+      'cyber',
+      'social media',
+      'morphed',
+      'blackmail',
+      'phishing',
+    ],
     summary:
       'Online financial fraud and harassment are punishable under the IT Act and IPC. Fast reporting dramatically improves fund recovery.',
     steps: [
@@ -205,15 +355,27 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
       'Ask your bank in writing to freeze/recall the disputed transfer.',
       'For harassment: preserve evidence before blocking the account.',
     ],
-    urgentNote: 'Money trail goes cold in hours — report on 1930 before anything else.',
+    urgentNote:
+      'Money trail goes cold in hours — report on 1930 before anything else.',
   },
   {
     key: 'tax-notice',
     title: 'Income tax & GST notices',
     practiceMatch: 'tax',
     keywords: [
-      'income tax', 'tax notice', 'gst', 'tds', 'itr', 'tax demand', 'tax refund',
-      'gst registration', 'gst cancelled', 'scrutiny', 'section 143', 'tax raid', 'notice from department',
+      'income tax',
+      'tax notice',
+      'gst',
+      'tds',
+      'itr',
+      'tax demand',
+      'tax refund',
+      'gst registration',
+      'gst cancelled',
+      'scrutiny',
+      'section 143',
+      'tax raid',
+      'notice from department',
     ],
     summary:
       'Tax notices carry strict reply deadlines — most are routine (mismatch, verification) and are answered online, but ignoring one converts it into a demand with penalties.',
@@ -223,15 +385,25 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
       'Reply online via incometax.gov.in or the GST portal within the deadline; keep the acknowledgement.',
       'For demands, scrutiny, or search cases, involve a CA or tax lawyer before replying.',
     ],
-    urgentNote: 'Reply windows on tax notices are usually 15–30 days and extensions are not guaranteed.',
+    urgentNote:
+      'Reply windows on tax notices are usually 15–30 days and extensions are not guaranteed.',
   },
   {
     key: 'traffic-challan',
     title: 'Traffic challans & licence issues',
     practiceMatch: 'criminal',
     keywords: [
-      'challan', 'traffic police', 'traffic fine', 'driving licence', 'licence suspended',
-      'drunk driving', 'vehicle seized', 'e challan', 'wrong challan', 'helmet fine', 'rc book',
+      'challan',
+      'traffic police',
+      'traffic fine',
+      'driving licence',
+      'licence suspended',
+      'drunk driving',
+      'vehicle seized',
+      'e challan',
+      'wrong challan',
+      'helmet fine',
+      'rc book',
     ],
     summary:
       'Traffic challans under the Motor Vehicles Act can be paid online or contested — many are disposed of through virtual courts without a personal appearance.',
@@ -247,8 +419,17 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
     title: 'Trademark, copyright & brand protection',
     practiceMatch: 'intellectual',
     keywords: [
-      'trademark', 'copyright', 'patent', 'brand name', 'logo copied', 'infringement',
-      'brand copied', 'design registration', 'copied my content', 'duplicate product', 'counterfeit',
+      'trademark',
+      'copyright',
+      'patent',
+      'brand name',
+      'logo copied',
+      'infringement',
+      'brand copied',
+      'design registration',
+      'copied my content',
+      'duplicate product',
+      'counterfeit',
     ],
     summary:
       'Brand names, logos, and creative work are protected by trademark and copyright law — registration is not always mandatory for protection, but it makes enforcement far stronger.',
@@ -264,8 +445,16 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
     title: 'Medical negligence & hospital disputes',
     practiceMatch: 'consumer',
     keywords: [
-      'medical negligence', 'wrong treatment', 'hospital negligence', 'surgery went wrong',
-      'misdiagnosis', 'doctor negligence', 'hospital overcharged', 'hospital bill', 'wrong medicine', 'died in hospital',
+      'medical negligence',
+      'wrong treatment',
+      'hospital negligence',
+      'surgery went wrong',
+      'misdiagnosis',
+      'doctor negligence',
+      'hospital overcharged',
+      'hospital bill',
+      'wrong medicine',
+      'died in hospital',
     ],
     summary:
       'Medical negligence claims run on records and expert opinion. Compensation is claimed through consumer forums; professional misconduct goes to the state medical council.',
@@ -281,8 +470,18 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
     title: 'Passport, visa & immigration',
     practiceMatch: 'immigration',
     keywords: [
-      'passport', 'visa', 'oci', 'immigration', 'deported', 'passport impounded',
-      'police verification', 'visa rejected', 'nri', 'work permit', 'green card', 'passport renewal',
+      'passport',
+      'visa',
+      'oci',
+      'immigration',
+      'deported',
+      'passport impounded',
+      'police verification',
+      'visa rejected',
+      'nri',
+      'work permit',
+      'green card',
+      'passport renewal',
     ],
     summary:
       'Passport and visa problems are administrative decisions with formal objection and appeal routes — most delays trace to verification issues that can be answered in writing.',
@@ -298,8 +497,18 @@ export const GUIDANCE_TOPICS: GuidanceTopic[] = [
     title: 'Business, partnership & company disputes',
     practiceMatch: 'corporate',
     keywords: [
-      'company registration', 'partnership dispute', 'shareholder', 'founder dispute', 'llp',
-      'roc', 'business partner', 'vendor not paying', 'client not paying', 'esop', 'business contract', 'mou',
+      'company registration',
+      'partnership dispute',
+      'shareholder',
+      'founder dispute',
+      'llp',
+      'roc',
+      'business partner',
+      'vendor not paying',
+      'client not paying',
+      'esop',
+      'business contract',
+      'mou',
     ],
     summary:
       'Business disputes are decided by the founding documents — partnership deed, shareholder agreement, or contract. Most agreements contain notice and arbitration clauses that must be used first.',
@@ -339,7 +548,9 @@ export const PRACTICE_CANONICAL: Record<string, string> = {
 
 export function canonicalPractice(token: string): string {
   const t = token.trim().toLowerCase();
-  return PRACTICE_CANONICAL[t] ?? token.charAt(0).toUpperCase() + token.slice(1);
+  return (
+    PRACTICE_CANONICAL[t] ?? token.charAt(0).toUpperCase() + token.slice(1)
+  );
 }
 
 export const FALLBACK_TOPIC: GuidanceTopic = {
@@ -357,14 +568,21 @@ export const FALLBACK_TOPIC: GuidanceTopic = {
 };
 
 /** Pure keyword classifier shared by intake + lead categorization. */
-export function classifyQuestion(question: string): { topic: GuidanceTopic; matched: boolean } {
+export function classifyQuestion(question: string): {
+  topic: GuidanceTopic;
+  matched: boolean;
+} {
   const q = ` ${question.toLowerCase().replace(/[^\w\s]/g, ' ')} `;
   let best: GuidanceTopic | null = null;
   let bestScore = 0;
   for (const t of GUIDANCE_TOPICS) {
     let score = 0;
     for (const kw of t.keywords) {
-      if (q.includes(` ${kw} `) || q.includes(`${kw} `) || q.includes(` ${kw}`)) {
+      if (
+        q.includes(` ${kw} `) ||
+        q.includes(`${kw} `) ||
+        q.includes(` ${kw}`)
+      ) {
         score += kw.includes(' ') ? 2 : 1;
       }
     }
@@ -401,13 +619,30 @@ export interface Clarify {
 
 export const CLARIFIES: Record<string, Clarify> = {
   'divorce-family': {
-    question: 'Family matters cover a lot — what best describes your situation?',
+    question:
+      'Family matters cover a lot — what best describes your situation?',
     options: [
       { label: 'Divorce / separation', topicKey: 'divorce-family' },
-      { label: 'Maintenance / money', topicKey: 'divorce-family', practiceOverride: 'family' },
-      { label: 'Children / custody', topicKey: 'divorce-family', practiceOverride: 'family' },
-      { label: 'Safety / domestic violence', topicKey: 'criminal-fir', practiceOverride: 'criminal' },
-      { label: 'Family property dispute', topicKey: 'will-succession', practiceOverride: 'property' },
+      {
+        label: 'Maintenance / money',
+        topicKey: 'divorce-family',
+        practiceOverride: 'family',
+      },
+      {
+        label: 'Children / custody',
+        topicKey: 'divorce-family',
+        practiceOverride: 'family',
+      },
+      {
+        label: 'Safety / domestic violence',
+        topicKey: 'criminal-fir',
+        practiceOverride: 'criminal',
+      },
+      {
+        label: 'Family property dispute',
+        topicKey: 'will-succession',
+        practiceOverride: 'property',
+      },
       { label: 'Something else', topicKey: 'general' },
     ],
   },
@@ -417,7 +652,11 @@ export const CLARIFIES: Record<string, Clarify> = {
       { label: 'A cheque bounced', topicKey: 'cheque-bounce' },
       { label: 'Loan / EMI / bank trouble', topicKey: 'loans-banking' },
       { label: 'Recovery agents harassing me', topicKey: 'loans-banking' },
-      { label: 'Someone owes me money', topicKey: 'cheque-bounce', practiceOverride: 'civil' },
+      {
+        label: 'Someone owes me money',
+        topicKey: 'cheque-bounce',
+        practiceOverride: 'civil',
+      },
       { label: 'Online / UPI fraud', topicKey: 'cyber' },
       { label: 'Something else', topicKey: 'general' },
     ],
@@ -435,7 +674,11 @@ export const CLARIFIES: Record<string, Clarify> = {
     question: 'Which area does this touch the most?',
     options: [
       { label: 'Family / marriage', clarifyKey: 'divorce-family' },
-      { label: 'Property / rent', topicKey: 'tenant-landlord', practiceOverride: 'property' },
+      {
+        label: 'Property / rent',
+        topicKey: 'tenant-landlord',
+        practiceOverride: 'property',
+      },
       { label: 'Buying land or a flat', topicKey: 'property-purchase' },
       { label: 'Land / boundary dispute', topicKey: 'encroachment' },
       { label: 'Money / cheque / loans', clarifyKey: 'money' },

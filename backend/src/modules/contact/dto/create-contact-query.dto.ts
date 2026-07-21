@@ -1,5 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsIn, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export const CONTACT_CATEGORIES = [
   'PAYMENT_ISSUE',
@@ -29,7 +36,7 @@ export class CreateContactQueryDto {
   mobile?: string;
 
   @ApiProperty({ enum: CONTACT_CATEGORIES, example: 'PAYMENT_ISSUE' })
-  @IsIn(CONTACT_CATEGORIES as unknown as string[])
+  @IsIn(CONTACT_CATEGORIES)
   category: ContactCategoryValue;
 
   @ApiPropertyOptional({ example: 'Charged twice for Premium' })
@@ -38,7 +45,10 @@ export class CreateContactQueryDto {
   @MaxLength(120)
   subject?: string;
 
-  @ApiProperty({ description: 'The query itself', example: 'I paid for the Premium plan but…' })
+  @ApiProperty({
+    description: 'The query itself',
+    example: 'I paid for the Premium plan but…',
+  })
   @IsString()
   @MinLength(20)
   @MaxLength(3000)

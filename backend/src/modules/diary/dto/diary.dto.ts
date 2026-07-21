@@ -12,8 +12,16 @@ import {
 import { Type } from 'class-transformer';
 
 export const CASE_STATUSES = [
-  'NEW', 'CONSULTATION', 'NOTICE_SENT', 'CASE_FILED', 'EVIDENCE',
-  'ARGUMENTS', 'JUDGMENT_RESERVED', 'DISPOSED', 'CLOSED', 'ARCHIVED',
+  'NEW',
+  'CONSULTATION',
+  'NOTICE_SENT',
+  'CASE_FILED',
+  'EVIDENCE',
+  'ARGUMENTS',
+  'JUDGMENT_RESERVED',
+  'DISPOSED',
+  'CLOSED',
+  'ARCHIVED',
 ] as const;
 export const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'] as const;
 
@@ -43,9 +51,9 @@ export class DiaryCaseCreateDto {
   @IsOptional() @IsString() @MaxLength(80) practiceAreaSlug?: string;
   @IsOptional() @IsString() @MaxLength(80) caseType?: string;
   @IsOptional() @IsString() @MaxLength(200) oppositeParty?: string;
-  @IsOptional() @IsIn(CASE_STATUSES as unknown as string[]) status?: string;
+  @IsOptional() @IsIn(CASE_STATUSES) status?: string;
   @IsOptional() @IsString() @MaxLength(80) stage?: string;
-  @IsOptional() @IsIn(PRIORITIES as unknown as string[]) priority?: string;
+  @IsOptional() @IsIn(PRIORITIES) priority?: string;
   @IsOptional() @IsString() @MaxLength(4000) description?: string;
   @IsOptional() @IsISO8601() dateFiled?: string;
   @IsOptional() @IsISO8601() nextHearingAt?: string;
@@ -69,8 +77,8 @@ export class DiaryHearingDto {
 }
 
 export class DiaryCaseQueryDto {
-  @IsOptional() @IsIn(CASE_STATUSES as unknown as string[]) status?: string;
-  @IsOptional() @IsIn(PRIORITIES as unknown as string[]) priority?: string;
+  @IsOptional() @IsIn(CASE_STATUSES) status?: string;
+  @IsOptional() @IsIn(PRIORITIES) priority?: string;
   @IsOptional() @IsString() @MaxLength(80) practiceArea?: string;
   @IsOptional() @IsString() @MaxLength(120) q?: string;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) page?: number;
@@ -79,7 +87,9 @@ export class DiaryCaseQueryDto {
 
 export class DiaryReminderDto {
   @IsOptional() @IsString() caseId?: string;
-  @IsOptional() @IsIn(['HEARING', 'FOLLOW_UP', 'DOCUMENT', 'PAYMENT', 'CUSTOM'] as unknown as string[]) type?: string;
+  @IsOptional()
+  @IsIn(['HEARING', 'FOLLOW_UP', 'DOCUMENT', 'PAYMENT', 'CUSTOM'])
+  type?: string;
   @IsISO8601() dueAt: string;
   @IsOptional() @IsString() @MaxLength(500) notes?: string;
 }

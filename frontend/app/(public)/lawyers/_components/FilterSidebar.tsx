@@ -22,7 +22,7 @@ type FormValues = z.infer<typeof schema>;
 
 const LANGUAGES = ['English', 'Hindi', 'Tamil', 'Telugu', 'Kannada', 'Malayalam'];
 
-export function FilterSidebar({ variant = 'rail' }: { variant?: 'card' | 'rail' }) {
+export function FilterSidebar({ variant = 'rail' }: { variant?: 'card' | 'rail' | 'map' }) {
   const { filters, setFilters, resetFilters } = useLawyerSearchStore();
   const [locating, setLocating] = useState(false);
 
@@ -90,7 +90,9 @@ export function FilterSidebar({ variant = 'rail' }: { variant?: 'card' | 'rail' 
       className={
         variant === 'card'
           ? 'rounded-2xl border border-gray-200/60 bg-white shadow-sm lg:sticky lg:top-24'
-          : 'w-72 shrink-0 overflow-y-auto border-r border-line bg-white'
+          : variant === 'map'
+            ? 'w-full flex-shrink-0 border-b border-line bg-white'
+            : 'w-72 shrink-0 overflow-y-auto border-r border-line bg-white'
       }
     >
       <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-5">

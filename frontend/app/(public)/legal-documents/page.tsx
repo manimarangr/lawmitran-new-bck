@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 import {
   getDocumentCategories,
   getDocumentTemplates,
@@ -44,7 +45,7 @@ export default async function LegalDocumentsPage() {
     <main id="main">
       {/* hero */}
       <header className="hero-light py-12">
-        <div className="mx-auto max-w-6xl px-6">
+        <Container>
           <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-400">
             <Link href="/" className="hover:text-gold">Home</Link> <span className="mx-1">/</span> Legal Documents
           </nav>
@@ -55,10 +56,10 @@ export default async function LegalDocumentsPage() {
             Pick a document, fill a guided form, add stamp paper if needed, and download — or get
             the stamped copy couriered. Drafted to standard formats.
           </p>
-        </div>
+        </Container>
       </header>
 
-      <div className="mx-auto max-w-6xl px-6 py-10">
+      <Container className="py-10">
         {categories.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-gray-200 p-10 text-center text-sm text-slate-400">
             The document library is being stocked — check back soon.
@@ -145,7 +146,7 @@ export default async function LegalDocumentsPage() {
           notarisation, signatures) which varies by state. LawMitran is not a law firm and does not
           provide legal advice.
         </p>
-      </div>
+      </Container>
     </main>
   );
 }

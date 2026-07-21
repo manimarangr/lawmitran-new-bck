@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 import {
   guideCategories,
   allGuideCards,
@@ -42,7 +43,7 @@ export default async function LegalGuidesPage() {
   return (
     <div>
       <section className="hero-light">
-        <div className="mx-auto max-w-6xl px-6 py-14 text-center">
+        <Container className="py-14 text-center">
           <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-gold">Legal Guides</p>
           <h1 className="text-3xl font-extrabold text-navy md:text-4xl">
             Indian law, explained in simple English
@@ -51,10 +52,10 @@ export default async function LegalGuidesPage() {
             Browse by topic to understand your rights and the correct process. Every guide is written
             for non-lawyers, with steps, documents, timelines, and FAQs.
           </p>
-        </div>
+        </Container>
       </section>
 
-      <div className="mx-auto max-w-6xl px-6 py-12">
+      <Container className="py-12">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-navy">Browse by topic</h2>
           <Link href="/legal-guides/all" className="text-sm font-semibold text-gold hover:underline">
@@ -117,7 +118,7 @@ export default async function LegalGuidesPage() {
             Connect with a verified lawyer
           </Link>
         </section>
-      </div>
+      </Container>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
     </div>
   );

@@ -3,7 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { LeadStatus, Prisma, PropertyCaseStatus, VerificationStatus } from '@prisma/client';
+import {
+  LeadStatus,
+  Prisma,
+  PropertyCaseStatus,
+  VerificationStatus,
+} from '@prisma/client';
 import { MailService } from '../../common/mail/mail.service';
 import { NotifyService } from '../../common/notify/notify.service';
 import { StorageService } from '../../common/storage/storage.service';
@@ -34,7 +39,10 @@ export class PropertyService {
   ) {}
 
   /** Best checklist for state+type, falling back to state=ANY, then OTHER. */
-  async getChecklist(state: string, transactionType: string): Promise<ChecklistItem[]> {
+  async getChecklist(
+    state: string,
+    transactionType: string,
+  ): Promise<ChecklistItem[]> {
     const candidates = await this.prisma.propertyChecklist.findMany({
       where: {
         OR: [
@@ -44,9 +52,15 @@ export class PropertyService {
         ],
       },
     });
-    const exact = candidates.find((c) => c.state === state && c.transactionType === transactionType);
-    const anyType = candidates.find((c) => c.state === 'ANY' && c.transactionType === transactionType);
-    const fallback = candidates.find((c) => c.state === 'ANY' && c.transactionType === 'OTHER');
+    const exact = candidates.find(
+      (c) => c.state === state && c.transactionType === transactionType,
+    );
+    const anyType = candidates.find(
+      (c) => c.state === 'ANY' && c.transactionType === transactionType,
+    );
+    const fallback = candidates.find(
+      (c) => c.state === 'ANY' && c.transactionType === 'OTHER',
+    );
     const list = exact ?? anyType ?? fallback;
     return ((list?.items ?? []) as unknown as ChecklistItem[]) || [];
   }
@@ -61,7 +75,10 @@ export class PropertyService {
     }));
   }
 
-  async createCase(userId: string, dto: { state: string; city: string; transactionType: string }) {
+  async createCase(
+    userId: string,
+    dto: { state: string; city: string; transactionType: string },
+  ) {
     if (!TRANSACTION_TYPES.includes(dto.transactionType)) {
       throw new BadRequestException('Unknown transaction type');
     }
@@ -124,7 +141,9 @@ export class PropertyService {
       fileUrl = await this.storage.upload(file, 'property');
     }
     if (!provided && !file) {
-      await this.prisma.propertyCaseDocument.deleteMany({ where: { caseId, docType } });
+      await this.prisma.propertyCaseDocument.deleteMany({
+        where: { caseId, docType },
+      });
       return { docType, provided: false };
     }
     return this.prisma.propertyCaseDocument.upsert({
@@ -138,7 +157,9 @@ export class PropertyService {
   async analyze(userId: string, caseId: string) {
     const c = await this.getOwnCase(userId, caseId);
     const checklist = await this.getChecklist(c.state, c.transactionType);
-    const have = new Set(c.documents.filter((d) => d.provided).map((d) => d.docType));
+    const have = new Set(
+      c.documents.filter((d) => d.provided).map((d) => d.docType),
+    );
 
     const items = checklist.map((i) => ({
       ...i,
@@ -158,7 +179,9 @@ export class PropertyService {
         missingRequired: missingRequired.length,
         completeness: requiredItems.length
           ? Math.round(
-              (requiredItems.filter((i) => i.status === 'PROVIDED').length / requiredItems.length) * 100,
+              (requiredItems.filter((i) => i.status === 'PROVIDED').length /
+                requiredItems.length) *
+                100,
             )
           : 100,
       },
@@ -169,9 +192,11 @@ export class PropertyService {
     await this.prisma.propertyCase.update({
       where: { id: c.id },
       data: {
-        reportJson: report as unknown as Prisma.InputJsonValue,
+        reportJson: report,
         status:
-          c.status === PropertyCaseStatus.OPEN ? PropertyCaseStatus.ANALYZED : c.status,
+          c.status === PropertyCaseStatus.OPEN
+            ? PropertyCaseStatus.ANALYZED
+            : c.status,
       },
     });
     return report;
@@ -184,10 +209,17 @@ export class PropertyService {
       where: {
         verificationStatus: VerificationStatus.APPROVED,
         practiceAreas: {
-          some: { practiceArea: { name: { contains: 'propert', mode: 'insensitive' } } },
+          some: {
+            practiceArea: {
+              name: { contains: 'propert', mode: 'insensitive' },
+            },
+          },
         },
         serviceAreas: {
-          some: { active: true, city: { name: { equals: c.city, mode: 'insensitive' } } },
+          some: {
+            active: true,
+            city: { name: { equals: c.city, mode: 'insensitive' } },
+          },
         },
       },
       take: 6,
@@ -208,12 +240,17 @@ export class PropertyService {
   /** Hand off to a lawyer: creates a normal lead with the case summary embedded. */
   async requestOpinion(userId: string, caseId: string, lawyerId: string) {
     const c = await this.getOwnCase(userId, caseId);
-    if (c.leadId) throw new BadRequestException('An opinion request was already sent for this case');
+    if (c.leadId)
+      throw new BadRequestException(
+        'An opinion request was already sent for this case',
+      );
     const report = c.reportJson as {
       items?: { label: string; status: string; required: boolean }[];
     } | null;
     if (!report?.items) {
-      throw new BadRequestException('Run the analysis first, then request an opinion');
+      throw new BadRequestException(
+        'Run the analysis first, then request an opinion',
+      );
     }
     const lawyer = await this.prisma.lawyer.findFirst({
       where: { id: lawyerId, verificationStatus: VerificationStatus.APPROVED },
@@ -221,8 +258,12 @@ export class PropertyService {
     });
     if (!lawyer) throw new NotFoundException('Lawyer not found');
 
-    const haveList = report.items.filter((i) => i.status === 'PROVIDED').map((i) => i.label);
-    const missingList = report.items.filter((i) => i.status === 'MISSING').map((i) => i.label);
+    const haveList = report.items
+      .filter((i) => i.status === 'PROVIDED')
+      .map((i) => i.label);
+    const missingList = report.items
+      .filter((i) => i.status === 'MISSING')
+      .map((i) => i.label);
     const description =
       `Property Document Check — request for a professional legal opinion.\n` +
       `Transaction: ${c.transactionType.replace(/_/g, ' ').toLowerCase()} in ${c.city}, ${c.state}.\n` +

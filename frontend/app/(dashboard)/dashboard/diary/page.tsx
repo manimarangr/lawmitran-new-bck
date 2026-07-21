@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchDiaryDashboard, CASE_STATUS_LABELS } from '@/lib/api/diary';
 import Icon from '@/components/ui/Icon';
 import DiaryNav from '@/components/diary/DiaryNav';
+import Container from '@/components/ui/Container';
 
 const dt = (iso: string) =>
   new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
@@ -27,7 +28,7 @@ export default function DiaryDashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <Container className="py-8">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-navy">Case Diary</h1>
@@ -145,6 +146,6 @@ export default function DiaryDashboardPage() {
           </ul>
         </section>
       </div>
-    </div>
+    </Container>
   );
 }

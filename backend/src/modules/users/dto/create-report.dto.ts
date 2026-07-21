@@ -13,19 +13,22 @@ const REASONS = [
 
 export class CreateReportDto {
   @ApiPropertyOptional({
-    description: 'User being reported. Omit and pass leadId to auto-resolve the counterparty.',
+    description:
+      'User being reported. Omit and pass leadId to auto-resolve the counterparty.',
   })
   @IsOptional()
   @IsString()
   reportedUserId?: string;
 
-  @ApiPropertyOptional({ description: 'Lead the two parties were in contact over' })
+  @ApiPropertyOptional({
+    description: 'Lead the two parties were in contact over',
+  })
   @IsOptional()
   @IsString()
   leadId?: string;
 
   @ApiProperty({ enum: REASONS })
-  @IsIn(REASONS as unknown as string[])
+  @IsIn(REASONS)
   reason: string;
 
   @ApiPropertyOptional({ maxLength: 500 })

@@ -43,7 +43,9 @@ export class AiIntakeService {
 
   /** Returns the userId for a valid access token, else null (optional auth). */
   private verifyOptionalToken(authHeader?: string): string | null {
-    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    const token = authHeader?.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : null;
     if (!token) return null;
     try {
       const payload = this.jwt.verify<{ sub: string }>(token, {
@@ -88,7 +90,11 @@ export class AiIntakeService {
     if (candidates.length === 0) return null;
     try {
       const hit = await this.prisma.city.findFirst({
-        where: { OR: candidates.map((c) => ({ name: { equals: c, mode: 'insensitive' as const } })) },
+        where: {
+          OR: candidates.map((c) => ({
+            name: { equals: c, mode: 'insensitive' as const },
+          })),
+        },
         select: { name: true },
       });
       return hit?.name ?? null;
@@ -122,7 +128,10 @@ export class AiIntakeService {
       'You map an Indian legal question to exactly one topic key from the list. If no topic clearly and specifically matches, you MUST reply "general" — never force the nearest topic. Reply with the key only — nothing else.',
       `Topics:\n${keys}\n\nQuestion: ${question}\n\nKey:`,
     );
-    const key = raw?.trim().toLowerCase().replace(/[^a-z-]/g, '');
+    const key = raw
+      ?.trim()
+      .toLowerCase()
+      .replace(/[^a-z-]/g, '');
     return GUIDANCE_TOPICS.find((t) => t.key === key) ?? null;
   }
 
@@ -140,7 +149,7 @@ export class AiIntakeService {
       cfg,
       'You are a legal-information assistant for an Indian legal marketplace. You will receive a ' +
         'user question and vetted knowledge-base content. Rewrite the summary so it speaks to the ' +
-        'user\'s situation and keep the steps relevant, using ONLY facts, rules, and timelines ' +
+        "user's situation and keep the steps relevant, using ONLY facts, rules, and timelines " +
         'present in the knowledge base. Never add legal rules, sections, or numbers that are not ' +
         'in it. Never predict outcomes or give advice. Reply as JSON: ' +
         '{"summary": string, "steps": string[]} with at most 5 short steps.',
@@ -198,7 +207,9 @@ export class AiIntakeService {
     );
     if (!raw) return null;
     try {
-      const parsed = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1)) as {
+      const parsed = JSON.parse(
+        raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1),
+      ) as {
         summary?: string;
         steps?: string[];
       };
@@ -233,7 +244,9 @@ export class AiIntakeService {
     const cfg = await this.llmConfig();
     if (!cfg) return null;
     const mustFinal = answers.length >= 3;
-    const topics = GUIDANCE_TOPICS.map((t) => `${t.key}: ${t.title}`).join('\n');
+    const topics = GUIDANCE_TOPICS.map((t) => `${t.key}: ${t.title}`).join(
+      '\n',
+    );
     const raw = await complete(
       cfg,
       'You are a legal-intake interviewer for an Indian legal marketplace. Your ONLY job is to ' +
@@ -256,7 +269,9 @@ export class AiIntakeService {
     );
     if (!raw) return null;
     try {
-      const parsed = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1)) as {
+      const parsed = JSON.parse(
+        raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1),
+      ) as {
         question?: string;
         options?: unknown[];
         final?: string;
@@ -265,8 +280,14 @@ export class AiIntakeService {
       if (typeof parsed.final === 'string') {
         const key = parsed.final.trim().toLowerCase();
         const valid =
-          GUIDANCE_TOPICS.some((t) => t.key === key) || key === 'general' || key === 'not-legal';
-        return { kind: 'final', topicKey: valid ? key : 'general', urgent: parsed.urgency === 'high' };
+          GUIDANCE_TOPICS.some((t) => t.key === key) ||
+          key === 'general' ||
+          key === 'not-legal';
+        return {
+          kind: 'final',
+          topicKey: valid ? key : 'general',
+          urgent: parsed.urgency === 'high',
+        };
       }
       if (
         !mustFinal &&
@@ -281,7 +302,11 @@ export class AiIntakeService {
           .filter((o) => o.length >= 2 && o.length <= 70)
           .slice(0, 6);
         if (options.length >= 2) {
-          return { kind: 'question', question: parsed.question.trim(), options };
+          return {
+            kind: 'question',
+            question: parsed.question.trim(),
+            options,
+          };
         }
       }
       return null;
@@ -358,7 +383,12 @@ export class AiIntakeService {
             ? {
                 practiceAreas: {
                   some: {
-                    practiceArea: { name: { contains: topic.practiceMatch, mode: 'insensitive' } },
+                    practiceArea: {
+                      name: {
+                        contains: topic.practiceMatch,
+                        mode: 'insensitive',
+                      },
+                    },
                   },
                 },
               }
@@ -366,7 +396,12 @@ export class AiIntakeService {
           ...(city?.trim()
             ? {
                 serviceAreas: {
-                  some: { active: true, city: { name: { equals: city.trim(), mode: 'insensitive' } } },
+                  some: {
+                    active: true,
+                    city: {
+                      name: { equals: city.trim(), mode: 'insensitive' },
+                    },
+                  },
                 },
               }
             : {}),
@@ -382,7 +417,10 @@ export class AiIntakeService {
           ratingCount: true,
           profileImageUrl: true,
           city: { select: { name: true } },
-          practiceAreas: { select: { practiceArea: { select: { name: true } } }, take: 3 },
+          practiceAreas: {
+            select: { practiceArea: { select: { name: true } } },
+            take: 3,
+          },
         },
       }),
       topic.templateMatch?.length
@@ -455,14 +493,23 @@ export class AiIntakeService {
     // A chip asked for a deeper deterministic clarify (e.g. generic → family).
     if (choice?.clarifyKey && CLARIFIES[choice.clarifyKey]) {
       const c = CLARIFIES[choice.clarifyKey];
-      return { step: 'clarify' as const, clarifyKey: choice.clarifyKey, question: c.question, options: c.options };
+      return {
+        step: 'clarify' as const,
+        clarifyKey: choice.clarifyKey,
+        question: c.question,
+        options: c.options,
+      };
     }
 
     // Option C: continue an in-flight LLM interview.
     if (choice?.answers?.length && !choice.topicKey) {
       const r = await this.llmInterview(question, choice.answers);
       if (r?.kind === 'question') {
-        return { step: 'interview' as const, question: r.question, options: r.options };
+        return {
+          step: 'interview' as const,
+          question: r.question,
+          options: r.options,
+        };
       }
       if (r?.kind === 'final') {
         if (r.topicKey === 'not-legal') return this.notLegalStep(question);
@@ -477,7 +524,12 @@ export class AiIntakeService {
       }
       // interviewer failed mid-flight — deterministic fallback
       const c = CLARIFIES.general;
-      return { step: 'clarify' as const, clarifyKey: 'general', question: c.question, options: c.options };
+      return {
+        step: 'clarify' as const,
+        clarifyKey: 'general',
+        question: c.question,
+        options: c.options,
+      };
     }
 
     let topic: GuidanceTopic;
@@ -493,24 +545,51 @@ export class AiIntakeService {
         // Option C: the interviewer gets first shot at vague input.
         const iv = await this.llmInterview(question, []);
         if (iv?.kind === 'question') {
-          return { step: 'interview' as const, question: iv.question, options: iv.options };
+          return {
+            step: 'interview' as const,
+            question: iv.question,
+            options: iv.options,
+          };
         }
         if (iv?.kind === 'final' && iv.topicKey === 'not-legal') {
           return this.notLegalStep(question);
         }
         if (iv?.kind === 'final' && iv.topicKey !== 'general') {
-          return this.buildRoute(topicByKey(iv.topicKey), true, question, undefined, iv.urgent);
+          return this.buildRoute(
+            topicByKey(iv.topicKey),
+            true,
+            question,
+            undefined,
+            iv.urgent,
+          );
         }
         const c = CLARIFIES.general;
-        return { step: 'clarify' as const, clarifyKey: 'general', question: c.question, options: c.options };
+        return {
+          step: 'clarify' as const,
+          clarifyKey: 'general',
+          question: c.question,
+          options: c.options,
+        };
       }
       if (CLARIFIES[topic.key]) {
         const c = CLARIFIES[topic.key];
-        return { step: 'clarify' as const, clarifyKey: topic.key, question: c.question, options: c.options };
+        return {
+          step: 'clarify' as const,
+          clarifyKey: topic.key,
+          question: c.question,
+          options: c.options,
+        };
       }
     }
 
-    return this.buildRoute(topic, matched, question, choice?.practiceOverride, false, choice?.answers);
+    return this.buildRoute(
+      topic,
+      matched,
+      question,
+      choice?.practiceOverride,
+      false,
+      choice?.answers,
+    );
   }
 
   /** Friendly off-ramp when the input isn't a legal matter at all. */
@@ -583,7 +662,9 @@ export class AiIntakeService {
       practiceArea: practice ? canonicalPractice(practice) : null,
       urgentNote:
         topic.urgentNote ??
-        (urgent ? 'This looks time-sensitive — speak to a lawyer as soon as possible.' : null),
+        (urgent
+          ? 'This looks time-sensitive — speak to a lawyer as soon as possible.'
+          : null),
       templates,
       propertyCheck: topic.key === 'property-purchase',
       detectedCity,
@@ -595,27 +676,34 @@ export class AiIntakeService {
   async adminInsights() {
     const d30 = new Date();
     d30.setDate(d30.getDate() - 30);
-    const [byTopic, total, unmatchedCount, recentUnmatched] = await Promise.all([
-      this.prisma.aiIntakeLog.groupBy({
-        by: ['topicKey'],
-        where: { createdAt: { gte: d30 } },
-        _count: { topicKey: true },
-        orderBy: { _count: { topicKey: 'desc' } },
-        take: 10,
-      }),
-      this.prisma.aiIntakeLog.count({ where: { createdAt: { gte: d30 } } }),
-      this.prisma.aiIntakeLog.count({ where: { createdAt: { gte: d30 }, matched: false } }),
-      this.prisma.aiIntakeLog.findMany({
-        where: { matched: false },
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-        select: { id: true, question: true, createdAt: true },
-      }),
-    ]);
+    const [byTopic, total, unmatchedCount, recentUnmatched] = await Promise.all(
+      [
+        this.prisma.aiIntakeLog.groupBy({
+          by: ['topicKey'],
+          where: { createdAt: { gte: d30 } },
+          _count: { topicKey: true },
+          orderBy: { _count: { topicKey: 'desc' } },
+          take: 10,
+        }),
+        this.prisma.aiIntakeLog.count({ where: { createdAt: { gte: d30 } } }),
+        this.prisma.aiIntakeLog.count({
+          where: { createdAt: { gte: d30 }, matched: false },
+        }),
+        this.prisma.aiIntakeLog.findMany({
+          where: { matched: false },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+          select: { id: true, question: true, createdAt: true },
+        }),
+      ],
+    );
     return {
       total,
       unmatchedCount,
-      topics: byTopic.map((t) => ({ topicKey: t.topicKey, count: t._count.topicKey })),
+      topics: byTopic.map((t) => ({
+        topicKey: t.topicKey,
+        count: t._count.topicKey,
+      })),
       recentUnmatched,
     };
   }

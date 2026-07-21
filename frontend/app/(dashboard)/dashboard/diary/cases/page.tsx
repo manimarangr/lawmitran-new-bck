@@ -15,6 +15,7 @@ import {
 import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
 import DiaryNav from '@/components/diary/DiaryNav';
+import Container from '@/components/ui/Container';
 
 const input = 'w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm focus:border-gold focus:outline-none';
 const PRIORITY_CHIP: Record<DiaryPriority, string> = {
@@ -66,7 +67,7 @@ export default function DiaryCasesPage() {
   const rows = casesQ.data?.items ?? [];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <Container className="py-8">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <nav aria-label="Breadcrumb" className="text-xs text-slate-400">
@@ -177,6 +178,6 @@ export default function DiaryCasesPage() {
           <Pagination page={casesQ.data.page} totalPages={casesQ.data.pages} onPageChange={setPage} label="case" />
         )}
       </div>
-    </div>
+    </Container>
   );
 }

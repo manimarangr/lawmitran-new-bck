@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site/SiteHeader';
 import SiteFooter from '@/components/site/SiteFooter';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 import AskLegalBox from '@/components/home/AskLegalBox';
 import HomeLawyers from '@/components/home/HomeLawyers';
 import { fetchDocTemplates, type DocTemplateListItem } from '@/lib/api/documents';
@@ -121,8 +122,8 @@ export default async function HomePage() {
         </section>
 
         {/* ===== Practice areas (from reference API) ===== */}
-        <section id="practice" className="px-5 pb-8 pt-8">
-          <div className="mx-auto max-w-[73.75rem]">
+        <section id="practice" className="pb-8 pt-8">
+          <Container>
             <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
               <div>
                 <h2 className="text-3xl font-bold tracking-tight text-navy">Popular practice areas</h2>
@@ -149,15 +150,15 @@ export default async function HomePage() {
                 </Link>
               ))}
             </div>
-          </div>
+          </Container>
         </section>
 
         {/* ===== Verified lawyers (neutral showcase — client, city-aware) ===== */}
         <HomeLawyers />
 
         {/* ===== Documents ===== */}
-        <section id="documents" className="px-5 pb-10 pt-8">
-          <div className="mx-auto max-w-[73.75rem] text-center">
+        <section id="documents" className="pb-10 pt-8">
+          <Container className="text-center">
             <h2 className="text-3xl font-bold tracking-tight text-navy">Get legal documents, delivered online</h2>
             <span aria-hidden="true" className="mx-auto mt-2 block h-1 w-12 rounded bg-gold" />
             <p className="mx-auto mt-2 max-w-[38.75rem] text-muted">
@@ -202,12 +203,12 @@ export default async function HomePage() {
                 Browse all documents
               </Link>
             </div>
-          </div>
+          </Container>
         </section>
 
         {/* ===== How it works ===== */}
-        <section id="how" className="bg-bg-soft px-5 pb-10 pt-8">
-          <div className="mx-auto max-w-[73.75rem]">
+        <section id="how" className="bg-bg-soft pb-10 pt-8">
+          <Container>
             <h2 className="text-center text-3xl font-bold tracking-tight text-navy">How LawMitran works</h2>
             <span aria-hidden="true" className="mx-auto mt-2 block h-1 w-12 rounded bg-gold" />
             <p className="mx-auto mt-2 max-w-[38.75rem] text-center text-muted">
@@ -232,7 +233,7 @@ export default async function HomePage() {
                 </li>
               ))}
             </ol>
-          </div>
+          </Container>
         </section>
       </main>
 

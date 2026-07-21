@@ -26,7 +26,14 @@ export class StorageService implements OnModuleInit {
   constructor(private config: ConfigService) {
     const endpoint = this.config.get<string>('S3_ENDPOINT');
     this.bucket = this.config.get<string>('S3_BUCKET') ?? 'lawmitran-documents';
-    this.publicBaseUrl = `${endpoint}/${this.bucket}`;
+    // Browser-facing base for public objects. In dev this is the MinIO endpoint
+    // itself; in deployed envs set S3_PUBLIC_URL to an HTTPS route that proxies
+    // the bucket (e.g. https://dev.lawmitran.com/storage) so images aren't
+    // served from an internal/loopback host over plain HTTP.
+    const publicUrl = this.config.get<string>('S3_PUBLIC_URL');
+    this.publicBaseUrl = publicUrl
+      ? publicUrl.replace(/\/+$/, '')
+      : `${endpoint}/${this.bucket}`;
     this.client = new S3Client({
       region: this.config.get<string>('S3_REGION') ?? 'us-east-1',
       endpoint,
@@ -58,7 +65,9 @@ export class StorageService implements OnModuleInit {
       this.bucketReady = true;
     } catch {
       try {
-        await this.client.send(new CreateBucketCommand({ Bucket: this.bucket }));
+        await this.client.send(
+          new CreateBucketCommand({ Bucket: this.bucket }),
+        );
         this.logger.log(`Created storage bucket "${this.bucket}"`);
         this.bucketReady = true;
       } catch (err) {
@@ -134,7 +143,11 @@ export class StorageService implements OnModuleInit {
     return `${this.publicBaseUrl}/${key}`;
   }
   /** Store raw bytes at an explicit key (used for generated PDFs). Returns the key. */
-  async putBytes(key: string, body: Buffer, contentType: string): Promise<string> {
+  async putBytes(
+    key: string,
+    body: Buffer,
+    contentType: string,
+  ): Promise<string> {
     await this.ensureBucket();
     try {
       await this.client.send(
@@ -147,7 +160,9 @@ export class StorageService implements OnModuleInit {
       );
     } catch (err) {
       this.logger.error(`putBytes failed: ${(err as Error).message}`);
-      throw new ServiceUnavailableException('Could not store the generated document');
+      throw new ServiceUnavailableException(
+        'Could not store the generated document',
+      );
     }
     return key;
   }
@@ -162,5 +177,37 @@ export class StorageService implements OnModuleInit {
     const stream = res.Body as unknown as AsyncIterable<Uint8Array>;
     for await (const chunk of stream) chunks.push(Buffer.from(chunk));
     return Buffer.concat(chunks);
+  }
+
+  /**
+   * Object key from a stored URL (or pass through if already a key). Handles
+   * every form we may have persisted: the configured public base, a legacy
+   * direct bucket URL (…/lawmitran-documents/<key>), a relative /storage/<key>,
+   * or a bare key.
+   */
+  keyFromUrl(urlOrKey: string): string {
+    if (this.publicBaseUrl && urlOrKey.startsWith(`${this.publicBaseUrl}/`)) {
+      return urlOrKey.slice(this.publicBaseUrl.length + 1);
+    }
+    for (const marker of [`/${this.bucket}/`, '/storage/']) {
+      const i = urlOrKey.indexOf(marker);
+      if (i !== -1) return urlOrKey.slice(i + marker.length);
+    }
+    return urlOrKey.replace(/^\/+/, '');
+  }
+
+  /** Fetch an object's bytes + content type by key (backend-proxied download). */
+  async getObject(key: string): Promise<{ body: Buffer; contentType: string }> {
+    await this.ensureBucket();
+    const res = await this.client.send(
+      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+    );
+    const chunks: Buffer[] = [];
+    const stream = res.Body as unknown as AsyncIterable<Uint8Array>;
+    for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+    return {
+      body: Buffer.concat(chunks),
+      contentType: res.ContentType ?? 'application/octet-stream',
+    };
   }
 }

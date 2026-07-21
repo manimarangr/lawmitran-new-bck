@@ -545,7 +545,7 @@ export default function AskLegalBox() {
                 <p className="mt-3.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[0.8125rem] text-amber-800">
                   <Icon name="lock" aria-hidden="true" className="mr-1" />
                   You&apos;ve used your <b>3 free guidance summaries</b> for today —{' '}
-                  <Link href="/signup" className="font-bold underline">create a free account</Link> or{' '}
+                  <Link href="/signup/client" className="font-bold underline">create a free account</Link> or{' '}
                   <Link href="/login" className="font-bold underline">sign in</Link> for unlimited guidance.
                 </p>
               )}

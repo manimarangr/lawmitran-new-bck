@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 import {
   guideCategories,
   getGuideCategory,
@@ -63,8 +64,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   };
 
   return (
-    <div>
-      <div className="mx-auto max-w-5xl px-6 py-10">
+    <Container className="py-10">
+      <div className="mx-auto max-w-5xl">
         <nav aria-label="Breadcrumb" className="mb-4 text-xs text-slate-400">
           <Link href="/" className="hover:text-gold">Home</Link> /{' '}
           <Link href="/legal-guides" className="hover:text-gold">Legal Guides</Link> /{' '}
@@ -127,6 +128,6 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
       </div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(listLd) }} />
-    </div>
+    </Container>
   );
 }

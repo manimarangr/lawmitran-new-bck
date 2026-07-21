@@ -55,7 +55,9 @@ export class RazorpayService {
 
     if (!response.ok) {
       const body = await response.text().catch(() => '');
-      this.logger.error(`Razorpay order failed (${response.status}): ${body.slice(0, 300)}`);
+      this.logger.error(
+        `Razorpay order failed (${response.status}): ${body.slice(0, 300)}`,
+      );
       throw new Error(
         `Razorpay order creation failed with status ${response.status}`,
       );

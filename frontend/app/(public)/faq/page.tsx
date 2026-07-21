@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Icon from '@/components/ui/Icon';
+import Container from '@/components/ui/Container';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
@@ -223,18 +224,21 @@ export default function FaqPage() {
 
       {/* hero */}
       <header className="hero-light py-12">
-        <div className="mx-auto max-w-4xl px-6">
-          <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-400">
-            <Link href="/" className="hover:text-gold">Home</Link> <span className="mx-1">/</span> FAQ
-          </nav>
-          <h1 className="text-3xl font-extrabold tracking-tight text-navy">Frequently Asked Questions</h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Payments, subscriptions, finding a lawyer, verification, documents, and privacy — answered.
-          </p>
-        </div>
+        <Container>
+          <div className="mx-auto max-w-4xl">
+            <nav aria-label="Breadcrumb" className="mb-3 text-xs text-slate-400">
+              <Link href="/" className="hover:text-gold">Home</Link> <span className="mx-1">/</span> FAQ
+            </nav>
+            <h1 className="text-3xl font-extrabold tracking-tight text-navy">Frequently Asked Questions</h1>
+            <p className="mt-2 text-sm text-slate-500">
+              Payments, subscriptions, finding a lawyer, verification, documents, and privacy — answered.
+            </p>
+          </div>
+        </Container>
       </header>
 
-      <div className="mx-auto max-w-4xl px-6 py-10">
+      <Container className="py-10">
+        <div className="mx-auto max-w-4xl">
         {/* category quick links */}
         <nav aria-label="FAQ categories" className="mb-10 flex flex-wrap gap-2">
           {CATEGORIES.map((c) => (
@@ -295,7 +299,8 @@ export default function FaqPage() {
           LawMitran is an information platform, not a law firm, and does not provide legal advice.
           Answers above are general guidance about how the platform works, not legal or financial advice.
         </p>
-      </div>
+        </div>
+      </Container>
     </main>
   );
 }

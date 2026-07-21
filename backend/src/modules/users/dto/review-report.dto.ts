@@ -7,7 +7,10 @@ export class ReviewReportDto {
   @IsEnum(ReportStatus)
   status: ReportStatus;
 
-  @ApiPropertyOptional({ description: 'Internal note / action taken', maxLength: 500 })
+  @ApiPropertyOptional({
+    description: 'Internal note / action taken',
+    maxLength: 500,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(500)

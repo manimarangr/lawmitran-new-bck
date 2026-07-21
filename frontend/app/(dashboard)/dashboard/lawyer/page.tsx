@@ -15,6 +15,7 @@ import Icon from '@/components/ui/Icon';
 import Pagination from '@/components/ui/Pagination';
 import type { Lead, LeadStatus, RevealedContact } from '@/types/lead';
 import { createDiaryCaseFromLead } from '@/lib/api/diary';
+import Container from '@/components/ui/Container';
 
 const badge: Record<LeadStatus, string> = {
   NEW: 'bg-blue-50 text-blue-600',
@@ -106,7 +107,7 @@ export default function LawyerDashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <Container className="py-8">
       {/* header */}
       <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
@@ -378,7 +379,7 @@ export default function LawyerDashboardPage() {
       </div>
 
       {reportLead && <ReportModal leadId={reportLead} who="client" onClose={() => setReportLead(null)} />}
-    </div>
+    </Container>
   );
 }
 

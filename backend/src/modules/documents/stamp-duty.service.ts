@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SettingsService } from '../settings/settings.service';
 
@@ -35,8 +39,13 @@ export class StampDutyService {
     opts: { state?: string; declaredValue?: number },
   ): Promise<DutyResult> {
     const mode =
-      (await this.settings.get('DOCS_STAMP_DUTY_MODE')) === 'strict' ? 'strict' : 'estimate';
-    const enabled = await this.settings.getBool('DOCS_STAMP_DUTY_ENABLED', false);
+      (await this.settings.get('DOCS_STAMP_DUTY_MODE')) === 'strict'
+        ? 'strict'
+        : 'estimate';
+    const enabled = await this.settings.getBool(
+      'DOCS_STAMP_DUTY_ENABLED',
+      false,
+    );
     if (!enabled || !template.requiresStamp || !template.stampBasis) {
       return { duty: 0, mode, rateFound: false };
     }
@@ -46,7 +55,12 @@ export class StampDutyService {
       if (mode === 'strict') {
         throw new BadRequestException('Select a state to compute stamp duty');
       }
-      return { duty: 0, mode, rateFound: false, note: 'Select a state for a stamp-duty estimate.' };
+      return {
+        duty: 0,
+        mode,
+        rateFound: false,
+        note: 'Select a state for a stamp-duty estimate.',
+      };
     }
 
     const rate = await this.prisma.stampDutyRate.findFirst({
@@ -54,7 +68,9 @@ export class StampDutyService {
     });
     if (!rate) {
       if (mode === 'strict') {
-        throw new BadRequestException(`Stamp-duty rate not configured for ${state}`);
+        throw new BadRequestException(
+          `Stamp-duty rate not configured for ${state}`,
+        );
       }
       return {
         duty: 0,
@@ -64,7 +80,11 @@ export class StampDutyService {
       };
     }
 
-    return { duty: this.compute(rate, opts.declaredValue), mode, rateFound: true };
+    return {
+      duty: this.compute(rate, opts.declaredValue),
+      mode,
+      rateFound: true,
+    };
   }
 
   private compute(rate: RateLike, declaredValue?: number): number {
@@ -116,8 +136,13 @@ export class StampDutyService {
       active: boolean;
     }>,
   ) {
-    const exists = await this.prisma.stampDutyRate.findUnique({ where: { id } });
+    const exists = await this.prisma.stampDutyRate.findUnique({
+      where: { id },
+    });
     if (!exists) throw new NotFoundException('Stamp-duty rate not found');
-    return this.prisma.stampDutyRate.update({ where: { id }, data: { ...dto } });
+    return this.prisma.stampDutyRate.update({
+      where: { id },
+      data: { ...dto },
+    });
   }
 }

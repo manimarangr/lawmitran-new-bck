@@ -9,6 +9,7 @@ import {
   verifyCheckout,
 } from '@/lib/api/subscriptions';
 import type { PlanName, PlanTier } from '@/types/subscription';
+import Container from '@/components/ui/Container';
 
 const GST = 0.18;
 const FALLBACK_LABEL: Record<number, string> = { 30: '30 days', 90: '3 months', 180: '6 months', 365: '1 year' };
@@ -117,7 +118,7 @@ export default function PlanPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
+    <Container className="py-8">
       <div className="mb-6 text-center">
         <h1 className="text-3xl font-extrabold text-navy">Choose your plan</h1>
         <p className="mt-2 text-sm text-slate-500">Keep receiving intent-matched client leads. Cancel anytime.</p>
@@ -204,6 +205,6 @@ export default function PlanPage() {
       <p className="mt-8 text-center text-xs text-slate-400">
         Secure payments via Razorpay. GST invoice emailed after payment. Longer terms are billed once for the full period.
       </p>
-    </div>
+    </Container>
   );
 }

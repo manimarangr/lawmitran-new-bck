@@ -11,7 +11,9 @@ export class ESignController {
   constructor(private readonly esign: ESignService) {}
 
   @Post('documents/:id/esign')
-  @ApiOperation({ summary: 'Start an e-sign request for a document (provider-agnostic)' })
+  @ApiOperation({
+    summary: 'Start an e-sign request for a document (provider-agnostic)',
+  })
   start(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
     return this.esign.createForDocument(user.userId, id);
   }
@@ -24,7 +26,9 @@ export class ESignController {
 
   @Public()
   @Post('webhooks/esign')
-  @ApiOperation({ summary: 'Generic e-sign webhook; dispatched to the owning provider' })
+  @ApiOperation({
+    summary: 'Generic e-sign webhook; dispatched to the owning provider',
+  })
   webhook(@Body() body: unknown) {
     return this.esign.handleWebhook(body);
   }

@@ -12,6 +12,7 @@ import {
   verifyMobileChange,
 } from '@/lib/api/users';
 import { clearSession } from '@/lib/api/client';
+import Container from '@/components/ui/Container';
 
 function Notice({ ok, msg }: { ok: boolean; msg: string }) {
   if (!msg) return null;
@@ -55,7 +56,7 @@ export default function SettingsPage() {
   });
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+    <Container className="space-y-6 py-8">
       <h1 className="text-2xl font-extrabold text-navy">Account settings</h1>
 
       {/* avatar */}
@@ -136,6 +137,6 @@ export default function SettingsPage() {
           <button onClick={() => delM.mutate()} disabled={confirm !== 'DELETE' || delM.isPending} className="rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-rose-700 disabled:opacity-40">Delete forever</button>
         </div>
       </section>
-    </div>
+    </Container>
   );
 }

@@ -298,7 +298,12 @@ export class SubscriptionsService {
   /** Admin: add a new duration tier for a plan (fails if it already exists). */
   async createPlanTier(
     planName: string,
-    data: { durationDays: number; amount: number; label?: string; active?: boolean },
+    data: {
+      durationDays: number;
+      amount: number;
+      label?: string;
+      active?: boolean;
+    },
   ) {
     const existing = await this.prisma.subscriptionPlanTier.findUnique({
       where: {
@@ -363,7 +368,7 @@ export class SubscriptionsService {
     const offer = await this.prisma.offer.findUnique({ where: { id } });
     if (!offer) throw new NotFoundException('Offer not found');
     this.assertOfferValid({
-      discountType: dto.discountType ?? (offer.discountType as 'PERCENT' | 'FLAT'),
+      discountType: dto.discountType ?? offer.discountType,
       discountValue: dto.discountValue ?? Number(offer.discountValue),
       startsAt: dto.startsAt ?? offer.startsAt.toISOString(),
       endsAt: dto.endsAt ?? offer.endsAt.toISOString(),
@@ -372,12 +377,24 @@ export class SubscriptionsService {
       where: { id },
       data: {
         ...(dto.name !== undefined ? { name: dto.name } : {}),
-        ...(dto.description !== undefined ? { description: dto.description } : {}),
-        ...(dto.discountType !== undefined ? { discountType: dto.discountType } : {}),
-        ...(dto.discountValue !== undefined ? { discountValue: dto.discountValue } : {}),
-        ...(dto.planName !== undefined ? { planName: dto.planName || null } : {}),
-        ...(dto.durationDays !== undefined ? { durationDays: dto.durationDays || null } : {}),
-        ...(dto.startsAt !== undefined ? { startsAt: new Date(dto.startsAt) } : {}),
+        ...(dto.description !== undefined
+          ? { description: dto.description }
+          : {}),
+        ...(dto.discountType !== undefined
+          ? { discountType: dto.discountType }
+          : {}),
+        ...(dto.discountValue !== undefined
+          ? { discountValue: dto.discountValue }
+          : {}),
+        ...(dto.planName !== undefined
+          ? { planName: dto.planName || null }
+          : {}),
+        ...(dto.durationDays !== undefined
+          ? { durationDays: dto.durationDays || null }
+          : {}),
+        ...(dto.startsAt !== undefined
+          ? { startsAt: new Date(dto.startsAt) }
+          : {}),
         ...(dto.endsAt !== undefined ? { endsAt: new Date(dto.endsAt) } : {}),
         ...(dto.active !== undefined ? { active: dto.active } : {}),
       },
@@ -398,7 +415,10 @@ export class SubscriptionsService {
     startsAt: string;
     endsAt: string;
   }) {
-    if ((dto.discountType ?? 'PERCENT') === 'PERCENT' && dto.discountValue > 100) {
+    if (
+      (dto.discountType ?? 'PERCENT') === 'PERCENT' &&
+      dto.discountValue > 100
+    ) {
       throw new BadRequestException('Percent discount cannot exceed 100');
     }
     if (new Date(dto.endsAt) <= new Date(dto.startsAt)) {
@@ -438,7 +458,8 @@ export class SubscriptionsService {
     );
     if (applicable.length === 0) return null;
     return applicable.reduce((best, o) =>
-      this.discountedAmount(listAmount, o) < this.discountedAmount(listAmount, best)
+      this.discountedAmount(listAmount, o) <
+      this.discountedAmount(listAmount, best)
         ? o
         : best,
     );
@@ -463,7 +484,9 @@ export class SubscriptionsService {
     data: { amount: number; label?: string; active?: boolean },
   ) {
     const label =
-      data.label ?? this.defaultLabelForDuration(durationDays) ?? `${durationDays} days`;
+      data.label ??
+      this.defaultLabelForDuration(durationDays) ??
+      `${durationDays} days`;
     return this.prisma.subscriptionPlanTier.upsert({
       where: { planName_durationDays: { planName, durationDays } },
       create: {
@@ -550,7 +573,11 @@ export class SubscriptionsService {
           status: SubscriptionStatus.ACTIVE,
           endDate: { gte: start, lt: end },
         },
-        select: { lawyer: { select: { user: { select: { email: true, mobile: true } } } } },
+        select: {
+          lawyer: {
+            select: { user: { select: { email: true, mobile: true } } },
+          },
+        },
       });
       for (const s of subs) {
         await this.notifyRenewal(s.lawyer.user, daysLeft, 'subscription');
@@ -625,8 +652,20 @@ export class SubscriptionsService {
             OR: [
               { providerOrderId: { contains: query, mode: 'insensitive' } },
               { providerPaymentId: { contains: query, mode: 'insensitive' } },
-              { lawyer: { is: { fullName: { contains: query, mode: 'insensitive' } } } },
-              { lawyer: { is: { user: { is: { email: { contains: query, mode: 'insensitive' } } } } } },
+              {
+                lawyer: {
+                  is: { fullName: { contains: query, mode: 'insensitive' } },
+                },
+              },
+              {
+                lawyer: {
+                  is: {
+                    user: {
+                      is: { email: { contains: query, mode: 'insensitive' } },
+                    },
+                  },
+                },
+              },
             ],
           }
         : {}),
@@ -654,10 +693,16 @@ export class SubscriptionsService {
   }
 
   /** Manual reconcile: admin confirmed the money arrived (e.g. via the Razorpay dashboard). */
-  async adminMarkPaymentPaid(adminUserId: string, paymentId: string, note?: string) {
+  async adminMarkPaymentPaid(
+    adminUserId: string,
+    paymentId: string,
+    note?: string,
+  ) {
     const payment = await this.prisma.payment.findUnique({
       where: { id: paymentId },
-      include: { lawyer: { select: { id: true, fullName: true, userId: true } } },
+      include: {
+        lawyer: { select: { id: true, fullName: true, userId: true } },
+      },
     });
     if (!payment) throw new NotFoundException('Payment not found');
     if (payment.status === PaymentStatus.PAID) {
@@ -735,7 +780,9 @@ export class SubscriptionsService {
     });
     if (!payment) throw new NotFoundException('Payment not found');
     if (payment.status !== PaymentStatus.PAID) {
-      throw new BadRequestException('Invoices are available only for paid transactions');
+      throw new BadRequestException(
+        'Invoices are available only for paid transactions',
+      );
     }
 
     let invoiceNo = payment.invoiceNo;
@@ -745,7 +792,9 @@ export class SubscriptionsService {
       // Low-volume sequential numbering; the unique index guards against races.
       for (let attempt = 0; attempt < 3 && !invoiceNo; attempt++) {
         const seq =
-          (await this.prisma.payment.count({ where: { invoiceNo: { not: null } } })) +
+          (await this.prisma.payment.count({
+            where: { invoiceNo: { not: null } },
+          })) +
           1 +
           attempt;
         const candidate = `${prefix}-${year}-${String(seq).padStart(5, '0')}`;
@@ -760,7 +809,9 @@ export class SubscriptionsService {
         }
       }
       if (!invoiceNo) {
-        throw new BadRequestException('Could not assign an invoice number — try again');
+        throw new BadRequestException(
+          'Could not assign an invoice number — try again',
+        );
       }
       await this.audit.log('INVOICE_GENERATED', {
         entityType: 'Payment',
@@ -789,7 +840,12 @@ export class SubscriptionsService {
         email: payment.lawyer.user.email,
         mobile: payment.lawyer.user.mobile,
         address: office
-          ? [office.addressLine, office.landmark, office.city?.name, office.pincode]
+          ? [
+              office.addressLine,
+              office.landmark,
+              office.city?.name,
+              office.pincode,
+            ]
               .filter(Boolean)
               .join(', ')
           : null,

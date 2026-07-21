@@ -50,7 +50,12 @@ export class DiaryService {
     return lawyer;
   }
 
-  private async log(lawyerId: string, action: string, summary: string, caseId?: string) {
+  private async log(
+    lawyerId: string,
+    action: string,
+    summary: string,
+    caseId?: string,
+  ) {
     await this.prisma.diaryActivity.create({
       data: { lawyerId, caseId: caseId ?? null, action, summary },
     });
@@ -61,53 +66,96 @@ export class DiaryService {
   async dashboard(userId: string) {
     const lawyer = await this.lawyerOf(userId);
     const now = new Date();
-    const dayStart = new Date(now); dayStart.setHours(0, 0, 0, 0);
-    const dayEnd = new Date(now); dayEnd.setHours(23, 59, 59, 999);
+    const dayStart = new Date(now);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(now);
+    dayEnd.setHours(23, 59, 59, 999);
     const in7 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     const live = { lawyerId: lawyer.id, deletedAt: null };
     const openStatuses: DiaryCaseStatus[] = [
-      DiaryCaseStatus.NEW, DiaryCaseStatus.CONSULTATION, DiaryCaseStatus.NOTICE_SENT,
-      DiaryCaseStatus.CASE_FILED, DiaryCaseStatus.EVIDENCE, DiaryCaseStatus.ARGUMENTS,
+      DiaryCaseStatus.NEW,
+      DiaryCaseStatus.CONSULTATION,
+      DiaryCaseStatus.NOTICE_SENT,
+      DiaryCaseStatus.CASE_FILED,
+      DiaryCaseStatus.EVIDENCE,
+      DiaryCaseStatus.ARGUMENTS,
       DiaryCaseStatus.JUDGMENT_RESERVED,
     ];
 
-    const [openCases, closedCases, todayHearings, upcomingHearings, dueReminders, recentActivity, recentCases] =
-      await this.prisma.$transaction([
-        this.prisma.diaryCase.count({ where: { ...live, status: { in: openStatuses } } }),
-        this.prisma.diaryCase.count({
-          where: { ...live, status: { in: [DiaryCaseStatus.DISPOSED, DiaryCaseStatus.CLOSED] } },
-        }),
-        this.prisma.diaryCase.findMany({
-          where: { ...live, nextHearingAt: { gte: dayStart, lte: dayEnd } },
-          select: { id: true, title: true, caseNumber: true, courtName: true, nextHearingAt: true },
-          orderBy: { nextHearingAt: 'asc' },
-        }),
-        this.prisma.diaryCase.findMany({
-          where: { ...live, nextHearingAt: { gt: dayEnd, lte: in7 } },
-          select: { id: true, title: true, caseNumber: true, courtName: true, nextHearingAt: true },
-          orderBy: { nextHearingAt: 'asc' },
-          take: 8,
-        }),
-        this.prisma.diaryReminder.findMany({
-          where: { lawyerId: lawyer.id, deletedAt: null, done: false, dueAt: { lte: in7 } },
-          orderBy: { dueAt: 'asc' },
-          take: 8,
-          include: { case: { select: { id: true, title: true } } },
-        }),
-        this.prisma.diaryActivity.findMany({
-          where: { lawyerId: lawyer.id },
-          orderBy: { createdAt: 'desc' },
-          take: 10,
-        }),
-        this.prisma.diaryCase.findMany({
-          where: live,
-          orderBy: { updatedAt: 'desc' },
-          take: 5,
-          select: { id: true, title: true, status: true, updatedAt: true },
-        }),
-      ]);
+    const [
+      openCases,
+      closedCases,
+      todayHearings,
+      upcomingHearings,
+      dueReminders,
+      recentActivity,
+      recentCases,
+    ] = await this.prisma.$transaction([
+      this.prisma.diaryCase.count({
+        where: { ...live, status: { in: openStatuses } },
+      }),
+      this.prisma.diaryCase.count({
+        where: {
+          ...live,
+          status: { in: [DiaryCaseStatus.DISPOSED, DiaryCaseStatus.CLOSED] },
+        },
+      }),
+      this.prisma.diaryCase.findMany({
+        where: { ...live, nextHearingAt: { gte: dayStart, lte: dayEnd } },
+        select: {
+          id: true,
+          title: true,
+          caseNumber: true,
+          courtName: true,
+          nextHearingAt: true,
+        },
+        orderBy: { nextHearingAt: 'asc' },
+      }),
+      this.prisma.diaryCase.findMany({
+        where: { ...live, nextHearingAt: { gt: dayEnd, lte: in7 } },
+        select: {
+          id: true,
+          title: true,
+          caseNumber: true,
+          courtName: true,
+          nextHearingAt: true,
+        },
+        orderBy: { nextHearingAt: 'asc' },
+        take: 8,
+      }),
+      this.prisma.diaryReminder.findMany({
+        where: {
+          lawyerId: lawyer.id,
+          deletedAt: null,
+          done: false,
+          dueAt: { lte: in7 },
+        },
+        orderBy: { dueAt: 'asc' },
+        take: 8,
+        include: { case: { select: { id: true, title: true } } },
+      }),
+      this.prisma.diaryActivity.findMany({
+        where: { lawyerId: lawyer.id },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+      }),
+      this.prisma.diaryCase.findMany({
+        where: live,
+        orderBy: { updatedAt: 'desc' },
+        take: 5,
+        select: { id: true, title: true, status: true, updatedAt: true },
+      }),
+    ]);
 
-    return { openCases, closedCases, todayHearings, upcomingHearings, dueReminders, recentActivity, recentCases };
+    return {
+      openCases,
+      closedCases,
+      todayHearings,
+      upcomingHearings,
+      dueReminders,
+      recentActivity,
+      recentCases,
+    };
   }
 
   // ================= clients =================
@@ -121,7 +169,9 @@ export class DiaryService {
         ...(q ? { name: { contains: q, mode: 'insensitive' } } : {}),
       },
       orderBy: { name: 'asc' },
-      include: { _count: { select: { cases: { where: { deletedAt: null } } } } },
+      include: {
+        _count: { select: { cases: { where: { deletedAt: null } } } },
+      },
     });
   }
 
@@ -130,7 +180,11 @@ export class DiaryService {
     const client = await this.prisma.diaryClient.create({
       data: { lawyerId: lawyer.id, ...dto },
     });
-    await this.log(lawyer.id, 'CLIENT_CREATED', `Added client "${client.name}"`);
+    await this.log(
+      lawyer.id,
+      'CLIENT_CREATED',
+      `Added client "${client.name}"`,
+    );
     return client;
   }
 
@@ -173,7 +227,10 @@ export class DiaryService {
       this.prisma.diaryCase.count({ where }),
       this.prisma.diaryCase.findMany({
         where,
-        orderBy: [{ nextHearingAt: { sort: 'asc', nulls: 'last' } }, { updatedAt: 'desc' }],
+        orderBy: [
+          { nextHearingAt: { sort: 'asc', nulls: 'last' } },
+          { updatedAt: 'desc' },
+        ],
         skip: (page - 1) * pageSize,
         take: pageSize,
         include: { client: { select: { id: true, name: true, mobile: true } } },
@@ -214,7 +271,11 @@ export class DiaryService {
         ? { dateFiled: dto.dateFiled ? new Date(dto.dateFiled) : null }
         : {}),
       ...(dto.nextHearingAt !== undefined
-        ? { nextHearingAt: dto.nextHearingAt ? new Date(dto.nextHearingAt) : null }
+        ? {
+            nextHearingAt: dto.nextHearingAt
+              ? new Date(dto.nextHearingAt)
+              : null,
+          }
         : {}),
       remarks: dto.remarks,
       lawyerNotes: dto.lawyerNotes,
@@ -228,9 +289,19 @@ export class DiaryService {
     });
     if (!client) throw new BadRequestException('Pick a valid client');
     const c = await this.prisma.diaryCase.create({
-      data: { lawyerId: lawyer.id, clientId: client.id, ...this.caseData(dto), title: dto.title },
+      data: {
+        lawyerId: lawyer.id,
+        clientId: client.id,
+        ...this.caseData(dto),
+        title: dto.title,
+      },
     });
-    await this.log(lawyer.id, 'CASE_CREATED', `Created case "${c.title}"`, c.id);
+    await this.log(
+      lawyer.id,
+      'CASE_CREATED',
+      `Created case "${c.title}"`,
+      c.id,
+    );
     return c;
   }
 
@@ -248,12 +319,20 @@ export class DiaryService {
     }
     const updated = await this.prisma.diaryCase.update({
       where: { id },
-      data: { ...(dto.clientId ? { clientId: dto.clientId } : {}), ...this.caseData(dto) },
+      data: {
+        ...(dto.clientId ? { clientId: dto.clientId } : {}),
+        ...this.caseData(dto),
+      },
     });
     if (dto.status && dto.status !== existing.status) {
       await this.log(lawyer.id, 'STATUS_CHANGED', `Status → ${dto.status}`, id);
     } else {
-      await this.log(lawyer.id, 'CASE_UPDATED', `Updated "${updated.title}"`, id);
+      await this.log(
+        lawyer.id,
+        'CASE_UPDATED',
+        `Updated "${updated.title}"`,
+        id,
+      );
     }
     return updated;
   }
@@ -264,8 +343,16 @@ export class DiaryService {
       where: { id, lawyerId: lawyer.id, deletedAt: null },
     });
     if (!existing) throw new NotFoundException('Case not found');
-    await this.prisma.diaryCase.update({ where: { id }, data: { deletedAt: new Date() } });
-    await this.log(lawyer.id, 'CASE_DELETED', `Deleted "${existing.title}"`, id);
+    await this.prisma.diaryCase.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+    await this.log(
+      lawyer.id,
+      'CASE_DELETED',
+      `Deleted "${existing.title}"`,
+      id,
+    );
     return { success: true };
   }
 
@@ -310,7 +397,11 @@ export class DiaryService {
   async listReminders(userId: string, includeDone = false) {
     const lawyer = await this.lawyerOf(userId);
     return this.prisma.diaryReminder.findMany({
-      where: { lawyerId: lawyer.id, deletedAt: null, ...(includeDone ? {} : { done: false }) },
+      where: {
+        lawyerId: lawyer.id,
+        deletedAt: null,
+        ...(includeDone ? {} : { done: false }),
+      },
       orderBy: { dueAt: 'asc' },
       include: { case: { select: { id: true, title: true } } },
       take: 100,
@@ -406,11 +497,15 @@ export class DiaryService {
     const lawyer = await this.lawyerOf(userId);
     const lead = await this.prisma.lead.findFirst({
       where: { id: leadId, lawyerId: lawyer.id },
-      include: { client: { select: { fullName: true, email: true, mobile: true } } },
+      include: {
+        client: { select: { fullName: true, email: true, mobile: true } },
+      },
     });
     if (!lead) throw new NotFoundException('Lead not found');
     if (lead.status === LeadStatus.NEW) {
-      throw new BadRequestException('Contact the client first — then convert the lead to a case');
+      throw new BadRequestException(
+        'Contact the client first — then convert the lead to a case',
+      );
     }
 
     // Reuse the diary client if this lead was converted before.
@@ -445,7 +540,12 @@ export class DiaryService {
         leadId: lead.id,
       },
     });
-    await this.log(lawyer.id, 'CASE_FROM_LEAD', `Converted lead into case "${c.title}"`, c.id);
+    await this.log(
+      lawyer.id,
+      'CASE_FROM_LEAD',
+      `Converted lead into case "${c.title}"`,
+      c.id,
+    );
     return c;
   }
 }

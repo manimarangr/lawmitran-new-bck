@@ -17,7 +17,9 @@ export class CreateOfferDto {
   @MinLength(2)
   name: string;
 
-  @ApiPropertyOptional({ example: 'Festival of lights special — 20% off all plans' })
+  @ApiPropertyOptional({
+    example: 'Festival of lights special — 20% off all plans',
+  })
   @IsOptional()
   @IsString()
   description?: string;
@@ -27,17 +29,26 @@ export class CreateOfferDto {
   @IsIn(['PERCENT', 'FLAT'])
   discountType?: 'PERCENT' | 'FLAT';
 
-  @ApiProperty({ example: 20, description: 'Percent (0–100) or flat ₹ amount off' })
+  @ApiProperty({
+    example: 20,
+    description: 'Percent (0–100) or flat ₹ amount off',
+  })
   @IsNumber()
   @Min(0)
   discountValue: number;
 
-  @ApiPropertyOptional({ example: 'PREMIUM', description: 'Limit to a plan; omit for all plans' })
+  @ApiPropertyOptional({
+    example: 'PREMIUM',
+    description: 'Limit to a plan; omit for all plans',
+  })
   @IsOptional()
   @IsString()
   planName?: string;
 
-  @ApiPropertyOptional({ example: 365, description: 'Limit to a duration; omit for all durations' })
+  @ApiPropertyOptional({
+    example: 365,
+    description: 'Limit to a duration; omit for all durations',
+  })
   @IsOptional()
   @IsInt()
   @Min(1)

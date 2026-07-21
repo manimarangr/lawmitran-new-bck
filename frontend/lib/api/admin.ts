@@ -1,4 +1,5 @@
-import { authFetch } from './client';
+import { authFetch, getToken, refreshSession } from './client';
+import { API_BASE } from './base';
 import type { PlanName } from '@/types/subscription';
 
 import type { Paginated } from '@/types/pagination';
@@ -498,4 +499,35 @@ export function setUserStatus(id: string, status: UserStatus) {
     method: 'PATCH',
     body: JSON.stringify({ status }),
   });
+}
+
+
+/**
+ * Fetch a lawyer's ID card / profile photo through the authenticated API and
+ * return a blob URL. Certificates are private (not publicly readable) and the
+ * bearer token can't ride on an <img>/<iframe> `src`, so we fetch the bytes
+ * with the token and hand back an object URL the viewer can render in-page.
+ * Caller is responsible for URL.revokeObjectURL() when done.
+ */
+export async function fetchAdminLawyerAsset(
+  id: string,
+  kind: 'certificate' | 'profile',
+): Promise<{ url: string; isPdf: boolean }> {
+  const call = () => {
+    const token = getToken();
+    return fetch(`${API_BASE}/lawyers/admin/lawyers/${id}/asset/${kind}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  };
+  let res = await call();
+  if (res.status === 401 && (await refreshSession())) res = await call();
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { message?: string };
+    throw new Error(body?.message ?? 'Could not load the document');
+  }
+  const blob = await res.blob();
+  return {
+    url: URL.createObjectURL(blob),
+    isPdf: blob.type === 'application/pdf',
+  };
 }

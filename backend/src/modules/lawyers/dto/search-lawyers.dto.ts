@@ -65,8 +65,8 @@ export class SearchLawyersDto {
   ratingMin?: number;
 
   @IsOptional()
-  @IsIn(['rating', 'experience', 'createdAt'])
-  sort?: 'rating' | 'experience' | 'createdAt';
+  @IsIn(['rating', 'experience', 'createdAt', 'distance'])
+  sort?: 'rating' | 'experience' | 'createdAt' | 'distance';
 
   // Map bounding box — used by /markers endpoint
   @IsOptional()
@@ -88,6 +88,27 @@ export class SearchLawyersDto {
   @Type(() => Number)
   @IsNumber()
   neLng?: number;
+
+  // Point-radius "near me" search — client's current position.
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  lat?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  lng?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  radiusKm?: number;
 
   @IsOptional()
   @Type(() => Number)

@@ -74,7 +74,10 @@ export class LeadsController {
   @ApiOperation({
     summary: 'Client confirms the lawyer actually made contact',
   })
-  @ApiResponse({ status: 201, description: 'Lead marked as client-confirmed contacted' })
+  @ApiResponse({
+    status: 201,
+    description: 'Lead marked as client-confirmed contacted',
+  })
   confirmContact(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id') id: string,
@@ -84,7 +87,9 @@ export class LeadsController {
 
   @Roles(Role.CLIENT)
   @Patch(':id/withdraw')
-  @ApiOperation({ summary: 'Client withdraws their requirement (closes the lead)' })
+  @ApiOperation({
+    summary: 'Client withdraws their requirement (closes the lead)',
+  })
   @ApiResponse({ status: 200, description: 'Lead closed as withdrawn' })
   withdraw(
     @CurrentUser() user: CurrentUserPayload,

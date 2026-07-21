@@ -9,6 +9,7 @@ import {
 } from '@/lib/api/users';
 import Pagination from '@/components/ui/Pagination';
 import type { AppNotification } from '@/types/user';
+import Container from '@/components/ui/Container';
 
 const meta: Record<string, string> = {
   LEAD_NEW: 'bg-blue-50 text-blue-600',
@@ -43,7 +44,7 @@ export default function NotificationsPage() {
   const unread = q.data?.filter((n) => !n.readAt).length ?? 0;
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <Container className="py-8">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-extrabold text-navy">Notifications</h1>
@@ -99,6 +100,6 @@ export default function NotificationsPage() {
         totalPages={Math.max(Math.ceil((q.data?.length ?? 0) / PER_PAGE), 1)}
         onPageChange={setPage}
       />
-    </div>
+    </Container>
   );
 }

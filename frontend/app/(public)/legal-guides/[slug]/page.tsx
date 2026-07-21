@@ -9,6 +9,7 @@ import {
   GUIDE_AUTHOR,
 } from '@/lib/legal-guides/source';
 import { getCategory } from '@/lib/legal-guides/categories';
+import Container from '@/components/ui/Container';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.lawmitran.com';
 
@@ -115,8 +116,8 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
   };
 
   return (
-    <div>
-      <article className="mx-auto max-w-4xl px-6 py-10">
+    <Container as="div" className="py-10">
+      <article className="mx-auto max-w-4xl">
         <nav aria-label="Breadcrumb" className="mb-4 text-xs text-slate-400">
           <Link href="/" className="hover:text-gold">Home</Link> /{' '}
           <Link href="/legal-guides" className="hover:text-gold">Legal Guides</Link> /{' '}
@@ -261,6 +262,6 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-    </div>
+    </Container>
   );
 }

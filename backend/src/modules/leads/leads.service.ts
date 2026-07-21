@@ -44,10 +44,18 @@ export class LeadsService {
     const hours = await this.settings.getNumber('LEAD_SLA_HOURS', 48);
     const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
     const stale = await this.prisma.lead.findMany({
-      where: { status: LeadStatus.NEW, createdAt: { lt: cutoff }, slaNudgedAt: null },
+      where: {
+        status: LeadStatus.NEW,
+        createdAt: { lt: cutoff },
+        slaNudgedAt: null,
+      },
       include: {
         lawyer: {
-          select: { userId: true, fullName: true, user: { select: { email: true } } },
+          select: {
+            userId: true,
+            fullName: true,
+            user: { select: { email: true } },
+          },
         },
       },
       take: 200,
@@ -56,7 +64,11 @@ export class LeadsService {
 
     for (const lead of stale) {
       try {
-        await this.mail.sendLeadSlaNudge(lead.lawyer.user.email, lead.practiceArea, hours);
+        await this.mail.sendLeadSlaNudge(
+          lead.lawyer.user.email,
+          lead.practiceArea,
+          hours,
+        );
         await this.notify.notifyUser(lead.lawyer.userId, 'LEAD_SLA', {
           title: 'A client is waiting to hear from you',
           body: `Your ${lead.practiceArea} lead has been waiting over ${hours} hours — contact the client soon or they may look elsewhere.`,
@@ -66,7 +78,9 @@ export class LeadsService {
           data: { slaNudgedAt: new Date() },
         });
       } catch (err) {
-        this.logger.warn(`lead SLA nudge failed for ${lead.id}: ${(err as Error).message}`);
+        this.logger.warn(
+          `lead SLA nudge failed for ${lead.id}: ${(err as Error).message}`,
+        );
       }
     }
     await this.notify.notifyAdmins('LEAD_SLA_DIGEST', {
@@ -109,9 +123,11 @@ export class LeadsService {
     let practiceArea = dto.practiceArea?.trim();
     if (!practiceArea) {
       const { topic, matched } = classifyQuestion(dto.description);
-      practiceArea = matched && topic.practiceMatch
-        ? topic.practiceMatch.charAt(0).toUpperCase() + topic.practiceMatch.slice(1)
-        : 'General';
+      practiceArea =
+        matched && topic.practiceMatch
+          ? topic.practiceMatch.charAt(0).toUpperCase() +
+            topic.practiceMatch.slice(1)
+          : 'General';
     }
 
     const lead = await this.prisma.lead.create({
@@ -215,7 +231,10 @@ export class LeadsService {
     const [updated] = await this.prisma.$transaction([
       this.prisma.lead.update({
         where: { id: leadId },
-        data: { status: LeadStatus.CLOSED, closedReason: reason ?? 'WITHDRAWN' },
+        data: {
+          status: LeadStatus.CLOSED,
+          closedReason: reason ?? 'WITHDRAWN',
+        },
       }),
       this.prisma.leadHistory.create({
         data: {
@@ -223,7 +242,9 @@ export class LeadsService {
           fromStatus: lead.status,
           toStatus: LeadStatus.CLOSED,
           changedBy: clientId,
-          note: reason ? `Withdrawn by client: ${reason}` : 'Withdrawn by client',
+          note: reason
+            ? `Withdrawn by client: ${reason}`
+            : 'Withdrawn by client',
         },
       }),
     ]);

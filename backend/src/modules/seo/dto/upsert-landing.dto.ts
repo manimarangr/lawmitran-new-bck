@@ -7,7 +7,9 @@ export class UpsertLandingDto {
   @MaxLength(120)
   title: string;
 
-  @ApiProperty({ description: 'Unique SEO intro copy for this city × practice page' })
+  @ApiProperty({
+    description: 'Unique SEO intro copy for this city × practice page',
+  })
   @IsString()
   @MaxLength(2000)
   intro: string;

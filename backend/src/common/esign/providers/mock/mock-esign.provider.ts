@@ -28,7 +28,10 @@ export class MockESignProvider implements ESignProvider {
   }
 
   parseWebhook(payload: unknown): ESignWebhookEvent | null {
-    const p = payload as { providerRequestId?: string; outcome?: string } | null;
+    const p = payload as {
+      providerRequestId?: string;
+      outcome?: string;
+    } | null;
     if (!p?.providerRequestId) return null;
     const map: Record<string, ESignStatusValue> = {
       signed: 'SIGNED',
@@ -43,7 +46,9 @@ export class MockESignProvider implements ESignProvider {
       providerRequestId: p.providerRequestId,
       status,
       signedDocumentUrl:
-        status === 'SIGNED' ? `/mock/esign/${p.providerRequestId}/signed.pdf` : undefined,
+        status === 'SIGNED'
+          ? `/mock/esign/${p.providerRequestId}/signed.pdf`
+          : undefined,
     };
   }
 }

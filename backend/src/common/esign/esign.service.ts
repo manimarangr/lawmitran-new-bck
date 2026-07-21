@@ -11,7 +11,11 @@ import { NotifyService } from '../notify/notify.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SettingsService } from '../../modules/settings/settings.service';
 import { ESIGN_PROVIDERS, ESignProvider } from './esign-provider.interface';
-import { ESIGN_TERMINAL, ESignStatusValue, ESignWebhookEvent } from './esign.types';
+import {
+  ESIGN_TERMINAL,
+  ESignStatusValue,
+  ESignWebhookEvent,
+} from './esign.types';
 
 /**
  * Vendor-agnostic e-sign orchestrator. Persists provider-independent
@@ -40,13 +44,23 @@ export class ESignService {
 
   private provider(name: string): ESignProvider {
     const p = this.registry.get(name);
-    if (!p) throw new BadRequestException(`e-sign provider "${name}" is not implemented`);
+    if (!p)
+      throw new BadRequestException(
+        `e-sign provider "${name}" is not implemented`,
+      );
     return p;
   }
 
-  private audit(existing: Prisma.JsonValue | null, event: string, status: string): Prisma.InputJsonValue {
+  private audit(
+    existing: Prisma.JsonValue | null,
+    event: string,
+    status: string,
+  ): Prisma.InputJsonValue {
     const prev = Array.isArray(existing) ? (existing as unknown[]) : [];
-    return [...prev, { at: new Date().toISOString(), event, status }] as Prisma.InputJsonValue;
+    return [
+      ...prev,
+      { at: new Date().toISOString(), event, status },
+    ] as Prisma.InputJsonValue;
   }
 
   /** Start an e-sign request for a paid document. */
@@ -60,7 +74,9 @@ export class ESignService {
     });
     if (!doc) throw new NotFoundException('Document not found');
     if (doc.status === DocumentStatus.DRAFT || !doc.contentHtml) {
-      throw new BadRequestException('Pay for the document before requesting e-sign');
+      throw new BadRequestException(
+        'Pay for the document before requesting e-sign',
+      );
     }
 
     const providerName = await this.activeProviderName();
@@ -86,7 +102,7 @@ export class ESignService {
         where: { id: req.id },
         data: {
           providerRequestId: res.providerRequestId,
-          status: res.status as unknown as ESignStatus,
+          status: res.status,
           auditLog: this.audit(req.auditLog, 'provider.create', res.status),
         },
       });
@@ -97,10 +113,15 @@ export class ESignService {
         signingUrl: res.signingUrl ?? null,
       };
     } catch (err) {
-      this.logger.warn(`e-sign create failed for ${req.id}: ${(err as Error).message}`);
+      this.logger.warn(
+        `e-sign create failed for ${req.id}: ${(err as Error).message}`,
+      );
       await this.prisma.eSignRequest.update({
         where: { id: req.id },
-        data: { status: ESignStatus.FAILED, auditLog: this.audit(req.auditLog, 'provider.error', 'FAILED') },
+        data: {
+          status: ESignStatus.FAILED,
+          auditLog: this.audit(req.auditLog, 'provider.error', 'FAILED'),
+        },
       });
       throw new BadRequestException('Could not start the e-sign request');
     }
@@ -110,7 +131,13 @@ export class ESignService {
   async getStatus(userId: string, id: string) {
     const req = await this.prisma.eSignRequest.findFirst({
       where: { id, userId },
-      select: { id: true, provider: true, status: true, signedDocumentUrl: true, updatedAt: true },
+      select: {
+        id: true,
+        provider: true,
+        status: true,
+        signedDocumentUrl: true,
+        updatedAt: true,
+      },
     });
     if (!req) throw new NotFoundException('e-sign request not found');
     return req;
@@ -131,26 +158,42 @@ export class ESignService {
     if (!event) return { ok: false, reason: 'unrecognized payload' };
 
     const req = await this.prisma.eSignRequest.findFirst({
-      where: { providerRequestId: event.providerRequestId, provider: providerName ?? undefined },
+      where: {
+        providerRequestId: event.providerRequestId,
+        provider: providerName ?? undefined,
+      },
     });
     if (!req) return { ok: false, reason: 'unknown request' };
 
     // Idempotency: terminal states are never re-applied.
-    if (ESIGN_TERMINAL.includes(req.status as ESignStatusValue)) {
+    if (ESIGN_TERMINAL.includes(req.status)) {
       return { ok: true, status: req.status, idempotent: true };
     }
-    await this.applyEvent(req.id, req.documentId, req.userId, req.auditLog, event);
+    await this.applyEvent(
+      req.id,
+      req.documentId,
+      req.userId,
+      req.auditLog,
+      event,
+    );
     return { ok: true, status: event.status };
   }
 
   /** Dev/testing only: fire a mock webhook for a request owned by the caller. */
   async simulate(userId: string, id: string, outcome: string) {
-    const req = await this.prisma.eSignRequest.findFirst({ where: { id, userId } });
+    const req = await this.prisma.eSignRequest.findFirst({
+      where: { id, userId },
+    });
     if (!req) throw new NotFoundException('e-sign request not found');
     if (req.provider !== 'mock') {
-      throw new BadRequestException('Simulation is only available for the mock provider');
+      throw new BadRequestException(
+        'Simulation is only available for the mock provider',
+      );
     }
-    return this.handleWebhook({ providerRequestId: req.providerRequestId, outcome });
+    return this.handleWebhook({
+      providerRequestId: req.providerRequestId,
+      outcome,
+    });
   }
 
   private async applyEvent(
@@ -163,7 +206,7 @@ export class ESignService {
     await this.prisma.eSignRequest.update({
       where: { id },
       data: {
-        status: event.status as unknown as ESignStatus,
+        status: event.status,
         signedDocumentUrl: event.signedDocumentUrl,
         callbackPayload: event as unknown as Prisma.InputJsonValue,
         auditLog: this.audit(prevAudit, 'webhook', event.status),
