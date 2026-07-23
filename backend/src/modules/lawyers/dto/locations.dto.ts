@@ -14,7 +14,10 @@ import {
 } from 'class-validator';
 
 export class CreateOfficeDto {
-  @ApiProperty({ example: 'Bengaluru', description: 'City name from the reference list' })
+  @ApiProperty({
+    example: 'Bengaluru',
+    description: 'City name from the reference list',
+  })
   @IsString()
   @MinLength(2)
   city: string;
@@ -43,7 +46,9 @@ export class CreateOfficeDto {
   @MaxLength(120)
   landmark?: string;
 
-  @ApiPropertyOptional({ description: 'Metro locality id (from GET /lawyers/localities)' })
+  @ApiPropertyOptional({
+    description: 'Metro locality id (from GET /lawyers/localities)',
+  })
   @IsOptional()
   @IsString()
   localityId?: string;
@@ -62,7 +67,9 @@ export class CreateOfficeDto {
 }
 
 export class UpdateOfficeDto extends PartialType(CreateOfficeDto) {
-  @ApiPropertyOptional({ description: 'Make this the primary office (syncs profile city/coords)' })
+  @ApiPropertyOptional({
+    description: 'Make this the primary office (syncs profile city/coords)',
+  })
   @IsOptional()
   @IsBoolean()
   isPrimary?: boolean;

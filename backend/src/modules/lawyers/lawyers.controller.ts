@@ -11,7 +11,10 @@ import {
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FilesInterceptor,
+} from '@nestjs/platform-express';
 import { ApiOperation } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { AdminRole, Role } from '@prisma/client';
@@ -28,7 +31,11 @@ import { ReviewLawyerDto } from './dto/review-lawyer.dto';
 import { SearchLawyersDto } from './dto/search-lawyers.dto';
 import { UpdateLawyerProfileDto } from './dto/update-lawyer-profile.dto';
 import { PracticeAreaDto } from './dto/practice-area.dto';
-import { CreateOfficeDto, SetServiceAreasDto, UpdateOfficeDto } from './dto/locations.dto';
+import {
+  CreateOfficeDto,
+  SetServiceAreasDto,
+  UpdateOfficeDto,
+} from './dto/locations.dto';
 
 @Controller('lawyers')
 export class LawyersController {
@@ -80,7 +87,9 @@ export class LawyersController {
 
   @Public()
   @Get('localities')
-  @ApiOperation({ summary: 'Metro localities for a city (public) — ?city=Bengaluru' })
+  @ApiOperation({
+    summary: 'Metro localities for a city (public) — ?city=Bengaluru',
+  })
   listLocalities(@Query('city') city: string) {
     return this.lawyersService.listLocalities(city);
   }
@@ -144,12 +153,18 @@ export class LawyersController {
     @CurrentUser() user: CurrentUserPayload,
     @UploadedFiles() files: LawyerProfileFiles,
   ) {
-    return this.lawyersService.updateProfilePhoto(user.userId, files?.photo?.[0]);
+    return this.lawyersService.updateProfilePhoto(
+      user.userId,
+      files?.photo?.[0],
+    );
   }
 
   @Roles(Role.LAWYER)
   @Post('me/reverify')
-  @ApiOperation({ summary: 'Rejected lawyer re-uploads documents and re-enters the pending queue' })
+  @ApiOperation({
+    summary:
+      'Rejected lawyer re-uploads documents and re-enters the pending queue',
+  })
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -177,7 +192,9 @@ export class LawyersController {
 
   @Roles(Role.LAWYER)
   @Get('me/locations')
-  @ApiOperation({ summary: 'My offices, active service areas, and plan cap (docs/28)' })
+  @ApiOperation({
+    summary: 'My offices, active service areas, and plan cap (docs/28)',
+  })
   getMyLocations(@CurrentUser() user: CurrentUserPayload) {
     return this.lawyersService.getMyLocations(user.userId);
   }
@@ -185,7 +202,10 @@ export class LawyersController {
   @Roles(Role.LAWYER)
   @Post('me/offices')
   @ApiOperation({ summary: 'Add an office (first office becomes primary)' })
-  addOffice(@CurrentUser() user: CurrentUserPayload, @Body() dto: CreateOfficeDto) {
+  addOffice(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() dto: CreateOfficeDto,
+  ) {
     return this.lawyersService.addOffice(user.userId, dto);
   }
 
@@ -202,7 +222,9 @@ export class LawyersController {
 
   @Roles(Role.LAWYER)
   @Post('me/offices/:id/photos')
-  @ApiOperation({ summary: 'Upload office photos (max 3 kept, replaces existing)' })
+  @ApiOperation({
+    summary: 'Upload office photos (max 3 kept, replaces existing)',
+  })
   @UseInterceptors(
     FilesInterceptor('photos', 3, {
       storage: memoryStorage(),
@@ -220,14 +242,22 @@ export class LawyersController {
   @Roles(Role.LAWYER)
   @Delete('me/offices/:id')
   @ApiOperation({ summary: 'Remove an office (at least one must remain)' })
-  deleteOffice(@CurrentUser() user: CurrentUserPayload, @Param('id') id: string) {
+  deleteOffice(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id') id: string,
+  ) {
     return this.lawyersService.deleteOffice(user.userId, id);
   }
 
   @Roles(Role.LAWYER)
   @Put('me/service-areas')
-  @ApiOperation({ summary: 'Replace my service areas (validated against the plan cap)' })
-  setServiceAreas(@CurrentUser() user: CurrentUserPayload, @Body() dto: SetServiceAreasDto) {
+  @ApiOperation({
+    summary: 'Replace my service areas (validated against the plan cap)',
+  })
+  setServiceAreas(
+    @CurrentUser() user: CurrentUserPayload,
+    @Body() dto: SetServiceAreasDto,
+  ) {
     return this.lawyersService.setServiceAreas(user.userId, dto.cities);
   }
 
@@ -247,14 +277,18 @@ export class LawyersController {
 
   @Roles(Role.ADMIN)
   @Patch('admin/practice-areas/:id')
-  @ApiOperation({ summary: 'Rename a practice area (slug stays stable for SEO)' })
+  @ApiOperation({
+    summary: 'Rename a practice area (slug stays stable for SEO)',
+  })
   renamePracticeArea(@Param('id') id: string, @Body() dto: PracticeAreaDto) {
     return this.lawyersService.renamePracticeArea(id, dto.name);
   }
 
   @Roles(Role.ADMIN)
   @Delete('admin/practice-areas/:id')
-  @ApiOperation({ summary: 'Delete a practice area (blocked while lawyers use it)' })
+  @ApiOperation({
+    summary: 'Delete a practice area (blocked while lawyers use it)',
+  })
   deletePracticeArea(@Param('id') id: string) {
     return this.lawyersService.deletePracticeArea(id);
   }
@@ -283,7 +317,13 @@ export class LawyersController {
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
   ) {
-    return this.lawyersService.adminListLawyers(status, q, sort, page, pageSize);
+    return this.lawyersService.adminListLawyers(
+      status,
+      q,
+      sort,
+      page,
+      pageSize,
+    );
   }
 
   @Roles(Role.ADMIN)

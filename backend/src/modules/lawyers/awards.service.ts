@@ -7,10 +7,14 @@ import { PrismaService } from '../../prisma/prisma.service';
  * Criteria-based platform awards — see docs/27-awards-and-recognition.md.
  * Computed per calendar year; recompute is idempotent (upserts, add-only).
  */
-const CLIENTS_CHOICE_MIN_RATINGS = Number(process.env.AWARD_CC_MIN_RATINGS ?? 10);
+const CLIENTS_CHOICE_MIN_RATINGS = Number(
+  process.env.AWARD_CC_MIN_RATINGS ?? 10,
+);
 const CLIENTS_CHOICE_MIN_AVG = Number(process.env.AWARD_CC_MIN_AVG ?? 4.5);
 const TOP_RESPONDER_MIN_SERVED = Number(process.env.AWARD_TR_MIN_SERVED ?? 20);
-const TOP_RESPONDER_MIN_CONFIRMED = Number(process.env.AWARD_TR_MIN_CONFIRMED ?? 5);
+const TOP_RESPONDER_MIN_CONFIRMED = Number(
+  process.env.AWARD_TR_MIN_CONFIRMED ?? 5,
+);
 const RISING_STAR_MIN_RATINGS = Number(process.env.AWARD_RS_MIN_RATINGS ?? 5);
 const RISING_STAR_MIN_AVG = Number(process.env.AWARD_RS_MIN_AVG ?? 4.0);
 
@@ -73,23 +77,32 @@ export class AwardsService {
       const ratings = ratingAgg._count._all;
       const avg = ratingAgg._avg.score ?? 0;
 
-      if (ratings >= CLIENTS_CHOICE_MIN_RATINGS && avg >= CLIENTS_CHOICE_MIN_AVG) {
+      if (
+        ratings >= CLIENTS_CHOICE_MIN_RATINGS &&
+        avg >= CLIENTS_CHOICE_MIN_AVG
+      ) {
         granted += await this.grant(lawyer.id, 'CLIENTS_CHOICE', year, {
           ratings,
           avg: Math.round(avg * 100) / 100,
         });
       }
 
-      if (served >= TOP_RESPONDER_MIN_SERVED && confirmed >= TOP_RESPONDER_MIN_CONFIRMED) {
+      if (
+        served >= TOP_RESPONDER_MIN_SERVED &&
+        confirmed >= TOP_RESPONDER_MIN_CONFIRMED
+      ) {
         granted += await this.grant(lawyer.id, 'TOP_RESPONDER', year, {
           leadsServed: served,
           clientConfirmed: confirmed,
         });
       }
 
-      const joinedThisYear =
-        lawyer.createdAt >= from && lawyer.createdAt < to;
-      if (joinedThisYear && ratings >= RISING_STAR_MIN_RATINGS && avg >= RISING_STAR_MIN_AVG) {
+      const joinedThisYear = lawyer.createdAt >= from && lawyer.createdAt < to;
+      if (
+        joinedThisYear &&
+        ratings >= RISING_STAR_MIN_RATINGS &&
+        avg >= RISING_STAR_MIN_AVG
+      ) {
         granted += await this.grant(lawyer.id, 'RISING_STAR', year, {
           ratings,
           avg: Math.round(avg * 100) / 100,
@@ -114,7 +127,13 @@ export class AwardsService {
     });
     if (existing) return 0;
     await this.prisma.lawyerAward.create({
-      data: { lawyerId, type, year, title: TITLES[type], criteriaJson: criteria },
+      data: {
+        lawyerId,
+        type,
+        year,
+        title: TITLES[type],
+        criteriaJson: criteria,
+      },
     });
     return 1;
   }

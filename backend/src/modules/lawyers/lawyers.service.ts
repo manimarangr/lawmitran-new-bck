@@ -5,7 +5,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Gender, Prisma, Role, VerificationStatus,
+import {
+  Gender,
+  Prisma,
+  Role,
+  VerificationStatus,
   SubscriptionStatus,
 } from '@prisma/client';
 import { paginate, resolvePagination } from '../../common/pagination';
@@ -43,10 +47,25 @@ const PUBLIC_SELECT = {
   ratingCount: true,
   verificationStatus: true,
   createdAt: true,
-  city: { select: { id: true, name: true, district: { select: { name: true, state: { select: { name: true } } } } } },
-  practiceAreas: { select: { practiceArea: { select: { id: true, name: true, slug: true } }, proficiency: true } },
-  languages: { select: { language: { select: { id: true, name: true, code: true } } } },
-  courts: { select: { court: { select: { id: true, name: true, type: true } } } },
+  city: {
+    select: {
+      id: true,
+      name: true,
+      district: { select: { name: true, state: { select: { name: true } } } },
+    },
+  },
+  practiceAreas: {
+    select: {
+      practiceArea: { select: { id: true, name: true, slug: true } },
+      proficiency: true,
+    },
+  },
+  languages: {
+    select: { language: { select: { id: true, name: true, code: true } } },
+  },
+  courts: {
+    select: { court: { select: { id: true, name: true, type: true } } },
+  },
   awards: {
     select: { id: true, type: true, year: true, title: true },
     orderBy: { year: 'desc' as const },
@@ -76,7 +95,10 @@ const MARKER_SELECT = {
   ratingAvg: true,
   ratingCount: true,
   city: { select: { name: true } },
-  practiceAreas: { take: 2, select: { practiceArea: { select: { name: true } } } },
+  practiceAreas: {
+    take: 2,
+    select: { practiceArea: { select: { name: true } } },
+  },
 } satisfies Prisma.LawyerSelect;
 
 @Injectable()
@@ -124,10 +146,14 @@ export class LawyersService {
       throw new BadRequestException('Profile photo is required');
     }
     if (!photoFile.mimetype?.startsWith('image/')) {
-      throw new BadRequestException('Profile photo must be an image (JPG/PNG/WebP)');
+      throw new BadRequestException(
+        'Profile photo must be an image (JPG/PNG/WebP)',
+      );
     }
     if (photoFile.size > 2 * 1024 * 1024) {
-      throw new BadRequestException('Profile photo is too large — maximum size is 2 MB');
+      throw new BadRequestException(
+        'Profile photo is too large — maximum size is 2 MB',
+      );
     }
     const profileImageUrl = await this.storage.upload(photoFile, 'profiles');
 
@@ -159,14 +185,21 @@ export class LawyersService {
     });
 
     // Practice areas from the onboarding form (comma-separated names → reference rows).
-    const areaNames = (dto.practiceAreas ?? []).map((a) => a.trim()).filter(Boolean);
+    const areaNames = (dto.practiceAreas ?? [])
+      .map((a) => a.trim())
+      .filter(Boolean);
     for (const name of areaNames) {
       const area = await this.prisma.practiceArea.findFirst({
         where: { name: { contains: name, mode: 'insensitive' } },
       });
       if (area) {
         await this.prisma.lawyerPracticeArea.upsert({
-          where: { lawyerId_practiceAreaId: { lawyerId: lawyer.id, practiceAreaId: area.id } },
+          where: {
+            lawyerId_practiceAreaId: {
+              lawyerId: lawyer.id,
+              practiceAreaId: area.id,
+            },
+          },
           create: { lawyerId: lawyer.id, practiceAreaId: area.id },
           update: {},
         });
@@ -174,7 +207,9 @@ export class LawyersService {
     }
 
     // Languages + courts from the onboarding form (reference rows; unknown names ignored).
-    for (const name of (dto.languages ?? []).map((l) => l.trim()).filter(Boolean)) {
+    for (const name of (dto.languages ?? [])
+      .map((l) => l.trim())
+      .filter(Boolean)) {
       const lang = await this.prisma.language.findFirst({
         where: {
           OR: [
@@ -185,13 +220,17 @@ export class LawyersService {
       });
       if (lang) {
         await this.prisma.lawyerLanguage.upsert({
-          where: { lawyerId_languageId: { lawyerId: lawyer.id, languageId: lang.id } },
+          where: {
+            lawyerId_languageId: { lawyerId: lawyer.id, languageId: lang.id },
+          },
           create: { lawyerId: lawyer.id, languageId: lang.id },
           update: {},
         });
       }
     }
-    for (const name of (dto.courts ?? []).map((c) => c.trim()).filter(Boolean)) {
+    for (const name of (dto.courts ?? [])
+      .map((c) => c.trim())
+      .filter(Boolean)) {
       const court = await this.prisma.court.findFirst({
         where: {
           OR: [
@@ -202,7 +241,9 @@ export class LawyersService {
       });
       if (court) {
         await this.prisma.lawyerCourt.upsert({
-          where: { lawyerId_courtId: { lawyerId: lawyer.id, courtId: court.id } },
+          where: {
+            lawyerId_courtId: { lawyerId: lawyer.id, courtId: court.id },
+          },
           create: { lawyerId: lawyer.id, courtId: court.id },
           update: {},
         });
@@ -210,7 +251,10 @@ export class LawyersService {
     }
 
     // docs/28 rule 4: never geo-empty — primary office + one service area from the chosen city.
-    const officeLocalityId = await this.validLocalityId(dto.localityId, city.id);
+    const officeLocalityId = await this.validLocalityId(
+      dto.localityId,
+      city.id,
+    );
     await this.prisma.$transaction([
       this.prisma.lawyerOffice.create({
         data: {
@@ -259,10 +303,19 @@ export class LawyersService {
         },
         city: { select: { id: true, name: true } },
         practiceAreas: {
-          select: { practiceArea: { select: { id: true, name: true, slug: true } }, proficiency: true },
+          select: {
+            practiceArea: { select: { id: true, name: true, slug: true } },
+            proficiency: true,
+          },
         },
-        languages: { select: { language: { select: { id: true, name: true, code: true } } } },
-        courts: { select: { court: { select: { id: true, name: true, type: true } } } },
+        languages: {
+          select: {
+            language: { select: { id: true, name: true, code: true } },
+          },
+        },
+        courts: {
+          select: { court: { select: { id: true, name: true, type: true } } },
+        },
         offices: {
           select: {
             id: true,
@@ -306,9 +359,16 @@ export class LawyersService {
       courts,
       ...scalarFields
     } = dto;
-    void _city; void _al; void _pc; void _lm; void _ol; void _lat; void _lng;
+    void _city;
+    void _al;
+    void _pc;
+    void _lm;
+    void _ol;
+    void _lat;
+    void _lng;
 
-    if (practiceAreas?.length) await this.replacePracticeAreas(lawyer.id, practiceAreas);
+    if (practiceAreas?.length)
+      await this.replacePracticeAreas(lawyer.id, practiceAreas);
     if (languages?.length) await this.replaceLanguages(lawyer.id, languages);
     if (courts?.length) await this.replaceCourts(lawyer.id, courts);
 
@@ -376,43 +436,79 @@ export class LawyersService {
   }
 
   /** Great-circle distance in km between two lat/lng points. */
-  private haversineKm(aLat: number, aLng: number, bLat: number, bLng: number): number {
+  private haversineKm(
+    aLat: number,
+    aLng: number,
+    bLat: number,
+    bLng: number,
+  ): number {
     const R = 6371;
     const dLat = ((bLat - aLat) * Math.PI) / 180;
     const dLng = ((bLng - aLng) * Math.PI) / 180;
     const a =
       Math.sin(dLat / 2) ** 2 +
-      Math.cos((aLat * Math.PI) / 180) * Math.cos((bLat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+      Math.cos((aLat * Math.PI) / 180) *
+        Math.cos((bLat * Math.PI) / 180) *
+        Math.sin(dLng / 2) ** 2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
   async search(query: SearchLawyersDto) {
     const {
-      city, practiceArea, courtId, locality, subscribed,
-      experienceMin, experienceMax,
-      language, gender, ratingMin, sort,
-      swLat, swLng, neLat, neLng,
-      lat, lng, radiusKm,
-      page, limit,
+      city,
+      practiceArea,
+      courtId,
+      locality,
+      subscribed,
+      experienceMin,
+      experienceMax,
+      language,
+      gender,
+      ratingMin,
+      sort,
+      swLat,
+      swLng,
+      neLat,
+      neLng,
+      lat,
+      lng,
+      radiusKm,
+      page,
+      limit,
     } = query;
 
     const where = this.buildWhere({
-      city, practiceArea, courtId,
-      experienceMin, experienceMax,
-      language, gender, ratingMin,
-      swLat, swLng, neLat, neLng,
+      city,
+      practiceArea,
+      courtId,
+      experienceMin,
+      experienceMax,
+      language,
+      gender,
+      ratingMin,
+      swLat,
+      swLng,
+      neLat,
+      neLng,
       subscribed: subscribed === '1' || subscribed === 'true',
     });
 
     const orderBy: Prisma.LawyerOrderByWithRelationInput =
-      sort === 'rating' ? { ratingAvg: 'desc' }
-      : sort === 'experience' ? { experienceYears: 'desc' }
-      : { createdAt: 'desc' };
+      sort === 'rating'
+        ? { ratingAvg: 'desc' }
+        : sort === 'experience'
+          ? { experienceYears: 'desc' }
+          : { createdAt: 'desc' };
 
     // Point-radius "near me" search — in-memory distance over a capped candidate
     // set, same approach as the locality-ranking boost below (fine at current scale).
     if (lat !== undefined && lng !== undefined) {
-      const all = await this.prisma.lawyer.findMany({ where, select: PUBLIC_SELECT, orderBy, take: 200 });
+      const all = await this.prisma.lawyer.findMany({
+        where,
+        select: PUBLIC_SELECT,
+        orderBy,
+        take: 200,
+      });
       const scored = all
         .map((l) => ({
           l,
@@ -421,15 +517,28 @@ export class LawyersService {
               ? null
               : this.haversineKm(lat, lng, l.latitude, l.longitude),
         }))
-        .filter((x) => radiusKm === undefined || (x.km !== null && x.km <= radiusKm));
+        .filter(
+          (x) => radiusKm === undefined || (x.km !== null && x.km <= radiusKm),
+        );
       if (sort === 'distance' || sort === undefined) {
-        scored.sort((a, b) => (a.km ?? Number.MAX_SAFE_INTEGER) - (b.km ?? Number.MAX_SAFE_INTEGER));
+        scored.sort(
+          (a, b) =>
+            (a.km ?? Number.MAX_SAFE_INTEGER) -
+            (b.km ?? Number.MAX_SAFE_INTEGER),
+        );
       }
       const total = scored.length;
-      const items = scored
-        .slice((page - 1) * limit, page * limit)
-        .map((x) => ({ ...x.l, distanceKm: x.km === null ? null : Math.round(x.km * 10) / 10 }));
-      return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
+      const items = scored.slice((page - 1) * limit, page * limit).map((x) => ({
+        ...x.l,
+        distanceKm: x.km === null ? null : Math.round(x.km * 10) / 10,
+      }));
+      return {
+        items,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
     }
 
     // Locality = ranking boost, never a hard filter (a thin marketplace would
@@ -469,9 +578,18 @@ export class LawyersService {
           .map((x) => ({
             ...x.l,
             nearLocality: x.tagged || x.km <= 7 ? loc.name : null,
-            localityKm: x.km === Number.MAX_SAFE_INTEGER ? null : Math.round(x.km * 10) / 10,
+            localityKm:
+              x.km === Number.MAX_SAFE_INTEGER
+                ? null
+                : Math.round(x.km * 10) / 10,
           }));
-        return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
+        return {
+          items,
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        };
       }
     }
 
@@ -491,21 +609,43 @@ export class LawyersService {
 
   async findMarkers(query: SearchLawyersDto) {
     const {
-      city, practiceArea, courtId,
-      experienceMin, experienceMax,
-      language, gender, ratingMin,
-      swLat, swLng, neLat, neLng,
-      lat, lng, radiusKm,
+      city,
+      practiceArea,
+      courtId,
+      experienceMin,
+      experienceMax,
+      language,
+      gender,
+      ratingMin,
+      swLat,
+      swLng,
+      neLat,
+      neLng,
+      lat,
+      lng,
+      radiusKm,
     } = query;
 
     const where = this.buildWhere({
-      city, practiceArea, courtId,
-      experienceMin, experienceMax,
-      language, gender, ratingMin,
-      swLat, swLng, neLat, neLng,
+      city,
+      practiceArea,
+      courtId,
+      experienceMin,
+      experienceMax,
+      language,
+      gender,
+      ratingMin,
+      swLat,
+      swLng,
+      neLat,
+      neLng,
     });
 
-    const markers = await this.prisma.lawyer.findMany({ where, select: MARKER_SELECT, take: 200 });
+    const markers = await this.prisma.lawyer.findMany({
+      where,
+      select: MARKER_SELECT,
+      take: 200,
+    });
 
     if (lat === undefined || lng === undefined) return markers;
 
@@ -515,10 +655,20 @@ export class LawyersService {
         distanceKm:
           m.latitude == null || m.longitude == null
             ? null
-            : Math.round(this.haversineKm(lat, lng, m.latitude, m.longitude) * 10) / 10,
+            : Math.round(
+                this.haversineKm(lat, lng, m.latitude, m.longitude) * 10,
+              ) / 10,
       }))
-      .filter((m) => radiusKm === undefined || (m.distanceKm !== null && m.distanceKm <= radiusKm))
-      .sort((a, b) => (a.distanceKm ?? Number.MAX_SAFE_INTEGER) - (b.distanceKm ?? Number.MAX_SAFE_INTEGER));
+      .filter(
+        (m) =>
+          radiusKm === undefined ||
+          (m.distanceKm !== null && m.distanceKm <= radiusKm),
+      )
+      .sort(
+        (a, b) =>
+          (a.distanceKm ?? Number.MAX_SAFE_INTEGER) -
+          (b.distanceKm ?? Number.MAX_SAFE_INTEGER),
+      );
   }
 
   private buildWhere(params: {
@@ -534,13 +684,21 @@ export class LawyersService {
     swLng?: number;
     neLat?: number;
     neLng?: number;
-      subscribed?: boolean;
+    subscribed?: boolean;
   }): Prisma.LawyerWhereInput {
     const {
-      city, practiceArea, courtId,
-      experienceMin, experienceMax,
-      language, gender, ratingMin,
-      swLat, swLng, neLat, neLng,
+      city,
+      practiceArea,
+      courtId,
+      experienceMin,
+      experienceMax,
+      language,
+      gender,
+      ratingMin,
+      swLat,
+      swLng,
+      neLat,
+      neLng,
     } = params;
 
     return {
@@ -567,15 +725,41 @@ export class LawyersService {
             ],
           }
         : {}),
-      ...(practiceArea ? { practiceAreas: { some: { practiceArea: { name: { equals: practiceArea, mode: 'insensitive' } } } } } : {}),
+      ...(practiceArea
+        ? {
+            practiceAreas: {
+              some: {
+                practiceArea: {
+                  name: { equals: practiceArea, mode: 'insensitive' },
+                },
+              },
+            },
+          }
+        : {}),
       ...(courtId ? { courts: { some: { courtId } } } : {}),
-      ...(experienceMin !== undefined ? { experienceYears: { gte: experienceMin } } : {}),
-      ...(experienceMax !== undefined ? { experienceYears: { lte: experienceMax } } : {}),
-      ...(language ? { languages: { some: { language: { name: { equals: language, mode: 'insensitive' } } } } } : {}),
+      ...(experienceMin !== undefined
+        ? { experienceYears: { gte: experienceMin } }
+        : {}),
+      ...(experienceMax !== undefined
+        ? { experienceYears: { lte: experienceMax } }
+        : {}),
+      ...(language
+        ? {
+            languages: {
+              some: {
+                language: { name: { equals: language, mode: 'insensitive' } },
+              },
+            },
+          }
+        : {}),
       ...(gender ? { gender } : {}),
       ...(ratingMin !== undefined ? { ratingAvg: { gte: ratingMin } } : {}),
-      ...(swLat !== undefined && neLat !== undefined ? { latitude: { gte: swLat, lte: neLat } } : {}),
-      ...(swLng !== undefined && neLng !== undefined ? { longitude: { gte: swLng, lte: neLng } } : {}),
+      ...(swLat !== undefined && neLat !== undefined
+        ? { latitude: { gte: swLat, lte: neLat } }
+        : {}),
+      ...(swLng !== undefined && neLng !== undefined
+        ? { longitude: { gte: swLng, lte: neLng } }
+        : {}),
     };
   }
 
@@ -744,7 +928,9 @@ export class LawyersService {
       const select = {
         id: true,
         name: true,
-        district: { select: { name: true, state: { select: { name: true, code: true } } } },
+        district: {
+          select: { name: true, state: { select: { name: true, code: true } } },
+        },
       } as const;
       const popular = await this.prisma.city.findMany({
         where: { name: { in: LawyersService.POPULAR_CITIES } },
@@ -785,7 +971,9 @@ export class LawyersService {
       select: {
         id: true,
         name: true,
-        district: { select: { name: true, state: { select: { name: true, code: true } } } },
+        district: {
+          select: { name: true, state: { select: { name: true, code: true } } },
+        },
       },
       orderBy: { name: 'asc' },
     });
@@ -846,10 +1034,14 @@ export class LawyersService {
     }
     for (const ph of photos) {
       if (!ph.mimetype?.startsWith('image/')) {
-        throw new BadRequestException('Office photos must be images (JPG/PNG/WebP)');
+        throw new BadRequestException(
+          'Office photos must be images (JPG/PNG/WebP)',
+        );
       }
       if (ph.size > 2 * 1024 * 1024) {
-        throw new BadRequestException('Each office photo must be 2 MB or smaller');
+        throw new BadRequestException(
+          'Each office photo must be 2 MB or smaller',
+        );
       }
     }
     const urls: string[] = [];
@@ -948,7 +1140,9 @@ export class LawyersService {
     const lawyer = await this.getLawyerByUserId(userId);
     const city = await this.findCityByName(dto.city);
     const localityId = await this.validLocalityId(dto.localityId, city.id);
-    const count = await this.prisma.lawyerOffice.count({ where: { lawyerId: lawyer.id } });
+    const count = await this.prisma.lawyerOffice.count({
+      where: { lawyerId: lawyer.id },
+    });
     return this.prisma.lawyerOffice.create({
       data: {
         lawyerId: lawyer.id,
@@ -991,7 +1185,10 @@ export class LawyersService {
 
     const localityId =
       dto.localityId !== undefined
-        ? await this.validLocalityId(dto.localityId, city ? city.id : office.cityId)
+        ? await this.validLocalityId(
+            dto.localityId,
+            city ? city.id : office.cityId,
+          )
         : undefined;
 
     const updated = await this.prisma.lawyerOffice.update({
@@ -1000,7 +1197,9 @@ export class LawyersService {
         ...(localityId !== undefined ? { localityId } : {}),
         ...(city ? { cityId: city.id } : {}),
         ...(dto.label !== undefined ? { label: dto.label } : {}),
-        ...(dto.addressLine !== undefined ? { addressLine: dto.addressLine } : {}),
+        ...(dto.addressLine !== undefined
+          ? { addressLine: dto.addressLine }
+          : {}),
         ...(dto.pincode !== undefined ? { pincode: dto.pincode } : {}),
         ...(dto.landmark !== undefined ? { landmark: dto.landmark } : {}),
         ...(dto.latitude !== undefined ? { latitude: dto.latitude } : {}),
@@ -1036,12 +1235,18 @@ export class LawyersService {
       where: { id: officeId, lawyerId: lawyer.id },
     });
     if (!office) throw new NotFoundException('Office not found');
-    const count = await this.prisma.lawyerOffice.count({ where: { lawyerId: lawyer.id } });
+    const count = await this.prisma.lawyerOffice.count({
+      where: { lawyerId: lawyer.id },
+    });
     if (count <= 1) {
-      throw new BadRequestException('You need at least one office — add another before removing this one');
+      throw new BadRequestException(
+        'You need at least one office — add another before removing this one',
+      );
     }
     if (office.isPrimary) {
-      throw new BadRequestException('Make another office primary before removing this one');
+      throw new BadRequestException(
+        'Make another office primary before removing this one',
+      );
     }
     await this.prisma.lawyerOffice.delete({ where: { id: office.id } });
     return { deleted: true };
@@ -1071,12 +1276,20 @@ export class LawyersService {
       );
     }
 
-    const cities = await Promise.all(unique.map((name) => this.findCityByName(name)));
+    const cities = await Promise.all(
+      unique.map((name) => this.findCityByName(name)),
+    );
 
     await this.prisma.$transaction([
-      this.prisma.lawyerServiceArea.deleteMany({ where: { lawyerId: lawyer.id } }),
+      this.prisma.lawyerServiceArea.deleteMany({
+        where: { lawyerId: lawyer.id },
+      }),
       this.prisma.lawyerServiceArea.createMany({
-        data: cities.map((c) => ({ lawyerId: lawyer.id, cityId: c.id, active: true })),
+        data: cities.map((c) => ({
+          lawyerId: lawyer.id,
+          cityId: c.id,
+          active: true,
+        })),
         skipDuplicates: true,
       }),
     ]);
@@ -1118,7 +1331,10 @@ export class LawyersService {
         ? status === 'PENDING'
           ? {
               verificationStatus: {
-                in: [VerificationStatus.PENDING, VerificationStatus.UNDER_REVIEW],
+                in: [
+                  VerificationStatus.PENDING,
+                  VerificationStatus.UNDER_REVIEW,
+                ],
               },
             }
           : { verificationStatus: status as VerificationStatus }
@@ -1129,7 +1345,11 @@ export class LawyersService {
               { fullName: { contains: query, mode: 'insensitive' } },
               { barCouncilNumber: { contains: query, mode: 'insensitive' } },
               { barCouncilState: { contains: query, mode: 'insensitive' } },
-              { user: { is: { email: { contains: query, mode: 'insensitive' } } } },
+              {
+                user: {
+                  is: { email: { contains: query, mode: 'insensitive' } },
+                },
+              },
               { user: { is: { mobile: { contains: query } } } },
             ],
           }
@@ -1450,10 +1670,14 @@ export class LawyersService {
     const lawyer = await this.getLawyerByUserId(userId);
     if (!photo) throw new BadRequestException('Attach a photo');
     if (!photo.mimetype?.startsWith('image/')) {
-      throw new BadRequestException('Profile photo must be an image (JPG/PNG/WebP)');
+      throw new BadRequestException(
+        'Profile photo must be an image (JPG/PNG/WebP)',
+      );
     }
     if (photo.size > 2 * 1024 * 1024) {
-      throw new BadRequestException('Photo is too large — maximum size is 2 MB');
+      throw new BadRequestException(
+        'Photo is too large — maximum size is 2 MB',
+      );
     }
     const profileImageUrl = await this.storage.upload(photo, 'profiles');
     return this.prisma.lawyer.update({
@@ -1479,14 +1703,18 @@ export class LawyersService {
       );
     }
     if (photoFile && !photoFile.mimetype?.startsWith('image/')) {
-      throw new BadRequestException('Profile photo must be an image (JPG/PNG/WebP)');
+      throw new BadRequestException(
+        'Profile photo must be an image (JPG/PNG/WebP)',
+      );
     }
 
     const certificateImageUrl = certFile
       ? await this.storage.upload(certFile, 'certificates')
       : lawyer.certificateImageUrl;
     if (photoFile && photoFile.size > 2 * 1024 * 1024) {
-      throw new BadRequestException('Profile photo is too large — maximum size is 2 MB');
+      throw new BadRequestException(
+        'Profile photo is too large — maximum size is 2 MB',
+      );
     }
     const profileImageUrl = photoFile
       ? await this.storage.upload(photoFile, 'profiles')
